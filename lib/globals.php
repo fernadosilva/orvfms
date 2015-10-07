@@ -29,7 +29,7 @@
 // network.
 // Unhappily, there is no portable and "clean" way of
 // finding it. Of course, there are several tricks that could 
-// be done, but they would be system depedendt and prone to
+// be done, but they would be system depedent and prone to
 // failures.
 //
 define("IP_BROADCAST","192.168.1.255");
