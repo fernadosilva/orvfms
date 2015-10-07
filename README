@@ -1,0 +1,136 @@
+
+#*************************************************************************                                 
+#  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt             *                                  
+#*************************************************************************/
+
+INSTALLATION NOTES 
+
+The set of tools contained in the orvfms S20 library comprise:
+    orvfms/lib
+    -a php library with a set of simple functions that are able to control 
+       the orvibo S20 power switch (scan the network, retrieve the S20 names,
+       check the status and power off/power on each one
+
+    orvfms/s20
+    - One example of a web interface that makes use of the orvfms library.
+      This interface, while just a quite simple example, is fully functional                                   
+      and it was conceived to be responsive in any web viewport size, in particular                            
+      smartphones. It divides the viewport in N horizontal buttons, each one with                              
+      the name of each S20 automatically found in the local network. Each button                               
+      is green or red according to the current S20 state (green = ON)                                          
+ 
+    orvfms/css
+    - The css stylesheet used by the example in orvfms/s20
+
+TESTING THE CODE
+
+Before installing this code on a web server, please test if the library recognizes 
+and is able to operate your S20. For this purpose, the  test program test.php
+in the lib directory scans your network for devices, dump all the contents in a readble
+format  and makes a full power on  / power off cycle in all your S20s.  PLEASE TAKE INTO 
+ACCOUNT POSSIBLE SAFETY ISSUES  of switching on/off!  Uplug any device or appliance
+that nay be affected by this test cycle!                                   
+                     
+                                                                                      
+In order to test the libray with your network in command line, just 
+open a console and:
+
+1. cd to the lib directory
+2. Check the file globals.php and please confirm (or update) the
+   broadcast address. Unappily, there is no portable and "clean" 
+   way of finding it, since the host may have more than one 
+   network interface.
+3. Check if you do not have appliances connected that may be affected
+   by the power on/off cycle. Unplug any devices that you want to spare.
+
+4. Just type in the command line:
+
+prompt> php-cgi test.php
+
+(or replace php-cgi with the name of your php interpreter).
+
+The output is quite straightforward, and possibly you are immediately able
+to recognize most of it. You should also see/hear the usual switch of
+the S20.  An example output is shown at the end of this file
+
+INSTALLATION OF THE SERVER CODE
+
+The main server code is located in s20/index.php. 
+
+The details of the installation will slightly depend on your HTTP server 
+configuration. Anyway, just move the index.php, css/orvfms.css and 
+orvfms/lib/* to the directories that suit your server and desired 
+configuration. You just have to check/update in the index.php
+(1) the relative location of orvfms libray (2) the relative location 
+of the css/orvfms.css library.
+
+In order to be able to operate the S20s from any place, I just installed
+the webserver on a general purpose, low power, raspberry pi that 
+I keep always pwowered on at home and that I use also as a media server. 
+Of course, in order to reach the private network  you have to configure 
+your router with some  Dynamic DNS and add appropriate port forwarding 
+rules to your router. These operations are router dependent and are
+beyond the scope of this document.
+
+EXAMPLE OUTPUT OF THE TEST SCRIPT
+
+Result of runing the test script test.php 
+(for 3 S20, names and initial state may of course differ):
+
+X-Powered-By: PHP/5.4.45-0+deb7u1
+Content-type: text/html
+
+
+
+
+
+Array
+(
+    [accf23358402] => Array
+        (
+            [ip] => 192.168.1.83
+            [st] => 0
+            [imac] => 02843523cfac
+            [name] => Living room
+        )
+
+    [accf2334e2b8] => Array
+        (
+            [ip] => 192.168.1.79
+            [st] => 1
+            [imac] => b8e23423cfac
+            [name] => Heater
+        )
+
+    [accf23350e50] => Array
+        (
+            [ip] => 192.168.1.85
+            [st] => 0
+            [imac] => 500e3523cfac
+            [name] => Room
+        )
+
+)
+Status of S20 named >Living room< (mac=accf23358402, IP=192.168.1.83) is OFF
+  ...Turning it ON
+  ...new status is ON
+
+Status of S20 named >Heater< (mac=accf2334e2b8, IP=192.168.1.79) is ON
+  ...Turning it OFF
+  ...new status is OFF
+
+Status of S20 named >Room< (mac=accf23350e50, IP=192.168.1.85) is OFF
+  ...Turning it ON
+  ...new status is ON
+
+Status of S20 named >Living room< (mac=accf23358402, IP=192.168.1.83) is ON
+  ...Turning it OFF
+  ...new status is OFF
+
+Status of S20 named >Heater< (mac=accf2334e2b8, IP=192.168.1.79) is OFF
+  ...Turning it ON
+  ...new status is ON
+
+Status of S20 named >Room< (mac=accf23350e50, IP=192.168.1.85) is ON
+  ...Turning it OFF
+  ...new status is OFF

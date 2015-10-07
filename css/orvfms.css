@@ -1,0 +1,48 @@
+/*
+  Button code obtained at dabuttonfactory.com
+*/
+body { background: #e7e7e7; font-family: Verdana, sans-serif; font-size: 11pt; }
+#page { background: #ffffff; margin: 50px; border: 2px solid #c0c0c0; padding: 10px; }
+#header { background: #4b6983; border: 2px solid #7590ae; text-align: center; padding: 10px; color: #ffffff; }
+#header h1 { color: #ffffff; }
+#body { padding: 10px; }
+span.tt { font-family: monospace; }
+span.bold { font-weight: bold; }
+a:link { text-decoration: none; font-weight: bold; color: #C00; background: #ffc; }
+a:visited { text-decoration: none; font-weight: bold; color: #999; background: #ffc; }
+a:active { text-decoration: none; font-weight: bold; color: #F00; background: #FC0; }
+a:hover { text-decoration: none; color: #C00; background: #FC0; }
+
+#redbutton {
+width: 95vw;
+height: 20vh;
+display:       inline-block;
+background:    #900 url('http://dabuttonfactory.com/button.png?w=1&h=40&bgt=gradient&bgc=f00&ebgc=900') repeat-x;
+background:    -moz-linear-gradient(#f00, #900);
+background:    -o-linear-gradient(#f00, #900);
+background:    -webkit-linear-gradient(#f00, #900);
+background:    linear-gradient(#f00, #900);
+border-radius: 5px;
+color:         #fff;
+font:          normal 700 29px/1 "Calibri", sans-serif;
+font-size:     5vh;
+text-align:    center;
+text-shadow:   1px 1px 0 #000;
+}
+
+#greenbutton {
+width: 95vw;
+height: 20vh;
+display:       inline-block;
+background:    #38761d url('http://dabuttonfactory.com/button.png?w=1&h=163&bgt=gradient&bgc=23ca23&ebgc=38761d') repeat-x;
+background:    -moz-linear-gradient(#23ca23, #38761d);
+background:    -o-linear-gradient(#23ca23, #38761d);
+background:    -webkit-linear-gradient(#23ca23, #38761d);
+background:    linear-gradient(#23ca23, #38761d);
+color:         #fff;
+font:          normal 700 29px/1 "Calibri", sans-serif;
+font-size:     5vh;
+text-align:    center;
+text-shadow:   1px 1px 0 #000;
+}
+
