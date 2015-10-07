@@ -1,0 +1,63 @@
+
+EXAMPLE OUTPUT OF THE TEST SCRIPT
+
+Result of runing the test script test.php in command line
+(for 3 S20, names and initial state may of course differ):
+
+X-Powered-By: PHP/5.4.45-0+deb7u1
+Content-type: text/html
+
+
+
+
+
+Array
+(
+    [accf23358402] => Array
+        (
+            [ip] => 192.168.1.83
+            [st] => 0
+            [imac] => 02843523cfac
+            [name] => Living room
+        )
+
+    [accf2334e2b8] => Array
+        (
+            [ip] => 192.168.1.79
+            [st] => 1
+            [imac] => b8e23423cfac
+            [name] => Heater
+        )
+
+    [accf23350e50] => Array
+        (
+            [ip] => 192.168.1.85
+            [st] => 0
+            [imac] => 500e3523cfac
+            [name] => Room
+        )
+
+)
+Status of S20 named >Living room< (mac=accf23358402, IP=192.168.1.83) is OFF
+  ...Turning it ON
+  ...new status is ON
+
+Status of S20 named >Heater< (mac=accf2334e2b8, IP=192.168.1.79) is ON
+  ...Turning it OFF
+  ...new status is OFF
+
+Status of S20 named >Room< (mac=accf23350e50, IP=192.168.1.85) is OFF
+  ...Turning it ON
+  ...new status is ON
+
+Status of S20 named >Living room< (mac=accf23358402, IP=192.168.1.83) is ON
+  ...Turning it OFF
+  ...new status is OFF
+
+Status of S20 named >Heater< (mac=accf2334e2b8, IP=192.168.1.79) is OFF
+  ...Turning it ON
+  ...new status is ON
+
+Status of S20 named >Room< (mac=accf23350e50, IP=192.168.1.85) is ON
+  ...Turning it OFF
+  ...new status is OFF
