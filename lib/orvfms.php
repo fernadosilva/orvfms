@@ -19,7 +19,7 @@
 /*
       Main  functions to control the Orvibo (C) S20 swicth.
 
-      This program was developed independenntly and it is not
+      This program was developed independently and it is not
       supported or endorsed in any way by Orvibo (C).
    
 */

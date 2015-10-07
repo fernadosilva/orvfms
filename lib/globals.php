@@ -18,7 +18,11 @@
 *************************************************************************/
 
 /*
-  Generic constants for the orvfms S20 control library
+  Generic constants for the orvfms S20 control library.
+
+  This program was developed independently and it is not
+  supported or endorsed in any way by Orvibo (C).
+
 */
 
 //

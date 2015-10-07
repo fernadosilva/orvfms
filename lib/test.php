@@ -18,7 +18,7 @@
 
 /*
 
-  This program was developed independenntly and it is not
+  This program was developed independently and it is not
   supported or endorsed in any way by Orvibo (C).  
 
   General test program of intended to test all functions
@@ -26,12 +26,12 @@
 
   It loops through all s20 plugs and switch them off and on.
 
-  PLEASE TAKE INTO ACCOUNT POSSIBLE SECURITY ISSUES  of switching on/off! 
+  PLEASE TAKE INTO ACCOUNT POSSIBLE SAFETY ISSUES  of switching on/off! 
   Uplug any device or appliance that nay be affected by this test cycle!
   
   This is intended to be run from the command line for test purposes. Use 
 
-  [commad line prompt]   php-cgi test.php
+  prompt>  php-cgi test.php
 
 */
 

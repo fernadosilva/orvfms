@@ -7,9 +7,9 @@
 S20 remote
 </title>
 
-<!-- CHECK THE LOCATION OF THE mystyle.css -->
-
-<link rel="stylesheet" type="text/css" href="../css/orvfms.css">
+<!-- UPDATE THE PATH OF THE FILE orvfms.css BELOW TO MATCH
+     YOUR LOCAL CONFIGURATION.                       -->
+<link rel="stylesheet" type="text/css" href="../css/orvfms.css"> 
 </head>
 <body>
 
@@ -31,27 +31,28 @@ S20 remote
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.*
 *************************************************************************/
 /*
-  This is a generic php example of an application and 
-  web interface that may be installed in a local server to
-  control Orvibo S20 sockets, using the orvfms library
-  supplied jointly. This library only supports 
-  ON/OFF actions
-
   This program was developed independenntly and it is not
   supported or endorsed in any way by Orvibo (C).
 
-  This interface, while just a quite simple example, is fully functional 
-  and it was conceived to be responsive in any web viewport size, in particular
-  smartphones. It divides the viewport in N horizontal buttons, each one with 
-  the name of each S20 automatically found in the local network. Each button
-  is green or red according to the current S20 state (green = ON)   
+  This page implements a web interface to control Orvibo S20 sockets 
+  attached to the local network. Major functions are implemented in the
+  orvfms.php library. 
+
+  The web interface provides status report of all S20 attached to the 
+  network and supports ON/OFF actions of the detected devices. It features
+  a responsive behavior to changing viewport sizes, including smartphones. It 
+  divides the viewport in N horizontal buttons, each one labeled with the 
+  name automatically retrieved from the connected S20s. Each button is 
+  shown in green or red according to the current S20 state (green = ON).  
   
-  Adjust the include below to the correct location of your orvfms.php. Check also
-  the css style located above in this page
-  
+  Note: adjust the include line orvfms.php below to the correct path, as well
+  as the location of the CSS  orvfms.css in the <head> section above.  
 */
 
-include( "../lib/orvfms/orvfms.php");
+/* UPDATE THE PATH OF THE FILE orvfms.php BELOW TO MATCH
+   YOUR LOCAL CONFIGURATION.                             -->
+
+include( "../lib/orvfms/orvfms.php"); 
 
 session_start();
 $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
