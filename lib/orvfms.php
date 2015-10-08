@@ -51,17 +51,36 @@ function createSocketAndSendMsg($msg,$addr){
         echo "<h1>Error opening socket</h1>";
         exit(0);
     }
-
-    if(!socket_bind($s,"0.0.0.0",PORT)){
-        echo "<h1>Error binding socket</h1>";
-        exit(0);
+    
+    $loop_count = 0;
+    $stay = 1;
+    while($stay){
+        if(!socket_bind($s,"0.0.0.0",PORT)){
+            if(++$loop_count > MAX_RETRIES){
+                error_log("Fatal error binding to socket\n");
+                echo "<h1>Error binding socket</h1>";
+                exit(0);
+            }
+            usleep(300000);
+        }
+        else{
+            $stay = 0;
+        }
     }
+    if(DEBUG)
+        error_log("Bind loop count = ".$loop_count);
+
     if(!socket_set_option($s,SOL_SOCKET,SO_BROADCAST,1)){
         echo "<h1>Error setting socket options</h1>";
         exit(0);
     }
-    // Set the timeout to 300ms; seems enough. 
-    $timeout = array('sec' => 0,'usec'=> 300000); 
+    //
+    // Set the timeout. Default set in globals.php
+    // to 300ms; seems enough. 
+    //
+    $sec = (int)  TIMEOUT;
+    $usec = (int) ((TIMEOUT - $sec) * 1000000.0);
+    $timeout = array('sec' => $sec,'usec'=> $usec); 
     socket_set_option($s,SOL_SOCKET,SO_RCVTIMEO,$timeout);
     sendByteMsg($s,$msg,$addr);
     return $s;
@@ -72,30 +91,30 @@ function searchS20(){
     //
     // This function searchs for all S20 in a local network
     // through a broadcast call 
-    // and returns an associative array $allS20Data indexed
+    // and returns an associative array $s20Table indexed
     // by each S20 mac adress. Each array position is itself 
     // an associative array which contains 
     //
-    // $allS20Data[$mac)['ip'] - IP adresss
-    // $allS20Data[$mac)['st'] - current S20 status (ON=1,OFF=0)
-    // $allS20Data[$mac)['imac'] - Inverted mac,not strictly required, 
+    // $s20Table[$mac)['ip'] - IP adresss
+    // $s20Table[$mac)['st'] - current S20 status (ON=1,OFF=0)
+    // $s20Table[$mac)['imac'] - Inverted mac,not strictly required, 
     //                             computed just once for sake of efficiency.
     //
     // Note that $mac and is represented as a sequence of hexadecimals 
     // without the usual separators; for example, ac:cf:23:34:e2:b8 is represented
     // as "accf2334e2b8".
     //
-    // An additional field $allS20Data[$mac]['name'] is later added 
+    // An additional field $s20Table[$mac]['name'] is later added 
     // to each entry with the name assigned to each device. 
     // This is done in a specific function since it requires a separate
     // request to each S20 (see function getName() and fillNames below).
     //
-    // Returns the $allS20Data array
+    // Returns the $s20Table array
     //
     $s = createSocketAndSendMsg(DISCOVERY_MSG,IP_BROADCAST);
     $recIP="";
     $recPort=0;
-    $allS20Data=array();
+    $s20Table=array();
     while ( 1 ){
         $n=@socket_recvfrom($s,$bytesRecMsg,42,0,$recIP,$recPort);
         if(!$n) 
@@ -105,26 +124,26 @@ function searchS20(){
             if(substr($recMsg,0,4) == "6864"){
                 $mac = substr($recMsg,14,12);
                 $status = (int) substr($recMsg,-1);
-                $allS20Data[$mac]=array();
-                $allS20Data[$mac]['ip']=$recIP;
-                $allS20Data[$mac]['st']=$status;
-                $allS20Data[$mac]['imac']=invMac($mac);
+                $s20Table[$mac]=array();
+                $s20Table[$mac]['ip']=$recIP;
+                $s20Table[$mac]['st']=$status;
+                $s20Table[$mac]['imac']=invMac($mac);
             }
         }        
     }
     socket_close($s);
-    return $allS20Data;
+    return $s20Table;
 }
 
-function subscribe($mac,$allS20Data){
+function subscribe($mac,$s20Table){
     //
     // Sends a subscribe message to S20 specified by mac address 
-    // $mac, using global device information im $allS20Data.
+    // $mac, using global device information im $s20Table.
     // 
     // Returns the socket status 
     //
-    $imac = $allS20Data[$mac]['imac'];
-    $ip   = $allS20Data[$mac]['ip'];
+    $imac = $s20Table[$mac]['imac'];
+    $ip   = $s20Table[$mac]['ip'];
     $msg = SUBSCRIBE.$mac.TWENTIES.$imac.TWENTIES;
     $s = createSocketAndSendMsg($msg,$ip);
     $stay=1;
@@ -137,7 +156,8 @@ function subscribe($mac,$allS20Data){
         $n=@socket_recvfrom($s,$bytesRecMsg,24,0,$recIP,$recPort);        
         if($n == 0){
             // This is probably due to timeout; retry...
-            // echo "retrying on update\n";
+            if(DEBUG)
+                error_log( "retrying on update\n");
             sendByteMsg($s,$msg,$ip);
         }
         else{
@@ -153,17 +173,19 @@ function subscribe($mac,$allS20Data){
             }
         }
     }
+    if(DEBUG) 
+        error_log("Number of retries subscribe = ".$loop_count."\n");
     socket_close($s);
     return $status;
 }
 
-function getName($mac,$allS20Data){
+function getName($mac,$s20Table){
     //
     // Returns the registered name in S20 specified by the mac $mac.
-    // Uses previous device information available in $allS20Data.
+    // Uses previous device information available in $s20Table.
     //
-    $ip = $allS20Data[$mac]['ip'];
-    subscribe($mac,$allS20Data);
+    $ip = $s20Table[$mac]['ip'];
+    subscribe($mac,$s20Table);
     $getSocketData = "6864001D7274".$mac.TWENTIES."0000000004001700000000";    
     $s = createSocketAndSendMsg($getSocketData,$ip);
     $recIp = ""; $recPort=0;
@@ -177,8 +199,9 @@ function getName($mac,$allS20Data){
         $n=@socket_recvfrom($s,$bytesRecMsg,168,0,$recIP,$recPort);        
         if($n == 0){
             // This is probably due to timeout; retry...
+            if(DEBUG) 
+                error_log("retrying in getName()".$loop_count);
             sendByteMsg($s,$getSocketData,$ip);
-            //            echo "retrying\n";
         }
         else{
             $recMsg = hex_byte2str($bytesRecMsg,$n);            
@@ -195,21 +218,23 @@ function getName($mac,$allS20Data){
         }
         //        ob_flush();
     }
+    if(DEBUG) 
+        error_log("Number of retries getName = ".$loop_count."\n");
     socket_close($s);
     return trim($name);
 }
 
-function fillNames($allS20Data){
+function fillNames($s20Table){
     //
-    // Loos through all S20 regiestered in $allS20Data and
+    // Loos through all S20 regiestered in $s20Table and
     // fills the name in each entry
     // 
     // 
-    foreach($allS20Data as $mac => $devData){
-        $name = getName($mac,$allS20Data);
-        $allS20Data[$mac]['name'] = $name;
+    foreach($s20Table as $mac => $devData){
+        $name = getName($mac,$s20Table);
+        $s20Table[$mac]['name'] = $name;
     }    
-    return $allS20Data;
+    return $s20Table;
 }
 
 function initS20Data(){
@@ -218,37 +243,37 @@ function initS20Data(){
     // an associative array with all collected data,
     // including names
     //
-    $allS20Data = searchS20();
-    $allS20Data = fillNames($allS20Data);
-    return $allS20Data;
+    $s20Table = searchS20();
+    $s20Table = fillNames($s20Table);
+    return $s20Table;
 }
 
-function checkStatus($mac,$allS20Data){
+function checkStatus($mac,$s20Table){
     //
     // Checks the power status of the S20 speciifed by
     // mac adresss $mac using available information in 
-    // $allS20Data. This is basically done with a subscribe 
+    // $s20Table. This is basically done with a subscribe 
     // function (see above)
     // 
-    return subscribe($mac,$allS20Data);
+    return subscribe($mac,$s20Table);
 }
 
-function updateAllStatus($allS20Data){
+function updateAllStatus($s20Table){
     //
     // This function updates the power status of all S20 in $allAllS20Data.
     //
     // InitS20Data also fills the power status when it is called.
-    // However, this function is more efficient when $allS20Data
+    // However, this function is more efficient when $s20Table
     // was already initialized and relevant available 
     // and one just wants to update the power status of all S20s
     //
-    foreach($allS20Data as $mac => $devData){
-        $allS20Data[$mac]['st'] = checkStatus($mac,$allS20Data);
+    foreach($s20Table as $mac => $devData){
+        $s20Table[$mac]['st'] = checkStatus($mac,$s20Table);
     }
-    return $allS20Data;
+    return $s20Table;
 }
 
-function sendAction($mac,$allS20Data,$action){
+function sendAction($mac,$s20Table,$action){
     //
     // Sends an $action (ON=1, OFF = 0) to S20 specified by $mac
     // It retries until a proper reply is received with the desired 
@@ -258,13 +283,13 @@ function sendAction($mac,$allS20Data,$action){
     // use this function alone. Prefer switchAndCheck() below, which 
     // performs a double check of the final state.
     //
-    subscribe($mac,$allS20Data);
+    subscribe($mac,$s20Table);
     $msg = ACTION.$mac.TWENTIES; 
     if($action)
         $msg .= ON;
     else
         $msg .= OFF;
-    $ip = $allS20Data[$mac]['ip'];
+    $ip = $s20Table[$mac]['ip'];
     $s = createSocketAndSendMsg($msg,$ip);    
     $stay=1;
     $loop_count = 0;
@@ -276,7 +301,8 @@ function sendAction($mac,$allS20Data,$action){
         $n=@socket_recvfrom($s,$bytesRecMsg,23,0,$recIP,$recPort);        
         if($n == 0){
             // This is probably due to timeout; retry...
-            // echo "retrying on switch\n";
+            if(DEBUG)
+                error_log("retrying on switch\n");
             sendByteMsg($s,$msg,$ip);
         }
         else{
@@ -295,10 +321,13 @@ function sendAction($mac,$allS20Data,$action){
             }
         }
     }
+    if(DEBUG) 
+        error_log("Number of retries sendAction() = ".$loop_count."\n");
+
     socket_close($s);
 }
 
-function actionAndCheck($mac,$allS20Data,$action){
+function actionAndCheck($mac,$s20Table,$action){
     /*
       This function implements a switch and check satus.
       The check is in fact a double check and should not 
@@ -317,8 +346,8 @@ function actionAndCheck($mac,$allS20Data,$action){
             echo "<h1> Error: too many retries without successfull action in actionAndCheck ()</h1>\n";
             exit(0);
         }
-        sendAction($mac,$allS20Data,$action);
-        $st = checkStatus($mac,$allS20Data);
+        sendAction($mac,$s20Table,$action);
+        $st = checkStatus($mac,$s20Table);
         if($st == $action){
             $stay = 0;
         }
@@ -328,15 +357,17 @@ function actionAndCheck($mac,$allS20Data,$action){
             error_log($logmsg);
         }
     } 
+    if(DEBUG) 
+        error_log("Number of retries actionAndCheck() = ".$loop_count."\n");
     return $st;
 }
 
-function getMacFromName($name,$allS20Data){
+function getMacFromName($name,$s20Table){
 //
 // Returns the $mac address of the S20 with name $name
 //
     $count = 0;
-    foreach($allS20Data as $imac => $devData){
+    foreach($s20Table as $imac => $devData){
         if($devData['name'] == $name){
             $mac = $imac;
             $count++;
@@ -349,16 +380,16 @@ function getMacFromName($name,$allS20Data){
     if($count > 1){
         echo "<h1>Ambiguous: more than one S20 found with same name  ".$name." result may be incorrect</h1>\n";
     }
-    // echo "Found mac for ".$name." = ".$mac."\n";
+
     return $mac;
 }
 
-function sendActionByDeviceName($name,$allS20Data,$action){
+function sendActionByDeviceName($name,$s20Table,$action){
     //
     // Sends an action to device designates with $name
     //    
-    $mac = getMacFromName($name,$allS20Data);
-    return actionAndCheck($mac,$allS20Data,$action);
+    $mac = getMacFromName($name,$s20Table);
+    return actionAndCheck($mac,$s20Table,$action);
 }
 ?>
 

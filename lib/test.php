@@ -37,32 +37,33 @@
 
 include("orvfms.php");
 
-$allS20Data = initS20Data(); 
+$s20Table = initS20Data(); 
 
 
-$allS20Data = updateAllStatus($allS20Data);   // Update all status (not required, just for test, 
+$s20Table = updateAllStatus($s20Table);   // Update all status (not required, just for test, 
                                               //since immediately after init they   
                                               // are already uptodate)
 // Print the full array
 
-print_r($allS20Data);   
+print_r($s20Table);   
 
 //
 // Loop over all switch and toggle twice the status
 //
 
 for($i = 0; $i < 2; $i++){
-    foreach($allS20Data as $mac => $devData){
+    foreach($s20Table as $mac => $devData){
         $name   = $devData['name'];    
         $ip     = $devData['ip'];
-        $st = checkStatus($mac,$allS20Data);
+        $st = checkStatus($mac,$s20Table);
         echo "Status of S20 named >".$name. "< (mac=".$mac.", IP=".$ip.") is ".($st ? "ON" : "OFF")."\n";
         echo "  ...Turning it ".($st ? "OFF" : "ON")."\n";
-        sendActionByDeviceName($name,$allS20Data,($st ? 0 : 1));
-        $st = checkStatus($mac,$allS20Data);
+        sendActionByDeviceName($name,$s20Table,($st ? 0 : 1));
+        $st = checkStatus($mac,$s20Table);
         echo "  ...new status is ".($st ? "ON" : "OFF")."\n\n";
         ob_flush();
     }
+    sleep(2);
 }
 
 

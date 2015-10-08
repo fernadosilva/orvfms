@@ -57,30 +57,35 @@ session_start();
 $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
 #print_r($_SESSION);
 
+if(isset($_SESSION["s20Table"]))
+    $s20Table = $_SESSION["s20Table"];
 
-if(isset($_SESSION["allS20Data"]) && isset($_SESSION["devNumber"]) &&
-   (count($allS20Data) == $_SESSION["devNumber"])){
-    $allS20Data = $_SESSION["allS20Data"];
-    $allS20Data = updateAllStatus($allS20Data);  
+if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
+   (count($s20Table) == $_SESSION["devNumber"])){
+    $s20Table = updateAllStatus($s20Table);  
+    if(DEBUG)
+        error_log("Session restarted; only status update\n");
 }
 else{
-    $allS20Data=initS20Data();    
-    $ndev=count($allS20Data);
+    $s20Table=initS20Data();    
+    $ndev=count($s20Table);
     $_SESSION["devNumber"]=$ndev;
+    if(DEBUG)
+        error_log("New session: S20 data initialized\n");
 }
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $location = $_POST['selected'];
-    $mac = getMacFromName($location,$allS20Data);
-    $st = $allS20Data[$mac]['st'];
-    $newSt = actionAndCheck($mac,$allS20Data,($st==0 ? 1 : 0));
-    $allS20Data[$mac]['st']=$newSt;
+    $mac = getMacFromName($location,$s20Table);
+    $st = $s20Table[$mac]['st'];
+    $newSt = actionAndCheck($mac,$s20Table,($st==0 ? 1 : 0));
+    $s20Table[$mac]['st']=$newSt;
 }
-$_SESSION["allS20Data"]=$allS20Data;
+$_SESSION["s20Table"]=$s20Table;
 
 
-$ndevs = count($allS20Data);
+$ndevs = count($s20Table);
 
 ?>
 <center>
@@ -93,14 +98,14 @@ $bheight = intval(100 / ($ndevs) * 0.85);
 //
 // Sort array (in this case, by mac address), such that data is displayed in a deterministic sequence
 //
-$macs = array_keys($allS20Data);
+$macs = array_keys($s20Table);
 sort($macs);
 //
 // Loop on all devices and display each button, coloured according to
 // current S20 state.
 //
 foreach ($macs as $mac){
-    $devData = $allS20Data[$mac];
+    $devData = $s20Table[$mac];
     $st   = $devData['st'];
     $name = $devData['name'];
     $type = ($st == 0 ? "redbutton" : "greenbutton");
