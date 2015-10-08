@@ -16,7 +16,7 @@ https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/
       and on comments and discussions by many other users. 
 
 SUMMARY:
-  This program implements a web interface to control Orvibo S20 sockets 
+  This code implements a web interface to control Orvibo S20 sockets 
   attached to the local network. 
 
   The web interface provides status report of all S20 attached to the 
@@ -36,16 +36,17 @@ The code contained herein includes:
        each device.
 
     orvfms/s20/index.php
-    -  A phppage that implements a web interface to monitor and 
+    -  A php page that implements a web interface to monitor and 
        control S20 sockets attached to the local network. 
 
        The web interface provides status report of all S20 attached to the 
        network and supports ON/OFF actions of each S20. It features a 
        responsive behavior to changing viewport sizes, therefore being 
-       easily weel suited to both smartphones and desktops. It divides 
+       well suited to both smartphones and desktops. It divides 
        the viewport in N horizontal buttons, each one labeled with the 
-       name automatically retrieved from the connected S20s. Each button is 
-       shown in green or red according to the current S20 state (green = ON).  
+       name automatically retrieved from each S20s. Each button is 
+       shown in green or red according to the current S20 state 
+       (green = ON).  
 
        An example of the web interface is available on 
        orvfms/web_screenshot.png
