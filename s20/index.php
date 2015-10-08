@@ -58,16 +58,10 @@ $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
 #print_r($_SESSION);
 
 
-if(isset($_SESSION["allS20Data"]) && isset($_SESSION["devNumber"])){
+if(isset($_SESSION["allS20Data"]) && isset($_SESSION["devNumber"]) &&
+   (count($allS20Data) == $_SESSION["devNumber"])){
     $allS20Data = $_SESSION["allS20Data"];
-    if(count($allS20Data) == $_SESSION["devNumber"]){
-            $allS20Data = updateAllStatus($allS20Data);  
-    }  
-    else{
-        $allS20Data=initS20Data();    
-        $ndev=count($allS20Data);
-        $_SESSION["devNumber"]=$ndev;
-    }
+    $allS20Data = updateAllStatus($allS20Data);  
 }
 else{
     $allS20Data=initS20Data();    
@@ -102,18 +96,14 @@ $bheight = intval(100 / ($ndevs) * 0.85);
 $macs = array_keys($allS20Data);
 sort($macs);
 //
-// Loop on all devices
+// Loop on all devices and display each button, coloured according to
+// current S20 state.
 //
 foreach ($macs as $mac){
     $devData = $allS20Data[$mac];
     $st   = $devData['st'];
     $name = $devData['name'];
-    if($st == 0){
-        $type="redbutton";
-    }
-    else{
-        $type = "greenbutton";
-    }
+    $type = ($st == 0 ? "redbutton" : "greenbutton");
     $h ='style="height:'.$bheight.'vh;"'; 
     $myButton='<input type="submit" name="selected" value="'.$name.'" id="'.$type.'" '.$h.' /><br>'."\n"; 
     echo $myButton;
