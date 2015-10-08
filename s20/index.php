@@ -50,8 +50,7 @@ S20 remote
 */
 
 /* UPDATE THE PATH OF THE FILE orvfms.php BELOW TO MATCH
-   YOUR LOCAL CONFIGURATION.                             -->
-
+   YOUR LOCAL CONFIGURATION.                             */
 include( "../lib/orvfms/orvfms.php"); 
 
 session_start();
