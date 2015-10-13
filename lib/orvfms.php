@@ -27,6 +27,84 @@
 include_once("globals.php"); // constants
 include_once("utils.php");   // utitlity functions
 
+function actionToTxt($st){
+    return $st ? "ON" : "OFF";
+}
+
+function setTimer($mac,$h,$m,$s,$act,$s20Table){
+
+    $ip=$s20Table[$mac]['ip'];
+    $timeHex = hourToSecHex($h,$m,$s);
+    $action  = ($act ? ONT : OFFT);
+    $setTimer="00".$action.substr($timeHex,0,2).substr($timeHex,2,2);
+ 
+    $cmdCode = "6364";
+    $setTimerHexMsg=MAGIC_KEY."001A".$cmdCode.$mac.
+                   TWENTIES.FOUR_ZEROS.$setTimer; 
+   
+    $stay = 1; $loop_count=0;
+    while($stay && ($loop_count++ < MAX_RETRIES)){
+        $s = createSocketAndBind($ip);
+        $recHex = sendHexMsgWaitReply($s,$setTimerHexMsg,$ip);
+        socket_close($s);
+        $hexMsg = strtoupper($setTimerHexMsg);
+        $recHex = strtoupper($recHex);
+        $recCode = substr($recHex,2*18,2);
+        $recHexAux = $recHex; 
+        $recHexAux[36]="0";$recHexAux[37]="0";
+        if(DEBUG){
+            print("Send\n");
+            printHex($hexMsg);
+            print("Rec\n");
+            printHex($recHex);
+            print("RecAux\n");
+            printHex($recHexAux);
+        }        
+        if(($recCode != "00") && ($recHexAux == $hexMsg))
+            return 0;
+        else
+            error_log("Retrying in setTimer\n");
+    }
+    return 1;
+}
+
+function checkTimer($mac,$s20Table,&$h,&$m,&$s,&$action){
+    
+    $ip=$s20Table[$mac]['ip'];
+    $cmdCode = "6364";
+    $checkTimer="01000000";
+    $checkTimerHexMsg = MAGIC_KEY."001A".$cmdCode.$mac.
+                        TWENTIES.FOUR_ZEROS.$checkTimer; 
+   
+    $s = createSocketAndBind($ip);
+    $recHex = sendHexMsgWaitReply($s,$checkTimerHexMsg,$ip);
+    if(DEBUG){
+        echo "Check timer\n";
+        echo "Sent\n"; 
+        printHex($checkTimerHexMsg);
+        echo "Rec\n"; 
+        printHex($recHex);
+    }
+    socket_close($s);
+
+    $relevant = substr($recHex,-6);
+    $status = substr($relevant,0,2);
+    $isSet = 0;
+    if($status!="FF"){
+        $isSet = 1;
+        $timeHex = substr($relevant,4,2).substr($relevant,2,2);
+        $sec = hexdec($timeHex);
+        secToHour($sec,$h,$m,$s); 
+        if($status == "00")
+            $action = 0; // Set to turn off
+        else
+            $action = 1; // Set to turn on
+    }
+    return $isSet;
+}
+
+
+
 function sendHexMsgWaitReply($s,$hexMsg,$ip){
     //
     // Sends msg specified by $hexMsg, in hexadecimal, to $ip and

@@ -46,6 +46,8 @@ define("SUBSCRIBE","6864001e636C");
 define("ACTION","686400176463");
 define("ON" ,"0000000001");
 define("OFF","0000000000");
+define("ONT" ,"01");
+define("OFFT","00");
 define("MAX_RETRIES",10);
 define("TIMEOUT",0.3); // Max time to wait for a reply from S20, in seconds
 define("MAGIC_KEY","6864");

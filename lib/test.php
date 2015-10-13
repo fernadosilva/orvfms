@@ -26,6 +26,10 @@
 
   It loops through all s20 plugs and switch them off and on.
 
+  At the end it tests the count down timer in one of the devices,
+  counting twice for 10 seconds, and toggling the result at the
+  end.
+
   PLEASE TAKE INTO ACCOUNT POSSIBLE SAFETY ISSUES  of switching on/off! 
   Uplug any device or appliance that nay be affected by this test cycle!
   
@@ -66,5 +70,58 @@ for($i = 0; $i < 2; $i++){
     sleep(2);
 }
 
+for($i = 0; $i < 2 ; $i++){
+//
+// Timer test; toggle first device twice, 10 seconds
+//
+    $mac = array_keys($s20Table)[0];
+    $ip=$s20Table[$mac]['ip'];
+    $name=$s20Table[$mac]['name'];
+
+    echo "\n\n ***  Testing timer in ".$name." *** \n\n";
+    
+    $st = checkStatus($mac,$s20Table);
+    
+    echo " Initital status: ".actionToTxt($st)."\n\n";
+
+
+    if($st){
+        $action = 0;
+    }
+    else{
+        $action = 1;
+    }
+    
+    $h=0;$m=0;$s=10;
+
+    echo "setting timer: ".$name.' -> '.actionToTxt($action)." Time=".
+                          sprintf("%02d:%02d:%02d\n",$h,$m,$s);
+    
+    if(!setTimer($mac,$h,$m,$s,$action,$s20Table)){
+        echo "Set timer succeed\n";
+    }
+    else{
+        echo "Some problem on set timer\n";
+    }
+    //
+    //Let us check
+    //
+
+    while(1){
+        $timer = checkTimer($mac,$s20Table,$h,$m,$s,$action);
+        $st    = checkStatus($mac,$s20Table);
+        if(!$timer){
+            echo "Timer is off, status = ".actionToTxt($st)."\n";
+            break;
+        }
+        else{        
+            echo sprintf("Current=%02d:%02d:%02d To => %s, curr = %s\n",
+                         $h,$m,$s,actionToTxt($action),actionToTxt($st));
+        }
+        ob_flush();
+        sleep(2);
+    }
+}
+echo "Test finished, everything seems OK\n";
 
 ?>

@@ -84,4 +84,32 @@ function  printHex($hexMsg){
     }
     echo "\n";
 }
+
+
+function secToHour($seconds,&$hour,&$min,&$sec){
+    $min = (int) ($seconds / 60);
+    $sec = $seconds % 60;
+    $hour = (int) ($min / 60);
+    $min = $min % 60;
+}
+    
+function hourToSec($h,$min,$seconds){
+    $sec = $h * 3600 + $min * 60 + $seconds;
+    return $sec;
+}
+
+function hourToSecHex($h,$min,$seconds){
+    //    converts hour, min and sec to a little endian hexadecimal 
+    //    representation of the number of second;
+    //
+    $sec = hourToSec($h,$min,$seconds);
+    $hexSec = dechex($sec);
+    $n = 4 - strlen($hexSec);
+    for($i = 0; $i < $n ; $i++){
+        $hexSec = "0".$hexSec;
+    }
+    $hexSecLE = substr($hexSec,2,2).substr($hexSec,0,2); // return Little Endian
+    return $hexSecLE;
+}
+    
 ?>
