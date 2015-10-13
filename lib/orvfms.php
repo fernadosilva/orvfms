@@ -27,24 +27,104 @@
 include_once("globals.php"); // constants
 include_once("utils.php");   // utitlity functions
 
-function sendByteMsg($s,$msg,$addr){
+function sendHexMsgWaitReply($s,$hexMsg,$ip){
     //
-    // Send the datagram $msg to address ($addr,PORT), using 
+    // Sends msg specified by $hexMsg, in hexadecimal, to $ip and
+    // waits for reply.
+    // Returns the reply in hex format after checking major conditions
+    //
+    
+    $magicKey = substr($hexMsg,0,4);               
+    if($magicKey != MAGIC_KEY)
+        error_log("Warning: wrong msg key in send msg (sendhexMsgWaitReply)!!");
+    
+    $msgCodeSend = substr($hexMsg,8,4);               
+    //
+    // double check msg length
+    //
+    $msgLenHex = substr($hexMsg,4,4);               
+    $msgLen    = hexdec($msgLenHex);
+    if($msgLen != strlen($hexMsg)/2){
+        echo $hexMsg."\n";
+        printHex($hexMsg);
+        echo $msgLenHex." -> ".$msgLen."\n";
+        error_log("Wrong msg length in sendHexWaitReply: Msg has ".strlen($hexMsg).
+                 " bytes, code states ".$msgLen." bytes\n");        
+    }
+    $codeSend = substr($hexMsg,8,4);
+    sendHexMsg($s,$hexMsg,$ip);
+    $loop_count=0;
+    for(;;){
+        if(++$loop_count > MAX_RETRIES){
+            echo "<h1> Error: too many retries without successfull replies</h1>\n";
+            exit(0);
+        }
+        $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
+        if($n == 0){
+            // This is probably due to timeout; retry...
+            sendHexMsg($s,$hexMsg,$ip);
+            if(DEBUG)
+                error_log( "retrying on update\n");
+        }
+        else{
+            if($n >= 12){
+                $recHexMsg     = hex_byte2str($binRecMsg,$n);                        
+                $magicKey      = substr($recHexMsg,0,4);
+                $recLenHex     = substr($recHexMsg,4,4);                
+                $recLen        = hexdec($recLenHex);
+                $msgCodeRec    = substr($recHexMsg,8,4);                
+                if(DEBUG){
+                    echo "Received: \n";
+                    printHex($recHexMsg);
+                    echo "Magic = ".$magicKey."\n";
+                    echo "recLenHex  = ".$recLenHex." n = ".$n."\n";
+                    echo "msgCodeRec = ".$msgCodeRec." (was ".$msgCodeSend.")\n";
+                    echo "IP=".$recIP. " ".$ip."\n";
+                }
+                if(($magicKey == MAGIC_KEY) &&
+                   ($n == $recLen) &&
+                   ($recIP==$ip) &&
+                   ($msgCodeRec == $msgCodeSend)) { 
+                    // Everything seems OK
+                    if(DEBUG) 
+                        error_log("Number of retries subscribe = ".$loop_count."\n");
+                    return $recHexMsg;
+                }
+            }
+        }
+    } /* Never reaches */;
+    echo "<h1>Fatal Error in sendHexMsgWaitReply: reached end of function</h1>";
+    exit(0);
+    return "";
+}
+
+function sendHexMsg($s,$hexMsg,$ip){
+    //
+    // Send the datagram $hexMsg to address ($ip,PORT), using 
     // opened socket $s
+    // $hexMsg is an hexadecimal coded sequence/string, therefore must be converted to
+    // binary.
     // 
-    $byteMsg = hex_str2byte($msg);
-    $nBytesMsg=strlen($msg)/2;
-    if(!socket_sendto($s,$byteMsg,$nBytesMsg,0,$addr,PORT)){
-        echo "<h1>Error sending  message to socket in sendByteMsg, addr= ".$addr."</h1>\n";
+    if(strlen($hexMsg) % 2){
+        error_log("Warning: odd hex msg in sendHexMsg");
+    }
+    if(strlen($hexMsg) == 0){
+        echo "<h1>Fatal: attempting to send null msg len in sendHexMsg</h1>\n";
+        exit(0);
+    }
+    $binMsg = hex_str2byte($hexMsg);
+    $lenBinMsg=strlen($hexMsg)/2;
+    if(!socket_sendto($s,$binMsg,$lenBinMsg,0,$ip,PORT)){
+        echo "<h1>Error sending  message to socket in sendHexMsg, addr= ".$ip."</h1>\n";
         exit(0);
     }
 }
 
-function createSocketAndSendMsg($msg,$addr){
+function createSocketAndBind($ip){
     //
     // Create socket, bind it to local address (0.0.0.0,PORT),
     // for listening, sets timeout to receiving operations, 
-    // and sends msge $msg to address ($addr,PORT)
+    // and sends msge $msg to address ($ip,PORT)
     // 
     $s = socket_create(AF_INET,SOCK_DGRAM,0);
     if(!$s){
@@ -61,15 +141,14 @@ function createSocketAndSendMsg($msg,$addr){
                 echo "<h1>Error binding socket</h1>";
                 exit(0);
             }
-            usleep(300000);
-        }
+            usleep(TIMEOUT);
+    	        }
         else{
             $stay = 0;
         }
     }
     if(DEBUG)
         error_log("Bind loop count = ".$loop_count);
-
     if(!socket_set_option($s,SOL_SOCKET,SO_BROADCAST,1)){
         echo "<h1>Error setting socket options</h1>";
         exit(0);
@@ -82,7 +161,17 @@ function createSocketAndSendMsg($msg,$addr){
     $usec = (int) ((TIMEOUT - $sec) * 1000000.0);
     $timeout = array('sec' => $sec,'usec'=> $usec); 
     socket_set_option($s,SOL_SOCKET,SO_RCVTIMEO,$timeout);
-    sendByteMsg($s,$msg,$addr);
+    return $s;
+}
+
+function createSocketAndSendMsg($msg,$ip){
+    //
+    // Create socket, bind it to local address (0.0.0.0,PORT),
+    // for listening, sets timeout to receiving operations, 
+    // and sends msge $msg to address ($ip,PORT)
+    // 
+    $s = createSocketAndBind($ip);		
+    sendHexMsg($s,$msg,$ip);			
     return $s;
 }
 
@@ -115,13 +204,26 @@ function searchS20(){
     $recIP="";
     $recPort=0;
     $s20Table=array();
+    $loop_count = 0;
     while ( 1 ){
-        $n=@socket_recvfrom($s,$bytesRecMsg,42,0,$recIP,$recPort);
-        if(!$n) 
-            break;
-        if($n == 42){
-            $recMsg = hex_byte2str($bytesRecMsg,$n);
-            if(substr($recMsg,0,4) == "6864"){
+        $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
+        if($n == 0){
+            if(++$loop_count > 3){
+                if(count($s20Table) == 0){
+                    error_log("Giving up searching for sockets");
+                    echo "<h1>Internal server error (see logs)</h1>";
+                    exit(1);
+                }
+                else{
+                    break;
+                }
+            }
+            sendHexMsg($s,DISCOVERY_MSG,IP_BROADCAST);
+            continue;
+        }
+        if($n >= 42){
+            $recMsg = hex_byte2str($binRecMsg,$n);
+            if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == "7161")){
                 $mac = substr($recMsg,14,12);
                 $status = (int) substr($recMsg,-1);
                 $s20Table[$mac]=array();
@@ -129,7 +231,7 @@ function searchS20(){
                 $s20Table[$mac]['st']=$status;
                 $s20Table[$mac]['imac']=invMac($mac);
             }
-        }        
+        }
     }
     socket_close($s);
     return $s20Table;
@@ -142,44 +244,46 @@ function subscribe($mac,$s20Table){
     // 
     // Returns the socket status 
     //
+    if(!isset($s20Table)){
+        echo "<h1>Internal server error</h1>";
+        error_log("Found null s20Table in subscribe\n");
+    }
     $imac = $s20Table[$mac]['imac'];
     $ip   = $s20Table[$mac]['ip'];
-    $msg = SUBSCRIBE.$mac.TWENTIES.$imac.TWENTIES;
-    $s = createSocketAndSendMsg($msg,$ip);
-    $stay=1;
-    $loop_count=0;
-    while($stay){
-        if(++$loop_count > MAX_RETRIES){
-            echo "<h1> Error: too many retries without successfull subscription</h1>\n";
-            exit(0);
-        }
-        $n=@socket_recvfrom($s,$bytesRecMsg,24,0,$recIP,$recPort);        
-        if($n == 0){
-            // This is probably due to timeout; retry...
-            if(DEBUG)
-                error_log( "retrying on update\n");
-            sendByteMsg($s,$msg,$ip);
-        }
-        else{
-            $recMsg = hex_byte2str($bytesRecMsg,$n);            
-            if($n == 24){
-                if(substr($recMsg,0,4)=="6864"){
-                    $rmac = substr($recMsg,12,12);
-                    if($rmac==$mac){
-                        $status = (int) substr($recMsg,-1);
-                        $stay = 0;
-                    }
-                }                    
-            }
-        }
-    }
-    if(DEBUG) 
-        error_log("Number of retries subscribe = ".$loop_count."\n");
+    $hexMsg = SUBSCRIBE.$mac.TWENTIES.$imac.TWENTIES;
+    $s = createSocketAndBind($ip);
+    $hexRecMsg = sendHexMsgWaitReply($s,$hexMsg,$ip);
+    $status = (int) hexdec(substr($hexRecMsg,-2,2));
     socket_close($s);
     return $status;
 }
 
+function getTable($mac,$table,$vflag,$s20Table){
+    $tableHex = dechex($table);
+    if(strlen($tableHex) == 1)
+        $tableHex = "0".$tableHex;
+    $hexMsg = "6864001D7274".$mac.TWENTIES."00000000".$tableHex."00".$vflag."00000000";    
+    $ip = $s20Table[$mac]['ip'];
+    $s = createSocketAndBind($ip);
+    $hexRec = sendHexMsgWaitReply($s,$hexMsg,$ip);
+    socket_close($s);
+    return $hexRec;
+}
+
 function getName($mac,$s20Table){
+    //
+    // Returns the registered name in S20 specified by the mac $mac.
+    // Uses previous device information available in $s20Table.
+    //
+    subscribe($mac,$s20Table);
+    $table = 4; $vflag = "17";
+    $recTable = getTable($mac,$table,$vflag,$s20Table);
+    $binTable = hex_str2byte($recTable);
+    $name = substr($binTable,70,16);
+    return trim($name);
+}
+
+function getNameOld($mac,$s20Table){
     //
     // Returns the registered name in S20 specified by the mac $mac.
     // Uses previous device information available in $s20Table.
@@ -196,21 +300,21 @@ function getName($mac,$s20Table){
             echo "<h1> Error: too many retries without successfull reply in getName()</h1>\n";
             exit(0);
         }
-        $n=@socket_recvfrom($s,$bytesRecMsg,168,0,$recIP,$recPort);        
+        $n=@socket_recvfrom($s,$binRecMsg,168,0,$recIP,$recPort);        
         if($n == 0){
             // This is probably due to timeout; retry...
             if(DEBUG) 
                 error_log("retrying in getName()".$loop_count);
-            sendByteMsg($s,$getSocketData,$ip);
+            sendHexMsg($s,$getSocketData,$ip);
         }
         else{
-            $recMsg = hex_byte2str($bytesRecMsg,$n);            
+            $recMsg = hex_byte2str($binRecMsg,$n);            
             //            print_r( "getName (".$n.")=".$recMsg."\n");
             if($n==168){
-                if(substr($recMsg,0,4)=="6864"){
+                if(substr($recMsg,0,4)==MAGIC_KEY){
                     $rmac = substr($recMsg,12,12);
                     if($rmac == $mac){
-                        $name = substr($bytesRecMsg,70,16);
+                        $name = substr($binRecMsg,70,16);
                         $stay=0;
                     }
                 }
@@ -273,7 +377,7 @@ function updateAllStatus($s20Table){
     return $s20Table;
 }
 
-function sendAction($mac,$s20Table,$action){
+function sendAction($mac,$action,$s20Table){
     //
     // Sends an $action (ON=1, OFF = 0) to S20 specified by $mac
     // It retries until a proper reply is received with the desired 
@@ -290,44 +394,13 @@ function sendAction($mac,$s20Table,$action){
     else
         $msg .= OFF;
     $ip = $s20Table[$mac]['ip'];
-    $s = createSocketAndSendMsg($msg,$ip);    
-    $stay=1;
-    $loop_count = 0;
-    while($stay){
-        if(++$loop_count > MAX_RETRIES){
-            echo "<h1> Error: too many retries without successfull sendAction()</h1>\n";
-            exit(0);
-        }
-        $n=@socket_recvfrom($s,$bytesRecMsg,23,0,$recIP,$recPort);        
-        if($n == 0){
-            // This is probably due to timeout; retry...
-            if(DEBUG)
-                error_log("retrying on switch\n");
-            sendByteMsg($s,$msg,$ip);
-        }
-        else{
-            $recMsg = hex_byte2str($bytesRecMsg,$n);            
-            // print_r("\nSent      ".$msg."\n");
-            // print_r("Receiving ".$recMsg." from ".$recIP."\n\n");
-            if($n == 23){
-                if(substr($recMsg,0,4)=="6864"){
-                    $rmac = substr($recMsg,12,12);
-                    if($rmac==$mac){
-                        $status = (int) substr($recMsg,-1);
-                        if($status == $action)
-                            $stay = 0;
-                    }
-                }                    
-            }
-        }
-    }
-    if(DEBUG) 
-        error_log("Number of retries sendAction() = ".$loop_count."\n");
-
+    $s = createSocketAndBind($ip);    
+    $hexRecMsg = sendHexMsgWaitReply($s,$msg,$ip);    
+    $status = (int) hexdec(substr($hexRecMsg,-2,2));    
     socket_close($s);
 }
 
-function actionAndCheck($mac,$s20Table,$action){
+function actionAndCheck($mac,$action,$s20Table){
     /*
       This function implements a switch and check satus.
       The check is in fact a double check and should not 
@@ -346,7 +419,7 @@ function actionAndCheck($mac,$s20Table,$action){
             echo "<h1> Error: too many retries without successfull action in actionAndCheck ()</h1>\n";
             exit(0);
         }
-        sendAction($mac,$s20Table,$action);
+        sendAction($mac,$action,$s20Table);
         $st = checkStatus($mac,$s20Table);
         if($st == $action){
             $stay = 0;
@@ -384,12 +457,12 @@ function getMacFromName($name,$s20Table){
     return $mac;
 }
 
-function sendActionByDeviceName($name,$s20Table,$action){
+function sendActionByDeviceName($name,$action,$s20Table){
     //
     // Sends an action to device designates with $name
     //    
     $mac = getMacFromName($name,$s20Table);
-    return actionAndCheck($mac,$s20Table,$action);
+    return actionAndCheck($mac,$action,$s20Table);
 }
 ?>
 

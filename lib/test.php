@@ -58,7 +58,7 @@ for($i = 0; $i < 2; $i++){
         $st = checkStatus($mac,$s20Table);
         echo "Status of S20 named >".$name. "< (mac=".$mac.", IP=".$ip.") is ".($st ? "ON" : "OFF")."\n";
         echo "  ...Turning it ".($st ? "OFF" : "ON")."\n";
-        sendActionByDeviceName($name,$s20Table,($st ? 0 : 1));
+        sendActionByDeviceName($name,($st ? 0 : 1),$s20Table);
         $st = checkStatus($mac,$s20Table);
         echo "  ...new status is ".($st ? "ON" : "OFF")."\n\n";
         ob_flush();

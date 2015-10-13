@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head
@@ -51,25 +54,36 @@ S20 remote
 
 /* UPDATE THE PATH OF THE FILE orvfms.php BELOW TO MATCH
    YOUR LOCAL CONFIGURATION.                             */
+
+
 include( "../lib/orvfms/orvfms.php"); 
 
-session_start();
 $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
-#print_r($_SESSION);
+if(DEBUG)
+    print_r($_SESSION);
 
-if(isset($_SESSION["s20Table"]))
+if(isset($_SESSION["s20Table"])) {
     $s20Table = $_SESSION["s20Table"];
+}
+
+if(isset($_SESSION["time_ref"])) 
+    $time_ref = $_SESSION["time_ref"];
+else
+    $time_ref = 0;
 
 if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
-   (count($s20Table) == $_SESSION["devNumber"])){
+   (count($s20Table) == $_SESSION["devNumber"]) 
+   && (count($s20Table)>0) && ((time()-$time_ref < 180))){
     $s20Table = updateAllStatus($s20Table);  
     if(DEBUG)
         error_log("Session restarted; only status update\n");
 }
 else{
+    $time_ref = time(); 
     $s20Table=initS20Data();    
     $ndev=count($s20Table);
     $_SESSION["devNumber"]=$ndev;
+    $_SESSION["time_ref"]=$time_ref;
     if(DEBUG)
         error_log("New session: S20 data initialized\n");
 }
@@ -79,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $location = $_POST['selected'];
     $mac = getMacFromName($location,$s20Table);
     $st = $s20Table[$mac]['st'];
-    $newSt = actionAndCheck($mac,$s20Table,($st==0 ? 1 : 0));
+    $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
     $s20Table[$mac]['st']=$newSt;
 }
 $_SESSION["s20Table"]=$s20Table;

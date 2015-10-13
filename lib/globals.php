@@ -40,6 +40,7 @@ define("IP_BROADCAST","192.168.1.255");
 
 define("PORT",10000);
 define("TWENTIES","202020202020");
+define("FOUR_ZEROS", "00000000");
 define("DISCOVERY_MSG","686400067161");
 define("SUBSCRIBE","6864001e636C");
 define("ACTION","686400176463");
@@ -47,7 +48,10 @@ define("ON" ,"0000000001");
 define("OFF","0000000000");
 define("MAX_RETRIES",10);
 define("TIMEOUT",0.3); // Max time to wait for a reply from S20, in seconds
+define("MAGIC_KEY","6864");
+define("BUFFER_SIZE",500);
 define("DEBUG",0);
+
 ?>
 
 

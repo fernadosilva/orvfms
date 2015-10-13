@@ -46,7 +46,7 @@ function hex_byte2str($bytes,$n){
         }             
         $str .= $hex;
     }     
-    return $str;
+    return strtoupper($str);
 }
 
 function invMac($mac){
@@ -64,5 +64,24 @@ function invMac($mac){
          for($i = 0; $i < 12; $i+=2)
              $imac = substr($mac,$i,2).$imac;
     return $imac;
+}
+
+function  printHex($hexMsg){
+    $n = strlen($hexMsg)/2;
+    echo"\n\n";
+    $col = 0;
+    $lin = 0;
+    for($k=0; $k <$n; $k++){
+        if($col++ == 0){
+            echo sprintf(" %02d    ",$lin++);
+        }
+        $pair = substr($hexMsg,2*$k,2);
+        echo sprintf(" %2s",$pair);
+        if($col == 16){
+            $col = 0;
+            echo "\n";
+        }
+    }
+    echo "\n";
 }
 ?>
