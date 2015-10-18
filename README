@@ -27,13 +27,14 @@ SUMMARY:
   operations are remotely supported, and remote operations often fail due to
   timeout. In fact, remote operations through the WiWo app use a remote 
   Orvibo proxy which is often out of service or possibly blocked(?). 
+  Moreover, the S20s  can not be operated from a desktop.
   The purpose of  this software is to setup a web interface in some server 
   in the local network, which may be accessed from any Internet 
   location, supporting the most relevant s20 actions (switch off/on and 
   countdown timers). The web interface is designed such that it may be 
-  operated from any type of web brwoser (desktop,pad,smartphone). 
-  Furthermore, it reports accurately the satus of the S20, something
-  the WiWo app often fails to do.
+  operated from any web browser (desktop,smartphone or pad). 
+  Furthermore, it reports accurately all the satus of the S20s, 
+  something  the WiWo app often fails to do.
 
   The web server can be installed on any computer always on or 
   on a cheap mini server (a Raspberry Pi, for example).
@@ -50,6 +51,9 @@ SUMMARY:
 
   An example of the web interface is available on web_screenshot.png
  
+  See the SECURITY section  below for some comments on security of this 
+  service.
+
 CONTENTS :
 The code contained herein includes:
     orvfms/lib
@@ -134,11 +138,14 @@ DNS and to add appropriate  port forwarding rules to the router. These
 operations are router and network dependent and are beyond the scope of this 
 document.
 
+SECURITY
+
 This web server does not offers any particular security against outside
-attacks. Please use it at your own risk. A simple counter measure to mitigate 
+attacks. Please use it at your own risk.  If you intend to  operate it 
+from any Internet location, a simple counter measure to mitigate 
 the risk is to store the index.php below a directory with a code name 
-only known to you (e.g., [DocumentRoot]/s20_myPassCode/index.php), to be 
-sure that the Document Root directory is not  readable and assume that 
+only known to you (e.g., [DocumentRoot]/s20_myPassCode/index.php), to  
+assure that the Document Root directory is not  readable and assume that 
 there  are not many attackers knowing this software or looking for the 
 control of your home devices :-). This is possibly more than enough for 
 most cases, provided that the  devices are not "too risky". Of course, this 
