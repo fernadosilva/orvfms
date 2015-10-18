@@ -5,7 +5,11 @@ session_start();
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<META HTTP-EQUIV="Refresh" CONTENT="60">
+<?php
+if(($_SERVER["REQUEST_METHOD"] != "POST") || isset($_POST["action"])){
+    echo '<META HTTP-EQUIV="Refresh" CONTENT="60">'."\n";
+}
+?>
 <title>
 S20 remote
 </title>
@@ -34,7 +38,7 @@ S20 remote
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.*
 *************************************************************************/
 /*
-  This program was developed independenntly and it is not
+  This program was developed independently and it is not
   supported or endorsed in any way by Orvibo (C).
 
   This page implements a web interface to control Orvibo S20 sockets 
@@ -52,11 +56,12 @@ S20 remote
   as the location of the CSS  orvfms.css in the <head> section above.  
 */
 
-/* UPDATE THE PATH OF THE FILE orvfms.php BELOW TO MATCH
-   YOUR LOCAL CONFIGURATION.                             */
+/* UPDATE THE PATH OF THE  orvfms LIBRARY  BELOW TO MATCH
+   YOUR LOCAL CONFIGURATION.              
+*/
+define("ORVFMS_PATH","../lib/orvfms/");
 
-
-include( "../lib/orvfms/orvfms.php"); 
+include(ORVFMS_PATH."orvfms.php"); 
 
 $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
 if(DEBUG)
@@ -73,7 +78,7 @@ else
 
 if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
    (count($s20Table) == $_SESSION["devNumber"]) 
-   && (count($s20Table)>0) && ((time()-$time_ref < 180))){
+   && (count($s20Table)>0) && ((time()-$time_ref < 300))){
     $s20Table = updateAllStatus($s20Table);  
     if(DEBUG)
         error_log("Session restarted; only status update\n");
@@ -90,45 +95,50 @@ else{
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $location = $_POST['selected'];
-    $mac = getMacFromName($location,$s20Table);
-    $st = $s20Table[$mac]['st'];
-    $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
-    $s20Table[$mac]['st']=$newSt;
+    //    print_r($_POST);
+    if(isset($_POST['action'])){
+        $submitAction = 'setTimer';
+        include(ORVFMS_PATH."timer_settings.php");
+        timerSettings($s20Table);
+    }
+    else{
+        $submitAction = $_POST['selected'];
+        if(substr($submitAction,0,strlen(PREFIX_CODE)) == PREFIX_CODE){
+            $timerName = substr($submitAction,strlen(PREFIX_CODE));
+            $submitAction = "timerMenu";
+        }
+        else{
+            $mac = getMacFromName($submitAction,$s20Table);
+            $st = $s20Table[$mac]['st'];
+            $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
+            $s20Table[$mac]['st']=$newSt;
+            $swVal = $s20Table[$mac]['switchOffTimer']; 
+            if(($st == 0) && ($newSt == 1) && ($swVal > 0)){
+                $s20Table[$mac]['timerVal'] = $swVal;
+                $s20Table[$mac]['timerAction'] = 0;
+            }
+            if(DEBUG)
+                print "<br><br><br><br>".$st." => ".$newSt." -> ".$swVal."<br><br><br>";
+        }
+    }
 }
+else{
+    $submitAction ="";
+}
+
 $_SESSION["s20Table"]=$s20Table;
+if(DEBUG)
+    print_r(-$s20Table);
 
-
-$ndevs = count($s20Table);
-
+if($submitAction == "timerMenu"){
+    include(ORVFMS_PATH."timer_page.php");
+    displayTimerPage($timerName,$s20Table,$myUrl);
+}
+else{
+    include(ORVFMS_PATH."main_page.php");
+    displayMainPage($s20Table,$myUrl);
+    include(ORVFMS_PATH."main_page_scripts.php");
+}
 ?>
-<center>
-<form action="<?php echo $myUrl ?>" method="post">
-<?php
-
-// Compute button height 
-$bheight = intval(100 / ($ndevs) * 0.85);
-
-//
-// Sort array (in this case, by mac address), such that data is displayed in a deterministic sequence
-//
-$macs = array_keys($s20Table);
-sort($macs);
-//
-// Loop on all devices and display each button, coloured according to
-// current S20 state.
-//
-foreach ($macs as $mac){
-    $devData = $s20Table[$mac];
-    $st   = $devData['st'];
-    $name = $devData['name'];
-    $type = ($st == 0 ? "redbutton" : "greenbutton");
-    $h ='style="height:'.$bheight.'vh;"'; 
-    $myButton='<input type="submit" name="selected" value="'.$name.'" id="'.$type.'" '.$h.' /><br>'."\n"; 
-    echo $myButton;
-} 
-
-?>
-</center>
 </body>
 </html>

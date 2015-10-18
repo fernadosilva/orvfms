@@ -32,9 +32,11 @@ function actionToTxt($st){
 }
 
 function setTimer($mac,$h,$m,$s,$act,$s20Table){
-
+    //
+    // Sets countdown timer of device $mac to $h:$m:$s and action $act
+    //
     $ip=$s20Table[$mac]['ip'];
-    $timeHex = hourToSecHex($h,$m,$s);
+    $timeHex = hourToSecHexLE($h,$m,$s);
     $action  = ($act ? ONT : OFFT);
     $setTimer="00".$action.substr($timeHex,0,2).substr($timeHex,2,2);
  
@@ -68,8 +70,49 @@ function setTimer($mac,$h,$m,$s,$act,$s20Table){
     return 1;
 }
 
-function checkTimer($mac,$s20Table,&$h,&$m,&$s,&$action){
-    
+function updTableTimers(&$s20Table){
+    //
+    // Update the values of count down timers im table $s20Table
+    //
+    $justTest = 0;
+    foreach($s20Table as $mac => $devData){
+        // Check && update count down timers
+        $s20Table[$mac]['timerVal'] = checkTimerSec($mac,$s20Table,$action);
+        $s20Table[$mac]['timerAction'] = $action;
+
+        // Check && update switch off after on timer
+        updNameAndTimerAfterOnDevice($mac,$s20Table);
+        /*
+        $s20Table[$mac]['timerVal'] = $justTest;
+        $s20Table[$mac]['timerAction'] = $justTest % 2;
+        $justTest += 143;        
+        */
+    }
+}
+
+function checkTimerSec($mac,$s20Table,&$act){
+    //
+    // Check if countdown timer of device with mac $mac is set.
+    // returns the number of seconds and updates value action
+    // with 0 (Off) or 1 (On).
+    // If no timer is programmed, returns 0.
+    //
+    if(checkTimer($mac,$s20Table,$h,$m,$s,$action)){
+        $act = $action;
+        $seconds = $h*3600+$m*60+$s;
+        return $seconds;
+    }
+    return 0;
+}
+
+
+function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
+    //
+    // Check if countdown timer of device with mac $mac is set.
+    // Updates the arguments h,m, and s with hour, minutes and seconds
+    // and updates value action with 0 (Off) or 1 (On).
+    // If no countdown timer is programmed, returns 0, otherwise 1.
+    //    
     $ip=$s20Table[$mac]['ip'];
     $cmdCode = "6364";
     $checkTimer="01000000";
@@ -93,8 +136,8 @@ function checkTimer($mac,$s20Table,&$h,&$m,&$s,&$action){
     if($status!="FF"){
         $isSet = 1;
         $timeHex = substr($relevant,4,2).substr($relevant,2,2);
-        $sec = hexdec($timeHex);
-        secToHour($sec,$h,$m,$s); 
+        $seconds = hexdec($timeHex);
+        secToHour($seconds,$h,$m,$sec); 
         if($status == "00")
             $action = 0; // Set to turn off
         else
@@ -165,7 +208,7 @@ function sendHexMsgWaitReply($s,$hexMsg,$ip){
                    ($msgCodeRec == $msgCodeSend)) { 
                     // Everything seems OK
                     if(DEBUG) 
-                        error_log("Number of retries subscribe = ".$loop_count."\n");
+                        error_log("OK in subscribe: Number of retries subscribe to ".$recIP." = ".$loop_count."\n");
                     return $recHexMsg;
                 }
             }
@@ -274,7 +317,7 @@ function searchS20(){
     // An additional field $s20Table[$mac]['name'] is later added 
     // to each entry with the name assigned to each device. 
     // This is done in a specific function since it requires a separate
-    // request to each S20 (see function getName() and fillNames below).
+    // request to each S20 (see function getName() and updNamesAndTimerAfterOn below).
     //
     // Returns the $s20Table array
     //
@@ -348,73 +391,111 @@ function getTable($mac,$table,$vflag,$s20Table){
     return $hexRec;
 }
 
+function setSwitchOffTimer($mac,$sec,&$s20Table){
+    //
+    // Sets the automatic switch off timer in table 4 to $sec
+    //
+    echo "===============================\n";
+    subscribe($mac,$s20Table);
+    $table = 4; $vflag = "17";
+    $recTable = getTable($mac,$table,$vflag,$s20Table);
+
+    printHex($recTable);
+    $switchOffData = substr($recTable,164*2,6);
+
+    print "OLD SWITCHOFFDATA   ".$switchOffData."(".
+                 secToHourString(hexdec(substr($switchOffData,2,4))).")\n";
+
+    $switchOffData = ($sec == 0) ? "00" : "01";
+    $switchOffData = $switchOffData.secToHexBE($sec);
+
+    echo "new switchOffData=".$switchOffData."\n";
+
+    // Set timer
+    $newTable = substr_replace($recTable,$switchOffData,2*164,6);
+
+    // replace receive code with send code
+    $newTable = substr_replace($newTable,WRITE_SOCKET_CODE,2*4,4);
+    print "\n table to be send:\n\n";
+    printHex($newTable);
+
+    $ip = $s20Table[$mac]['ip'];
+    $s = createSocketAndBind($ip);    
+    $reply = sendHexMsgWaitReply($s,$newTable,$ip);
+    socket_close($s);
+    print "\nReply:\n\n";
+    printHex($reply);
+    $newSec = getSwitchOffTimer($mac,$s20Table);
+    if($sec == $newSec)
+        echo "OK! ".$sec."== ".$newSec."\n";
+    else
+        echo "NOK! ".$sec."<> ".$newSec."\n";
+
+    $recTable2 = getTable($mac,$table,$vflag,$s20Table);
+    print("FINAL TABLE 4\n");
+    printHex($recTable2);
+    if($recTable2 == $recTable)
+        echo "Table unchanged :-(\n";
+}
+
+function getSwitchOffTimer($mac,&$s20Table){
+    //
+    // Returns the switch off timer for device $mac
+    //
+    updNameAndTimerAfterOnDevice($mac,$s20Table);
+    return $s20Table[$mac]['switchOffTimer'];
+}
+
+function updNameAndTimerAfterOnDevice($mac,&$s20Table){
+    //
+    // Updates the name and "switch Off timer" on 
+    // $s20Table. Information retrieved from table 4.
+    //
+    subscribe($mac,$s20Table);
+    $table = 4; $vflag = "17";
+    $recTable = getTable($mac,$table,$vflag,$s20Table);
+
+    // Upd Name
+    $binTable = hex_str2byte($recTable);
+    $name = substr($binTable,70,16);
+    $s20Table[$mac]['name'] = trim($name);
+
+    // Upd automatic timer switch off after on
+    $timerSetString = substr($recTable,164*2,2);
+    $timerValString = substr($recTable,166*2,4);
+    $timerValString = invertEndian($timerValString);
+    if($timerSetString == "00")
+        $timerVal = 0;
+    else
+        $timerVal = hexdec($timerValString);
+
+    if(DEBUG)
+        echo "Timer Set=".$timerSetString." Val= ".$timerValString." dec = ".$timerVal."\n";
+
+    $s20Table[$mac]['switchOffTimer']=$timerVal;    
+}
+
+
+
+
+
 function getName($mac,$s20Table){
     //
     // Returns the registered name in S20 specified by the mac $mac.
     // Uses previous device information available in $s20Table.
     //
-    subscribe($mac,$s20Table);
-    $table = 4; $vflag = "17";
-    $recTable = getTable($mac,$table,$vflag,$s20Table);
-    $binTable = hex_str2byte($recTable);
-    $name = substr($binTable,70,16);
-    return trim($name);
+    updNameAndTimerAfterOn($mac,$s20Table);
+    return $s20Table[$mac]['name'];
 }
 
-function getNameOld($mac,$s20Table){
-    //
-    // Returns the registered name in S20 specified by the mac $mac.
-    // Uses previous device information available in $s20Table.
-    //
-    $ip = $s20Table[$mac]['ip'];
-    subscribe($mac,$s20Table);
-    $getSocketData = "6864001D7274".$mac.TWENTIES."0000000004001700000000";    
-    $s = createSocketAndSendMsg($getSocketData,$ip);
-    $recIp = ""; $recPort=0;
-    $stay = 1;
-    $loop_count = 0;
-    while($stay){
-        if(++$loop_count > MAX_RETRIES){
-            echo "<h1> Error: too many retries without successfull reply in getName()</h1>\n";
-            exit(0);
-        }
-        $n=@socket_recvfrom($s,$binRecMsg,168,0,$recIP,$recPort);        
-        if($n == 0){
-            // This is probably due to timeout; retry...
-            if(DEBUG) 
-                error_log("retrying in getName()".$loop_count);
-            sendHexMsg($s,$getSocketData,$ip);
-        }
-        else{
-            $recMsg = hex_byte2str($binRecMsg,$n);            
-            //            print_r( "getName (".$n.")=".$recMsg."\n");
-            if($n==168){
-                if(substr($recMsg,0,4)==MAGIC_KEY){
-                    $rmac = substr($recMsg,12,12);
-                    if($rmac == $mac){
-                        $name = substr($binRecMsg,70,16);
-                        $stay=0;
-                    }
-                }
-            }
-        }
-        //        ob_flush();
-    }
-    if(DEBUG) 
-        error_log("Number of retries getName = ".$loop_count."\n");
-    socket_close($s);
-    return trim($name);
-}
-
-function fillNames($s20Table){
+function updNamesAndTimerAfterOn($s20Table){
     //
     // Loos through all S20 regiestered in $s20Table and
     // fills the name in each entry
     // 
     // 
     foreach($s20Table as $mac => $devData){
-        $name = getName($mac,$s20Table);
-        $s20Table[$mac]['name'] = $name;
+        updNameAndTimerAfterOnDevice($mac,$s20Table);
     }    
     return $s20Table;
 }
@@ -426,7 +507,8 @@ function initS20Data(){
     // including names
     //
     $s20Table = searchS20();
-    $s20Table = fillNames($s20Table);
+    $s20Table = updNamesAndTimerAfterOn($s20Table);
+    updTableTimers($s20Table);
     return $s20Table;
 }
 
@@ -452,6 +534,7 @@ function updateAllStatus($s20Table){
     foreach($s20Table as $mac => $devData){
         $s20Table[$mac]['st'] = checkStatus($mac,$s20Table);
     }
+    updTableTimers($s20Table);
     return $s20Table;
 }
 

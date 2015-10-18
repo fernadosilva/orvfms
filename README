@@ -132,3 +132,16 @@ DNS and to add appropriate  port forwarding rules to the router. These
 operations are router and network dependent and are beyond the scope of this 
 document.
 
+OPERATION OF THE WEBPAGE
+
+The operation is straightforward. Just note that a countdown timer over the 
+button in red means "time to switch off", in green "time to switch on", 
+and in white "time to switch off after switching on".
+
+Please note that in this version:
+1. Currently, only countdown timers (set and display) are supported;
+2. Time to switch off after switch on, if enabled, is displayed in white.
+However, changing / setting this timer is not yet supported.
+3. The timer page if functional, but lacks styling.
+
+

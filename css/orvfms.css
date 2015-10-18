@@ -46,3 +46,35 @@ text-align:    center;
 text-shadow:   1px 1px 0 #000;
 }
 
+.counter{
+font:          normal 700 29px/1 "Calibri", sans-serif;
+font-size:     3vh;
+color:         #fff;
+position:      relative;
+left:  30vw;
+height: 0;
+}
+
+#timerButton{
+    position: absolute;
+    left: 5vw;
+    top: 2vw;
+    width:10vh;
+    height:10vh;
+    background-image:url('../img/clock2.png');
+    background-size: contain;
+    margin-bottom:5px;
+    text-indent:-9999px;		
+}
+
+#timerButtonOK{
+    position: absolute;
+    left: 2.5vw;
+    width:10vh;
+    height:10vh;
+    background-image:url('../img/clock2.png');
+    background-size: contain;
+    margin-bottom:5px;
+    text-indent:-9999px;		
+}
+

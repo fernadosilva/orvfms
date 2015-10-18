@@ -86,6 +86,11 @@ function  printHex($hexMsg){
 }
 
 
+function secToHourString($seconds){
+    secToHour($seconds,$h,$m,$s);
+    return sprintf("%02d:%02d:%02d",$h,$m,$s);
+}
+
 function secToHour($seconds,&$hour,&$min,&$sec){
     $min = (int) ($seconds / 60);
     $sec = $seconds % 60;
@@ -98,18 +103,46 @@ function hourToSec($h,$min,$seconds){
     return $sec;
 }
 
-function hourToSecHex($h,$min,$seconds){
+function hourToSecHexLE($h,$min,$seconds){
     //    converts hour, min and sec to a little endian hexadecimal 
     //    representation of the number of second;
+    //    4 hexadecimal numbers with '0' padding (at right...);
+    //
+    $hexSecBE = hourToSecHexBE($h,$min,$seconds);
+    $hexSecLE = invertEndian($hexSecBE); // return Little Endian
+    return $hexSecLE;
+}
+
+function hourToSecHexBE($h,$min,$seconds){
+    //    converts hour, min and sec to a Big endian hexadecimal 
+    //    representation of the number of second
+    //    4 hexadecimal numbers with '0' padding (at left);
     //
     $sec = hourToSec($h,$min,$seconds);
+    $hexSec = secToHexBE($sec);
+    return $hexSec; //return Big Endian
+}
+
+function secToHexBE($sec){
+    //    converts sec to a Big endian hexadecimal 
+    //    representation of the number of second;
+    //    4 hexadecimal numbers with '0' padding
+    //
+    $hexSec = dechex($sec);
     $hexSec = dechex($sec);
     $n = 4 - strlen($hexSec);
     for($i = 0; $i < $n ; $i++){
         $hexSec = "0".$hexSec;
     }
-    $hexSecLE = substr($hexSec,2,2).substr($hexSec,0,2); // return Little Endian
-    return $hexSecLE;
+    return $hexSec; //return Big Endian
+}
+
+function invertEndian($hex){
+    $res="";
+    for($k = 0;$k < strlen($hex);$k+=2){
+        $res = substr($hex,$k,2).$res;
+    } 
+    return $res;
 }
     
 ?>

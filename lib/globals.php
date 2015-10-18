@@ -52,8 +52,9 @@ define("MAX_RETRIES",10);
 define("TIMEOUT",0.3); // Max time to wait for a reply from S20, in seconds
 define("MAGIC_KEY","6864");
 define("BUFFER_SIZE",500);
+define("PREFIX_CODE","T_KEY_373R_");
+define("WRITE_SOCKET_CODE","746D");
 define("DEBUG",0);
-
 ?>
 
 
