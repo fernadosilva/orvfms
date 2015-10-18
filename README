@@ -26,49 +26,49 @@ SUMMARY:
   when the user is outside the local network. Only switch on and switch off
   operations are remotely supported, and remote operations often fail due to
   timeout. In fact, remote operations through the WiWo app use a remote 
-  Orvibo proxy which is often out of service or possibly blocked(?). The purpose of 
-  this software is to setup a web interface in some server in the local network, 
-  which may be accessed from the  external network and, at the same time, 
-  to have access to the local network, enabling easy and fast remote operation of 
-  the S20. The web server can be installed on any computer always on or 
+  Orvibo proxy which is often out of service or possibly blocked(?). 
+  The purpose of  this software is to setup a web interface in some server 
+  in the local network, which may be accessed from any Internet 
+  location, supporting the most relevant s20 actions (switch off/on and 
+  countdown timers). The web interface is designed such that it may be 
+  operated from any type of web brwoser (desktop,pad,smartphone). 
+  Furthermore, it reports accurately the satus of the S20, something
+  the WiWo app often fails to do.
+
+  The web server can be installed on any computer always on or 
   on a cheap mini server (a Raspberry Pi, for example).
 
-  This web interface provides status report of all S20 attached to the 
-  network and supports ON/OFF actions of the detected devices. It features
-  a responsive behavior to changing viewport sizes, including smartphones. It 
-  divides the viewport in N horizontal buttons, each one labeled with the 
-  name automatically retrieved from the connected S20s. Each button is 
-  shown in green or red according to the current S20 state (green = ON).  
-  The included php Library orvfms.php also supports programming count down 
-  timer operations on/off, but theses are not yet supported by the
-  web interface.
+  This web interface reports the status of all S20 attached to the 
+  network and supports ON/OFF actions of the detected devices. All
+  devices are automatically detected and, therefore, no configuration
+  of individual devices is required. The web interface has a responsive 
+  behavior to changing viewport sizes, therefore being well suite to either 
+  desktops or smartphones. It divides the viewport in N horizontal buttons, 
+  each one labeled with the  name automatically retrieved from the 
+  connected S20s. Each button is shown in green or red according to the 
+  current S20 status (green = ON).
+
+  An example of the web interface is available on web_screenshot.png
  
 CONTENTS :
 The code contained herein includes:
     orvfms/lib
-    -  a php library with a set of simple functions to discover S20 devices
-       attached to the local network and retrieve of S20 names, addresses 
-       and switch state. It also include simple functions to switch ON/OFF 
-       each device.
+    -  a php library (orvfms.php) with a set of simple functions to 
+       discover S20 device attached to the local network and retrieve of 
+       S20 names, addresses and switch state. It also include functions to 
+       switch ON/OFF each device.
+       This directory also includes several auxliary php files 
+       required by the main web page (index.php).
 
     orvfms/s20/index.php
     -  A php page that implements a web interface to monitor and 
        control S20 sockets attached to the local network. 
-
-       The web interface provides status report of all S20 attached to the 
-       network and supports ON/OFF actions of each S20. It features a 
-       responsive behavior to changing viewport sizes, therefore being 
-       well suited to both smartphones and desktops. It divides 
-       the viewport in N horizontal buttons, each one labeled with the 
-       name automatically retrieved from each S20s. Each button is 
-       shown in green or red according to the current S20 state 
-       (green = ON).  
-
-       An example of the web interface is available on 
-       orvfms/web_screenshot.png
  
     orvfms/css
     - The css stylesheet used by index.php
+
+    orvfms/img
+    - An icon for the timer clock
 
 TESTING THE CODE:
 
@@ -93,9 +93,11 @@ console and take the following steps:
    network interface. In many cases, the default setting (192.168.1.255)
    will do the job, but please confirm your local address. It will probably 
    be something similar to 192.168.XX.255 or, in rare cases 172.16.XX.255.
-3. Check if you do not have appliances connected that may be affected
+3. Check/update the path of the img directory in css/orvfms.css (below
+   id timerButton).
+4. Check if you do not have appliances connected that may be affected
    by the power on/off cycle. Unplug any devices that you want to spare.
-4. Just type in the command line:
+5. Just type in the command line:
 
 prompt> php-cgi test.php
 
@@ -110,7 +112,7 @@ INSTALLATION OF THE WEB PAGE:
 
 The main web page is located in s20/index.php. 
 
-The details of the installation will slightly depend on your HTTP server 
+The details of the installation will depend slightly on your HTTP server 
 configuration and your own preferences. Anyway, just move the index.php, 
 css/orvfms.css and  orvfms/lib/* to the directories that suit the local 
 hierarchy and configuration of your HTTP server. Just check/update in  
@@ -131,6 +133,19 @@ domestic networks, it will be required to configure the home router with Dynamic
 DNS and to add appropriate  port forwarding rules to the router. These 
 operations are router and network dependent and are beyond the scope of this 
 document.
+
+This web server does not offers any particular security against outside
+attacks. Please use it at your own risk. A simple counter measure to mitigate 
+the risk is to store the index.php below a directory with a code name 
+only known to you (e.g., [DocumentRoot]/s20_myPassCode/index.php), to be 
+sure that the Document Root directory is not  readable and assume that 
+there  are not many attackers knowing this software or looking for the 
+control of your home devices :-). This is possibly more than enough for 
+most cases, provided that the  devices are not "too risky". Of course, this 
+is not "real security", and it is subject to eavesdropping.  If you want to 
+setup real security you will have to generate your own [self signed] 
+certificate, enable HTTPS on your server and setup an .htaccess file with 
+username/password permissions (or any other eequivalent option).
 
 OPERATION OF THE WEBPAGE
 
