@@ -19,7 +19,7 @@ https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/
 
 SUMMARY:
   This software implements a web interface to control Orvibo S20 
-  sockets/switch attached to the local network. 
+  sockets/switchs attached to the local network. 
 
   The S20 switchs can be operated  in the local network using the freely
   available WiWo app. However, it is behavior when the user is outside
@@ -31,23 +31,24 @@ SUMMARY:
   since only IOS or Android apps are supplied by Orvibo.
 
   The purpose of  this software is to setup a web interface, running 
-  in a web server in the local network, which supports the most relevant 
+  on a web server in the local network, which supports the most relevant 
   S20 actions (switch off/on and countdown timers). The web interface 
   is designed such that it may be operated from any web browser 
   (desktop,smartphone or pad). Furthermore, it reports accurately 
   all the satus of the S20s, something  the WiWo app often fails 
   to do. By making this web server available over the Internet, it is
-  possible the remote, direct  and fast  operation of the S20s independently 
-  of any Orvibo proprietary proxy or infrastructure.
+  possible the remote and fast  operation of the S20s independently 
+  of the Orvibo proxys.
 
-  The web server can be installed on any computer supporting a web server
-  with php, or on a cheap mini server (a Raspberry Pi, for example).
+  The web server can be installed on any computer attached to the local 
+  network or on a cheap mini server (a Raspberry Pi, for example), 
+  provided that it supports a web server with php. 
 
   This web interface reports the status of all S20 attached to the 
   network and supports ON/OFF actions of the detected devices. Moreover,
   it supports reporting and setting of countdown timers (both switch 
-  on/off timers, as well as automatic switch off after on timer). All
-  devices are automatically detected and, therefore, no configuration
+  on/off timers and switch off after on timer). 
+  All devices are automatically detected and, therefore, no configuration
   of individual devices is required. The web interface has a responsive 
   behavior to changing viewport sizes, therefore being well suited to either 
   desktops or smartphones. It divides the viewport in N horizontal buttons, 
