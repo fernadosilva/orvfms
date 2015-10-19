@@ -89,9 +89,11 @@ TESTING THE CODE:
 
 Before installing this code on a web server, please test if the library 
 recognizes and is able to operate your S20s. For this purpose, run the 
-test script test.php available in the lib directory from the command line. 
-It looks for S20 devices connected to the local network, retrieves relevant 
-data and  dump all collected information in readble format to the console.
+test script test.php available in the lib/orvfms directory from the 
+command line.  It looks for S20 devices connected to the local network, 
+retrieves relevant data and  dump all collected information in readble 
+format to the console.
+
 Moreover, it makes a full power on  / power off cycle to all your S20s and
 tests the timers with two 10 seconds countdowns cycles using a randomly 
 choosed device. PLEASE TAKE INTO  ACCOUNT POSSIBLE SAFETY ISSUES  of the 
@@ -101,7 +103,7 @@ affected by this test cycle before running test.php.
 In order to test this library from the command line, just open a  
 terminal or console and take the following steps: 
 
-1. Change the working directory (cd) to the orvfms/lib  directory;
+1. Change the working directory (cd) to the lib/orvfms  directory;
 2. Check the file globals.php and please confirm (or update) the broadcast 
    address. Unappily, there is no portable and "clean" way of finding it 
    automatically in the general case, since the host may have more than one 
