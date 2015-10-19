@@ -115,7 +115,7 @@ for($i = 0; $i < 2 ; $i++){
             break;
         }
         else{        
-            echo sprintf("Current=%02d:%02d:%02d To => %s, curr = %s\n",
+            echo sprintf("%02d:%02d:%02d to => %s, current is %s\n",
                          $h,$m,$s,actionToTxt($action),actionToTxt($st));
         }
         ob_flush();
@@ -126,30 +126,32 @@ for($i = 0; $i < 2 ; $i++){
 //
 // Test automatic switch off after on first device.
 //
+echo "\n\n\nTesting automatic switch off after on using switch ".$name."\n";
 $initValue = getSwitchOffTimer($mac,$s20Table);
 
 $setOff = 1800; 
 $res=setSwitchOffTimer($mac,$setOff,$s20Table);
 if($res == $setOff){
-    echo "Setting automatic switch off timer  OK\n";
+    echo "\nSetting automatic switch off timer to ".$setOff."s OK\n";
 }
 else{
-    echo "Set automatic switch off timer failed\n";
+    echo "\nSet automatic switch off timer failed\n";
 }
 
 $setOff = 0;
 $res = setSwitchOffTimer($mac,$setOff,$s20Table);
 if($res == $setOff){
-    echo "Resetting automatic switch off timer OK\n";
+    echo "\nResetting automatic switch off timer OK\n";
 }
 else{
-    echo "Reset automatic switch off timer failed\n";
+    echo "\nReset automatic switch off timer ".$name." failed\n";
 }
 
 // Program again the initial value
 
 $res=setSwitchOffTimer($mac,$initValue,$s20Table);
+echo "\nSetting automatic switch off timer ".$name." to initial value (".$res."s)\n"; 
 
-echo "Test finished, check if everything seems OK\n";
+echo "\n\nTest finished, check if everything seems OK\n";
 
 ?>
