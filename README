@@ -49,10 +49,11 @@ SUMMARY:
   connected S20s. Each button is shown in green or red according to the 
   current S20 status (green = ON).
 
-  An example of the web interface is available on web_screenshot.png
+  Examples of the web interface are available on web_screenshot.png and
+  web_screenshot_2.png.
  
-  See the SECURITY section  below for some comments on security of this 
-  service.
+  See the SECURITY section  below for discussion of security details.
+
 
 CONTENTS :
 The code contained herein includes:
@@ -84,8 +85,8 @@ and  dump all collected information in readble format to the console.
 Moreover, it makes a full power on  / power off cycle to all your S20s and
 tests the timer with two 10 seconds countdowns cycles usin a randomly 
 choosed device. PLEASE TAKE INTO  ACCOUNT POSSIBLE SAFETY ISSUES  of the 
-switching on/off cycle!  Uplug any devices or appliances that nay be affected by 
-this test cycle before running test.php.
+switching on/off cycle!  Unplug any devices or appliances that may be 
+affected by this test cycle before running test.php.
 
 In order to test this library in command line, just open a  terminal or 
 console and take the following steps: 
@@ -97,11 +98,9 @@ console and take the following steps:
    network interface. In many cases, the default setting (192.168.1.255)
    will do the job, but please confirm your local address. It will probably 
    be something similar to 192.168.XX.255 or, in rare cases 172.16.XX.255.
-3. Check/update the path of the img directory in css/orvfms.css (below
-   id timerButton).
-4. Check if you do not have appliances connected that may be affected
+3. Check if you do not have appliances connected that may be affected
    by the power on/off cycle. Unplug any devices that you want to spare.
-5. Just type in the command line:
+4. Just type in the command line:
 
 prompt> php-cgi test.php
 
@@ -121,8 +120,9 @@ configuration and your own preferences. Anyway, just move the index.php,
 css/orvfms.css and  orvfms/lib/* to the directories that suit the local 
 hierarchy and configuration of your HTTP server. Just check/update in  
 index.php (1) the relative location of the orvfms lib directory (2)  
-the relative location  of the css/orvfms.css file. These two lines are 
-well marked in index.php with "UPDATE THE PATH".
+the relative location  of the css/orvfms.css file. (3) Check/update 
+the path of the img directory in css/orvfms.css (below timerButton).
+These lines are well marked in index.php with "UPDATE THE PATH".
 
 In order to use the web server software, you may of course run  both the 
 server and the  browser in your desktop or laptop when you are connected 
@@ -133,14 +133,14 @@ applications, a good option is to set up the server on a Raspberry
 Pi, which can be kept powered on with minimal energy consumption and which 
 can be simultaneously used by other applications (e.g., media center). 
 Of course, if the server has a private address, as it usually happens in 
-domestic networks, it will be required to configure the home router with Dynamic 
-DNS and to add appropriate  port forwarding rules to the router. These 
-operations are router and network dependent and are beyond the scope of this 
-document.
+domestic networks, it will be required to configure the home router with 
+Dynamic  DNS and to add appropriate  port forwarding rules to the router. 
+These operations are router and network dependent and are beyond the scope 
+of this document.
 
 SECURITY
 
-This web server does not offers any particular security against outside
+This web server does not offer any particular security against outside
 attacks. Please use it at your own risk.  If you intend to  operate it 
 from any Internet location, a simple counter measure to mitigate 
 the risk is to store the index.php below a directory with a code name 
@@ -160,10 +160,5 @@ The operation is straightforward. Just note that a countdown timer over the
 button in red means "time to switch off", in green "time to switch on", 
 and in white "time to switch off after switching on".
 
-Please note that in this version:
-1. Currently, only countdown timers (set and display) are supported;
-2. Time to switch off after switch on, if enabled, is displayed in white.
-However, changing / setting this timer is not yet supported.
-3. The timer page if functional, but lacks styling.
 
 

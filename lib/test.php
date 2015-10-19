@@ -122,6 +122,34 @@ for($i = 0; $i < 2 ; $i++){
         sleep(2);
     }
 }
-echo "Test finished, everything seems OK\n";
+
+//
+// Test automatic switch off after on first device.
+//
+$initValue = getSwitchOffTimer($mac,$s20Table);
+
+$setOff = 1800; 
+$res=setSwitchOffTimer($mac,$setOff,$s20Table);
+if($res == $setOff){
+    echo "Setting automatic switch off timer  OK\n";
+}
+else{
+    echo "Set automatic switch off timer failed\n";
+}
+
+$setOff = 0;
+$res = setSwitchOffTimer($mac,$setOff,$s20Table);
+if($res == $setOff){
+    echo "Resetting automatic switch off timer OK\n";
+}
+else{
+    echo "Reset automatic switch off timer failed\n";
+}
+
+// Program again the initial value
+
+$res=setSwitchOffTimer($mac,$initValue,$s20Table);
+
+echo "Test finished, check if everything seems OK\n";
 
 ?>

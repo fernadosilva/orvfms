@@ -395,47 +395,46 @@ function setSwitchOffTimer($mac,$sec,&$s20Table){
     //
     // Sets the automatic switch off timer in table 4 to $sec
     //
-    echo "===============================\n";
     subscribe($mac,$s20Table);
     $table = 4; $vflag = "17";
     $recTable = getTable($mac,$table,$vflag,$s20Table);
 
-    printHex($recTable);
-    $switchOffData = substr($recTable,164*2,6);
+    $switchOffData = substr($recTable,164*2,8);
+    $switchOffData = (($sec == 0) ? "00" : "01").
+                   substr($switchOffData,2,2);
+    $switchOffData = $switchOffData.secToHexLE($sec);
 
-    print "OLD SWITCHOFFDATA   ".$switchOffData."(".
-                 secToHourString(hexdec(substr($switchOffData,2,4))).")\n";
-
-    $switchOffData = ($sec == 0) ? "00" : "01";
-    $switchOffData = $switchOffData.secToHexBE($sec);
-
-    echo "new switchOffData=".$switchOffData."\n";
 
     // Set timer
-    $newTable = substr_replace($recTable,$switchOffData,2*164,6);
+    $newTableAux = substr_replace($recTable,$switchOffData,2*164,8);
 
     // replace receive code with send code
-    $newTable = substr_replace($newTable,WRITE_SOCKET_CODE,2*4,4);
-    print "\n table to be send:\n\n";
-    printHex($newTable);
+    $newTableAux = substr_replace($newTableAux,WRITE_SOCKET_CODE,2*4,4);
+
+    //
+    // Delete byte 18 (??)
+    // Wireshark shows...
+    //
+    $newTable = substr_replace($newTableAux,"",18*2,2);
+    //
+    // Delete byte 25 and 26 of resulting (??)
+    // Wireshark shows...
+    //
+    $newTable = substr_replace($newTable,"",25*2,4);
+
+    // Adjust msg size
+    $newSize = strlen($newTable) / 2;
+    $newSizeHex = padHex(dechex($newSize),4);
+    $newTable = substr_replace($newTable,$newSizeHex,2*2,4);    
+
+    
 
     $ip = $s20Table[$mac]['ip'];
     $s = createSocketAndBind($ip);    
     $reply = sendHexMsgWaitReply($s,$newTable,$ip);
     socket_close($s);
-    print "\nReply:\n\n";
-    printHex($reply);
     $newSec = getSwitchOffTimer($mac,$s20Table);
-    if($sec == $newSec)
-        echo "OK! ".$sec."== ".$newSec."\n";
-    else
-        echo "NOK! ".$sec."<> ".$newSec."\n";
-
-    $recTable2 = getTable($mac,$table,$vflag,$s20Table);
-    print("FINAL TABLE 4\n");
-    printHex($recTable2);
-    if($recTable2 == $recTable)
-        echo "Table unchanged :-(\n";
+    return $newSec;
 }
 
 function getSwitchOffTimer($mac,&$s20Table){

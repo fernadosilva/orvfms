@@ -123,18 +123,29 @@ function hourToSecHexBE($h,$min,$seconds){
     return $hexSec; //return Big Endian
 }
 
+function padHex($hex,$hexSize){
+    //
+    // Pad hexadecimal string with left 0 such that
+    // $hexSize is reached
+    // 
+    $n = $hexSize - strlen($hex);
+    $hexRes=$hex;
+    for($i = 0; $i < $n ; $i++){
+        $hexRes = "0".$hexRes;
+    }
+    return $hexRes;
+}
+
 function secToHexBE($sec){
     //    converts sec to a Big endian hexadecimal 
     //    representation of the number of second;
     //    4 hexadecimal numbers with '0' padding
     //
-    $hexSec = dechex($sec);
-    $hexSec = dechex($sec);
-    $n = 4 - strlen($hexSec);
-    for($i = 0; $i < $n ; $i++){
-        $hexSec = "0".$hexSec;
-    }
+    $hexSec = padHex(dechex($sec),4);
     return $hexSec; //return Big Endian
+}
+function secToHexLE($sec){
+    return invertEndian(secToHexBE($sec));
 }
 
 function invertEndian($hex){

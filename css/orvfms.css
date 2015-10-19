@@ -1,7 +1,20 @@
 /*
   Button code obtained at dabuttonfactory.com
 */
-body { background: #e7e7e7; font-family: Verdana, sans-serif; font-size: 11pt; }
+
+
+body { 
+background: #ffffff; 
+font:          normal 700 29px/1 "Calibri", sans-serif;
+font-size: 2.5vh;
+color: #073763;
+}
+
+
+/*
+body { background: #ffffff; font-family: Verdana, sans-serif; font-size: 11pt; }
+*/
+
 #page { background: #ffffff; margin: 50px; border: 2px solid #c0c0c0; padding: 10px; }
 #header { background: #4b6983; border: 2px solid #7590ae; text-align: center; padding: 10px; color: #ffffff; }
 #header h1 { color: #ffffff; }
@@ -59,22 +72,106 @@ height: 0;
     position: absolute;
     left: 5vw;
     top: 2vw;
-    width:10vh;
-    height:10vh;
+    width:8vh;
+    height:8vh;
+/* UPDATE THE PATH OF THE IMG DIRECTORY BELOW */
     background-image:url('../img/clock2.png');
     background-size: contain;
     margin-bottom:5px;
     text-indent:-9999px;		
 }
 
-#timerButtonOK{
-    position: absolute;
-    left: 2.5vw;
-    width:10vh;
-    height:10vh;
-    background-image:url('../img/clock2.png');
-    background-size: contain;
-    margin-bottom:5px;
-    text-indent:-9999px;		
+#timerPageButton{
+    height: 10vh;
+    width: 60vw;
+    display:       inline-block;
+    padding:       8px 27px;
+    background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+    border-radius: 5px;
+    color:         #fff;
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size:     2.5vh;
+    text-align:    center;
+    text-shadow:   1px 1px 0 #000;
 }
 
+
+input[type=checkbox]:not(old),
+input[type=radio   ]:not(old){
+  width     : 2em;
+  margin    : 0;
+  padding   : 0;
+  font-size : 1em;
+  opacity   : 0;
+}
+<
+input[type=checkbox]:not(old) + label,
+input[type=radio   ]:not(old) + label{
+  display      : inline-block;
+  margin-left  : -2em;
+  line-height  : 1.5em;
+}
+
+input[type=checkbox]:not(old) + label > span,
+input[type=radio   ]:not(old) + label > span{
+  display          : inline-block;
+  width            : 0.875em;
+  height           : 0.875em;
+  margin           : 0.25em 0.5em 0.25em 0.25em;
+  border           : 0.0625em solid rgb(192,192,192);
+  border-radius    : 0.25em;
+  background       : rgb(224,224,224);
+  background-image :    -moz-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image :     -ms-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image :      -o-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image : -webkit-linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  background-image :         linear-gradient(rgb(240,240,240),rgb(224,224,224));
+  vertical-align   : bottom;
+}
+
+input[type=checkbox]:not(old):checked + label > span,
+input[type=radio   ]:not(old):checked + label > span{
+  background-image :    -moz-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image :     -ms-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image :      -o-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image : -webkit-linear-gradient(rgb(224,224,224),rgb(240,240,240));
+  background-image :         linear-gradient(rgb(224,224,224),rgb(240,240,240));
+}
+
+input[type=checkbox]:not(old):checked + label > span:before{
+  content     : '✓';
+  display     : block;
+  width       : 1em;
+  height      : 1em;
+  color       : rgb(153,204,102);
+  font-size   : 0.875em;
+  line-height : 1em;
+  text-align  : center;
+  text-shadow : 0 0 0.0714em rgb(115,153,77);
+  font-weight : bold;
+}
+
+input[type=radio]:not(old):checked +  label > span > span{
+  display          : block;
+  width            : 0.5em;
+  height           : 0.5em;
+  margin           : 0.125em;
+  border           : 0.0625em solid rgb(115,153,77);
+  border-radius    : 0.125em;
+  background       : rgb(153,204,102);
+  background-image :    -moz-linear-gradient(#3d85c6, #073763);
+  background-image :     -ms-linear-gradient(#3d85c6, #073763);
+  background-image :      -o-linear-gradient(#3d85c6, #073763);
+  background-image : -webkit-linear-gradient(#3d85c6, #073763);
+  background-image :         linear-gradient(#3d85c6, #073763);
+}
+
+select {
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size: 2.5vh;
+    color: #073763;
+}

@@ -54,7 +54,7 @@ function displayMainPage(&$s20Table,$myUrl){
             if($devData['timerAction'])
                 $color="green";
             else
-                $color="red";
+                $color="#980000";
         else
             if($devData['switchOffTimer'] > 0)
                 $color = "white";
