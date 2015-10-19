@@ -7,7 +7,7 @@ Last update: 18 October 2015
 
 DISCLAIMER:
 
-     This program was developed independently and it is not
+     This software was developed independently and it is not
      supported or endorsed in any way by Orvibo (C).
 
 ACKNOWLEDGMENTS:
@@ -18,34 +18,38 @@ https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/
       and on comments and discussions by many other users. 
 
 SUMMARY:
-  This code implements a web interface to control Orvibo S20 sockets 
-  attached to the local network. 
+  This software implements a web interface to control Orvibo S20 
+  sockets/switch attached to the local network. 
 
-  The S20 switch can be operated  in the local network using the freely
-  available WiWo app. However, it is behavior is much less convenient
-  when the user is outside the local network. Only switch on and switch off
+  The S20 switchs can be operated  in the local network using the freely
+  available WiWo app. However, it is behavior when the user is outside
+  the local network is much less convenient. Only switch on and switch off
   operations are remotely supported, and remote operations often fail due to
   timeout. In fact, remote operations through the WiWo app use a remote 
   Orvibo proxy which is often out of service or possibly blocked(?). 
   Moreover, the S20s  can not be operated from a regular desktop, 
-  since only IOS or Android apps are supplied.
+  since only IOS or Android apps are supplied by Orvibo.
 
-  The purpose of  this software is to setup a web interface, runnning 
-  in a server off the local network, supporting the most relevant s20 
-  actions (switch off/on and countdown timers). The web interface 
+  The purpose of  this software is to setup a web interface, running 
+  in a web server in the local network, which supports the most relevant 
+  S20 actions (switch off/on and countdown timers). The web interface 
   is designed such that it may be operated from any web browser 
   (desktop,smartphone or pad). Furthermore, it reports accurately 
   all the satus of the S20s, something  the WiWo app often fails 
-  to do.
+  to do. By making this web server available in the Internet, it is
+  possible the remote and fast  operation of the S20s independently 
+  of any Orvibo server.
 
   The web server can be installed on any computer supporting a web server
   with php, or on a cheap mini server (a Raspberry Pi, for example).
 
   This web interface reports the status of all S20 attached to the 
-  network and supports ON/OFF actions of the detected devices. All
+  network and supports ON/OFF actions of the detected devices. Moreover,
+  it supports reporting and setting of countdown timers (both switch 
+  on/off timers, as well as automatic switch off after on timer). All
   devices are automatically detected and, therefore, no configuration
   of individual devices is required. The web interface has a responsive 
-  behavior to changing viewport sizes, therefore being well suite to either 
+  behavior to changing viewport sizes, therefore being well suited to either 
   desktops or smartphones. It divides the viewport in N horizontal buttons, 
   each one labeled with the  name automatically retrieved from the 
   connected S20s. Each button is shown in green or red according to the 
@@ -58,40 +62,44 @@ SUMMARY:
 
 
 CONTENTS :
-The code contained herein includes:
-    orvfms/lib
+The code contained herein includes the following directories:
+    lib/orvfms
     -  a php library (orvfms.php) with a set of simple functions to 
        discover S20 device attached to the local network and retrieve of 
        S20 names, addresses and switch state. It also include functions to 
-       switch ON/OFF each device.
-       This directory also includes several auxliary php files 
-       required by the main web page (index.php).
+       switch ON/OFF each device and timer reporting and programming.
 
-    orvfms/s20/index.php
-    -  A php page that implements a web interface to monitor and 
-       control S20 sockets attached to the local network. 
+       This directory includes also a small utility library (util.php), 
+       a test program (test.php) for testing the library and local S20s,
+       and several auxiliary php files used by the main web 
+       page (index.php);
+
+    s20
+    -  A php page (index.php) that implements a web interface 
+       to monitor and control S20 sockets attached to the local 
+       network; 
  
-    orvfms/css
-    - The css stylesheet used by index.php
+    css
+    - The css stylesheet (orvfms.css) used by index.php;
 
-    orvfms/img
-    - An icon for the timer clock
+    img
+    - An icon for the timer clock (clock2.png);
 
 TESTING THE CODE:
 
 Before installing this code on a web server, please test if the library 
 recognizes and is able to operate your S20s. For this purpose, run the 
-test script test.php available in the lib directory from the command line. It 
-looks for S20 devices connected to the local network, retrieves relevant data 
-and  dump all collected information in readble format to the console.
+test script test.php available in the lib directory from the command line. 
+It looks for S20 devices connected to the local network, retrieves relevant 
+data and  dump all collected information in readble format to the console.
 Moreover, it makes a full power on  / power off cycle to all your S20s and
-tests the timer with two 10 seconds countdowns cycles usin a randomly 
+tests the timers with two 10 seconds countdowns cycles using a randomly 
 choosed device. PLEASE TAKE INTO  ACCOUNT POSSIBLE SAFETY ISSUES  of the 
 switching on/off cycle!  Unplug any devices or appliances that may be 
 affected by this test cycle before running test.php.
 
-In order to test this library in command line, just open a  terminal or 
-console and take the following steps: 
+In order to test this library from the command line, just open a  
+terminal or console and take the following steps: 
 
 1. Change the working directory (cd) to the orvfms/lib  directory;
 2. Check the file globals.php and please confirm (or update) the broadcast 
@@ -99,10 +107,14 @@ console and take the following steps:
    automatically in the general case, since the host may have more than one 
    network interface. In many cases, the default setting (192.168.1.255)
    will do the job, but please confirm your local address. It will probably 
-   be something similar to 192.168.XX.255 or, in rare cases 172.16.XX.255.
-3. Check if there are  not have appliances connected that may be affected
-   by the power on/off cycle. Unplug any devices that may be affected by
-   this test cycle. Each off/on cycle takes about 5 seconds.
+   be something similar to 192.168.X.255 with X=0 or X=1. In rare cases, 
+   X may took other values, or the broadcast may be something like 
+   172.16.XX.255 or 10.xx.xx.255.
+3. Check if there are  not appliances connected to the S20 sockets that may 
+   be affected by the power on/off cycle. Unplug any devices that may be 
+   affected be this test cycle. Each off/on cycle switchs each S20 to
+   the oposite state for about 5/10 seconds (exact figures depend on the
+   number of S20s in the local network.		
 4. Just type in the command line:
 
 prompt> php-cgi test.php
@@ -148,14 +160,15 @@ attacks. Please use it at your own risk.  If you intend to  operate it
 from any Internet location, a simple counter measure to mitigate 
 the risk is to store the index.php below a directory with a code name 
 only known to you (e.g., [DocumentRoot]/s20_myPassCode/index.php), to  
-assure that the Document Root directory is not  readable and assume that 
-there  are not many attackers knowing this software or looking for the 
-control of your home devices :-). This is possibly more than enough for 
-most cases, provided that the  devices are not "too risky". Of course, this 
-is not "real security", and it is subject to eavesdropping.  If you want to 
-setup real security you will have to generate your own [self signed] 
-certificate, enable HTTPS on your server and setup an .htaccess file with 
-username/password permissions (or any other eequivalent option).
+assure that the Document Root directory is not  readable. This option
+assumes that  there  are not many attackers knowing this software or 
+looking for the control of your home devices :-). This is possibly more 
+than enough for most cases, provided that the  devices are not "too risky". 
+Of course, this is not "real security", and it is subject to eavesdropping.  
+If you want to setup real security you will have to generate your own 
+[self signed] certificate, enable HTTPS on your server and setup an 
+.htaccess file with username/password permissions (or any other equivalent 
+option).
 
 OPERATION OF THE WEBPAGE
 
