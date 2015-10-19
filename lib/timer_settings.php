@@ -11,17 +11,16 @@ function timerSettings(&$s20Table){
     if(($_POST["buttonPressed"] == "Clear automatic switch off")  ||
        ($_POST["buttonPressed"] == "Clear countdown")){
         $h = $m = $s = 0;
-        $action = "off";
+        $act = $s20Table[$mac]['st'];
     }
     else{
-        $reset = 0;
         $action     = $_POST['action'];
         $h          = $_POST['hours'];
         $m          = $_POST['minutes'];
         $s          = $_POST['seconds'];
+        $act = ($action == "on" ? 1 : 0);
     }
     $sec = $h * 3600 + $m * 60 + $s;
-    $act = ($action == "on" ? 1 : 0);
 
     if(($_POST["buttonPressed"] == "Clear countdown") ||
        (($_POST["buttonPressed"] == "Set countdown") &&
