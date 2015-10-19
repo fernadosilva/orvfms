@@ -36,9 +36,9 @@ SUMMARY:
   is designed such that it may be operated from any web browser 
   (desktop,smartphone or pad). Furthermore, it reports accurately 
   all the satus of the S20s, something  the WiWo app often fails 
-  to do. By making this web server available in the Internet, it is
-  possible the remote and fast  operation of the S20s independently 
-  of any Orvibo server.
+  to do. By making this web server available over the Internet, it is
+  possible the remote, direct  and fast  operation of the S20s independently 
+  of any Orvibo proprietary proxy or infrastructure.
 
   The web server can be installed on any computer supporting a web server
   with php, or on a cheap mini server (a Raspberry Pi, for example).
