@@ -27,17 +27,19 @@ SUMMARY:
   operations are remotely supported, and remote operations often fail due to
   timeout. In fact, remote operations through the WiWo app use a remote 
   Orvibo proxy which is often out of service or possibly blocked(?). 
-  Moreover, the S20s  can not be operated from a desktop.
-  The purpose of  this software is to setup a web interface in some server 
-  in the local network, which may be accessed from any Internet 
-  location, supporting the most relevant s20 actions (switch off/on and 
-  countdown timers). The web interface is designed such that it may be 
-  operated from any web browser (desktop,smartphone or pad). 
-  Furthermore, it reports accurately all the satus of the S20s, 
-  something  the WiWo app often fails to do.
+  Moreover, the S20s  can not be operated from a regular desktop, 
+  since only IOS or Android apps are supplied.
 
-  The web server can be installed on any computer always on or 
-  on a cheap mini server (a Raspberry Pi, for example).
+  The purpose of  this software is to setup a web interface, runnning 
+  in a server off the local network, supporting the most relevant s20 
+  actions (switch off/on and countdown timers). The web interface 
+  is designed such that it may be operated from any web browser 
+  (desktop,smartphone or pad). Furthermore, it reports accurately 
+  all the satus of the S20s, something  the WiWo app often fails 
+  to do.
+
+  The web server can be installed on any computer supporting a web server
+  with php, or on a cheap mini server (a Raspberry Pi, for example).
 
   This web interface reports the status of all S20 attached to the 
   network and supports ON/OFF actions of the detected devices. All
@@ -52,7 +54,7 @@ SUMMARY:
   Examples of the web interface are available on web_screenshot.png and
   web_screenshot_2.png.
  
-  See the SECURITY section  below for discussion of security details.
+  See the SECURITY section  below for discussion of security issues.
 
 
 CONTENTS :
@@ -98,8 +100,9 @@ console and take the following steps:
    network interface. In many cases, the default setting (192.168.1.255)
    will do the job, but please confirm your local address. It will probably 
    be something similar to 192.168.XX.255 or, in rare cases 172.16.XX.255.
-3. Check if you do not have appliances connected that may be affected
-   by the power on/off cycle. Unplug any devices that you want to spare.
+3. Check if there are  not have appliances connected that may be affected
+   by the power on/off cycle. Unplug any devices that may be affected by
+   this test cycle. Each off/on cycle takes about 5 seconds.
 4. Just type in the command line:
 
 prompt> php-cgi test.php
