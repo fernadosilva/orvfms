@@ -31,10 +31,14 @@ function displayCountDownTimer(){
     if(delta < 0){
         clearInterval(countDownId);
         countDownStr = "hh:mm:ss";
+        document.getElementById("countDown").style.color = "black";
     }
     else{
         countDownStr = convToString(delta);
-        countDownStr += (timerAction ? " to on" :" to off"); 
+        if(timerAction)
+            document.getElementById("countDown").style.color = "green";
+        else
+            document.getElementById("countDown").style.color = "red";
     }
     document.getElementById("countDown").innerHTML = countDownStr;
 }
