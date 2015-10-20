@@ -50,8 +50,8 @@ SUMMARY:
   on/off timers and switch off after on timer). 
   All devices are automatically detected and, therefore, no configuration
   of individual devices is required. The web interface has a responsive 
-  behavior to changing viewport sizes, therefore being well suited to either 
-  desktops or smartphones. It divides the viewport in N horizontal buttons, 
+  behavior to changing viewport sizes, therefore being well suited to both
+  desktops and smartphones. It divides the viewport in N horizontal buttons, 
   each one labeled with the  name automatically retrieved from the 
   connected S20s. Each button is shown in green or red according to the 
   current S20 status (green = ON).

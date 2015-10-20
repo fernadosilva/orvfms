@@ -6,11 +6,9 @@ session_start();
 <head
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <?php
-    /*
 if(($_SERVER["REQUEST_METHOD"] != "POST") || isset($_POST["action"])){
     echo '<META HTTP-EQUIV="Refresh" CONTENT="60">'."\n";
 }
-    */
 ?>
 <title>
 S20 remote

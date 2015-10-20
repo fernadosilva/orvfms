@@ -15,10 +15,12 @@ function checkIfValidOn(){
 <?php
 function displayTimerPage($timerName,&$s20Table,$myUrl){
 ?>
-<h2 align = "center"> <?php echo $timerName ?> </h2>
+<div style="text-align:center">
+<h2> <?php echo $timerName ?> </h2>
 
 <hr>
-<form action="<?php echo $myUrl ?>" method="post" align="center">
+
+<form action="<?php echo $myUrl ?>" method="post">
 <div>
 Action<br>
   <input id="action1" type="radio" name="action" value="off"  checked>
@@ -35,6 +37,7 @@ Action type<br>
     <br>
 </div>
 <div>hh   :    mm   :    ss</div>
+<div>
 <select name="hours">
 <?php
     for($i = 0 ; $i < 17; $i++)
@@ -75,6 +78,9 @@ Action type<br>
 id="timerPageButton"><p><p>        
 <?php        
     }
-}
 ?>
 </form>
+</div>
+<?php
+}
+?>
