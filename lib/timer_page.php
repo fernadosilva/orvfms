@@ -1,4 +1,15 @@
+<?php
+function displayTimerPage($timerName,&$s20Table,$myUrl){
+    $mac = getMacFromName($timerName,$s20Table);
+    $swVal = $s20Table[$mac]['switchOffTimer'];
+    $timerVal = $s20Table[$mac]['timerVal'];
+    $timerAction = $s20Table[$mac]['timerAction'];
+?>
+
 <script>
+var swVal = <?php echo $swVal ?>;
+var timerVal = <?php echo $timerVal ?>;
+var timerAction = <?php echo $timerAction ?>;
 function setActionOff(){
     var action;
     action = document.getElementById("action1");
@@ -11,10 +22,31 @@ function checkIfValidOn(){
         setActionOff();
     }
 }
+var timerEnd;
+var countDownId;
+function displayCountDownTimer(){
+    var delta;
+    var countDownStr;
+    delta = Math.round(timerEnd - new Date().getTime()/1000);
+    if(delta < 0){
+        clearInterval(countDownId);
+        countDownStr = "hh:mm:ss";
+    }
+    else{
+        countDownStr = convToString(delta);
+        countDownStr += (timerAction ? " to on" :" to off"); 
+    }
+    document.getElementById("countDown").innerHTML = countDownStr;
+}
+function initTimerPageScripts(){
+    document.getElementById("countDown").innerHTML = "hh:mm:ss";
+    if(timerVal != 0){
+        timerEnd = new Date().getTime()/1000 + timerVal;
+        countDownId = setInterval(displayCountDownTimer,1000)
+    }
+}
 </script>
-<?php
-function displayTimerPage($timerName,&$s20Table,$myUrl){
-?>
+
 <div style="text-align:center">
 <h2> <?php echo $timerName ?> </h2>
 
@@ -35,8 +67,8 @@ Action type<br>
   <input id="actionType2" type="radio" name="actionType" value="switchOn" onclick="setActionOff()"> 
   <label for="actionType2"><span><span></span></span>After switch on</label>
     <br>
-</div>
-<div>hh   :    mm   :    ss</div>
+</div><p>
+<div id="countDown"></div>
 <div>
 <select name="hours">
 <?php
@@ -67,8 +99,6 @@ Action type<br>
     id="timerPageButton"><br>
 
 <?php
-    $mac = getMacFromName($timerName,$s20Table);
-    $swVal = $s20Table[$mac]['switchOffTimer'];
     if($swVal > 0){
         echo "<hr>";
         $msg = "<p>Automatic switch off timer set to: ".secToHourString($swVal)."<p>";
@@ -81,6 +111,9 @@ id="timerPageButton"><p><p>
 ?>
 </form>
 </div>
+<script>
+    initTimerPageScripts();
+</script>
 <?php
 }
 ?>

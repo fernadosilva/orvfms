@@ -9,16 +9,16 @@ foreach ($macs as $mac) {
     $swVal  = $s20Table[$mac]['switchOffTimer'];
     if($val > 0){
         $id = 'b'.$mac;
-        $ac = $s20Table[$mac]['timerAction'];
+        $action = $s20Table[$mac]['timerAction'];
         if($nCounters++== 0){
             $timerNames='var timerNames = ["b'.$mac.'"';;
             $timerVals = "var timerVals  = [".$val;
-            $timerActs = "var timerAct  = [".$ac;
+            $timerActs = "var timerAct  = [".$action;
         }
         else{
             $timerNames=$timerNames.',"b'.$mac.'"';
             $timerVals =$timerVals.",".$val;
-            $timerActs =$timerActs.",".$ac;
+            $timerActs =$timerActs.",".$action;
         }
     }
     if($swVal > 0){
@@ -75,20 +75,6 @@ if($nSw > 0){
                   document.getElementById(name).innerHTML = t;
               }
           }
-      }
-      function convToString(time){
-            var  h,m,min,s;
-            var  hs,ms,ss;
-            var t;
-            h = Math.floor(time/3600);
-            min = time % 3600;
-            m = Math.floor(min / 60);
-            s = min % 60;
-            hs=('0'+h.toString()).slice(-2);
-            ms=('0'+m.toString()).slice(-2);
-            ss=('0'+s.toString()).slice(-2);
-            t = hs+':'+ms+':'+ss;
-            return t;
       }
       function refreshCounter(){
           var k;

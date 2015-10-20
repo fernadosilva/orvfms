@@ -79,14 +79,8 @@ function updTableTimers(&$s20Table){
         // Check && update count down timers
         $s20Table[$mac]['timerVal'] = checkTimerSec($mac,$s20Table,$action);
         $s20Table[$mac]['timerAction'] = $action;
-
         // Check && update switch off after on timer
         updNameAndTimerAfterOnDevice($mac,$s20Table);
-        /*
-        $s20Table[$mac]['timerVal'] = $justTest;
-        $s20Table[$mac]['timerAction'] = $justTest % 2;
-        $justTest += 143;        
-        */
     }
 }
 
@@ -100,10 +94,13 @@ function checkTimerSec($mac,$s20Table,&$act){
     if(checkTimer($mac,$s20Table,$h,$m,$s,$action)){
         $act = $action;
         $seconds = $h*3600+$m*60+$s;
-        return $seconds;
     }
-    return 0;
+    else{
+        $act = $seconds = 0;
+    }
+    return $seconds;
 }
+
 
 
 function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
@@ -142,6 +139,9 @@ function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
             $action = 0; // Set to turn off
         else
             $action = 1; // Set to turn on
+    }
+    else{
+        $h = $m = $sec  = $action = 0;
     }
     return $isSet;
 }
