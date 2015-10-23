@@ -114,7 +114,7 @@ terminal or console and take the following steps:
    X may took other values, or the broadcast may be something like 
    172.16.XX.255 or 10.xx.xx.255.
 3. Check if there are  not appliances connected to the S20 sockets that may 
-   be affected by the power on/off cycle. Unplug any devices that may be 
+  2 be affected by the power on/off cycle. Unplug any devices that may be 
    affected be this test cycle. Each off/on cycle switchs each S20 to
    the oposite state for about 5/10 seconds (exact figures depend on the
    number of S20s in the local network.		
@@ -123,6 +123,13 @@ terminal or console and take the following steps:
 prompt> php-cgi test.php
 
 (or replace php-cgi with the name of your php interpreter).
+
+5. If you are running in Windows, and you get an error in "socket_create()", 
+please confim if you have the sockets module installed and enabled. You may 
+have to uncomment a line in php.ini (;extension=php_sockets.dll, just delete 
+the ";") and to be sure that php_sockets.dll is available. For more 
+information  check http://php.net/manual/en/sockets.installation.php 
+(thanks to Javier Ortiz for reporting this error).
 
 The output is quite straightforward, and possibly you are immediately able
 to recognize most of it. You should also see/hear the usual switching on and 
@@ -155,6 +162,7 @@ domestic networks, it will be required to configure the home router with
 Dynamic  DNS and to add appropriate  port forwarding rules to the router. 
 These operations are router and network dependent and are beyond the scope 
 of this document.
+
 
 SECURITY
 

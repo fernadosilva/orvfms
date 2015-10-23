@@ -1,3 +1,6 @@
+/*  UPDATE THE PATH below to match the image directory */
+
+
 /*
   Button code obtained at dabuttonfactory.com
 */
@@ -68,17 +71,67 @@ left:  30vw;
 height: 0;
 }
 
+/*
+ Timer buttons in main page.
+*/
 #timerButton{
     position: absolute;
     left: 5vw;
     top: 2vw;
     width:8vh;
     height:8vh;
-/* UPDATE THE PATH OF THE IMG DIRECTORY BELOW */
-    background-image:url('../img/clock2.png');
+
+/*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/clock2.png");
     background-size: contain;
     margin-bottom:5px;
+    text-indent:-9999px;
+}
+
+/*
+  Menu button in the timer page
+*/
+#menuButton{
+    position: absolute;
+    left: 2vh;
+    top: 2vh;
+
+    width:5vh;
+    height:5vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+/*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/menu_icon100px35pc.png");
+    background-size:5vh 5vh;
     text-indent:-9999px;		
+    border: none;
+}
+
+/*
+  Back button in the timer page
+*/
+#backButton{
+    position: absolute;
+    right: 2vh;
+    top: 2vh;
+
+    width:5vh;
+    height:5vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+    /*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/back_icon100px35pc.png");
+    background-size:5vh 5vh;
+    text-indent:-9999px;		
+    border: none;
 }
 
 #timerPageButton{
@@ -170,6 +223,9 @@ input[type=radio]:not(old):checked +  label > span > span{
   background-image :         linear-gradient(#3d85c6, #073763);
 }
 
+/*
+  Select: slector for hours, min, seconds 
+*/
 select {
     font:          normal 700 29px/1 "Calibri", sans-serif;
     font-size: 2.5vh;

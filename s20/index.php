@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 ?>
@@ -113,9 +114,17 @@ else{
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //    print_r($_POST);
     if(isset($_POST['action'])){
-        $submitAction = 'setTimer';
-        include(ORVFMS_PATH."timer_settings.php");
-        timerSettings($s20Table);
+        if($_POST['buttonPressed'] == "Details"){
+            $submitAction = 'timerDetails';
+        } 
+        else if($_POST['buttonPressed'] == "Back"){
+            $submitAction = "";
+        }
+        else {                
+            $submitAction = 'setTimer';
+            include(ORVFMS_PATH."timer_settings.php");
+            timerSettings($s20Table);
+        }
     }
     else{
         $submitAction = $_POST['selected'];
@@ -144,9 +153,14 @@ else{
 
 $_SESSION["s20Table"]=$s20Table;
 if(DEBUG)
-    print_r(-$s20Table);
+    print_r($s20Table);
 
-if($submitAction == "timerMenu"){
+if($submitAction == "timerDetails"){
+    $timerName       = $_POST['name'];
+    include(ORVFMS_PATH."details_page.php");
+    displayDetailsPage($timerName,$s20Table,$myUrl);
+}
+else if($submitAction == "timerMenu"){
     include(ORVFMS_PATH."timer_page.php");
     displayTimerPage($timerName,$s20Table,$myUrl);
 }

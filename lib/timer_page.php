@@ -57,6 +57,11 @@ function initTimerPageScripts(){
 <hr>
 
 <form action="<?php echo $myUrl ?>" method="post">
+<input type="submit" name="buttonPressed" value="Details" 
+    id="menuButton">
+<input type="submit" name="buttonPressed" value="Back" 
+    id="backButton">
+
 <div>
 Action<br>
   <input id="action1" type="radio" name="action" value="off"  checked>

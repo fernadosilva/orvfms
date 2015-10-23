@@ -27,6 +27,66 @@
 include_once("globals.php"); // constants
 include_once("utils.php");   // utitlity functions
 
+function cmpTimers($a,$b){
+    return $a['time'] - $b['time'];
+}
+
+function parseTimerTable($mac,$s20Table){
+    $timerList = array();
+    $table = 3; $vflag = "02";
+    $tab3 = getTable($mac,$table,$vflag,$s20Table);
+    $recs = getRecordsFromTable($tab3,$s20Table);
+    for($i=0;$i<count($recs);$i++){
+        $timerList[$i] = getRecordDetails($recs[$i]);
+        $timerList[$i]['index'] = $i;
+    }
+    usort($timerList,"cmpTimers");
+    return $timerList;
+}
+
+function getRecordDetails($rec){
+    $timerDetails = array();
+    $swState = (substr($rec,20*2,2) == "00" ? 0 : 1);
+    $year = hexdec(invertEndian(substr($rec,22*2,4)));
+    $month = hexdec(invertEndian(substr($rec,24*2,2)));
+    $day = hexdec(invertEndian(substr($rec,25*2,2)));
+    $h = hexdec(invertEndian(substr($rec,26*2,2)));
+    $m = hexdec(invertEndian(substr($rec,27*2,2)));
+    $s = hexdec(invertEndian(substr($rec,28*2,2)));
+    $rep=substr($rec,29*2,2);
+
+    //    print sprintf("Set to %3s:  %02d:%02d:%02 rep=%2s (since %02d/%02d/%04d)\n",($swState ? "on ":"off"),$h,$m,$s,$rep,$day,$month,$year);
+
+    $timerDetails['y'] = $year;
+    $timerDetails['m'] = $month;
+    $timerDetails['d'] = $day;
+    $timerDetails['time'] = $h*3600+$m*60+$s;
+    $timerDetails['r'] = $rep;
+    $timerDetails['st'] = $swState;
+    return $timerDetails;
+}
+
+function getRecordsFromTable($tab,$s20Table){
+    $records=array();
+    // First record & length in bytes 29,30, record numnber in 31,32
+    $n = strlen($tab)/2;
+    $k = 0;
+    $start = 28;
+    while($start < $n){
+        $k++;
+        $recLenHex = substr($tab,$start*2,4);
+        $recLenHex = invertEndian($recLenHex);
+        $recLen = hexdec($recLenHex);
+        // print "rec= ".$k." Start = ".$start. " len= ".$recLen."\n";
+        $rec = substr($tab,2*$start,2*($recLen+2));
+        $records[]=$rec;
+        // print $rec."\n";
+        $start += ($recLen+2);
+    }    
+    return $records;    
+}
+
+
 function actionToTxt($st){
     return $st ? "ON" : "OFF";
 }
@@ -166,11 +226,9 @@ function sendHexMsgWaitReply($s,$hexMsg,$ip){
     $msgLenHex = substr($hexMsg,4,4);               
     $msgLen    = hexdec($msgLenHex);
     if($msgLen != strlen($hexMsg)/2){
-        echo $hexMsg."\n";
-        printHex($hexMsg);
-        echo $msgLenHex." -> ".$msgLen."\n";
-        error_log("Wrong msg length in sendHexWaitReply: Msg has ".strlen($hexMsg).
-                 " bytes, code states ".$msgLen." bytes\n");        
+        error_log($hexMsg."\n");
+        error_log("Wrong msg length in sendHexWaitReply: Msg has ".(strlen($hexMsg)/2).
+                  " bytes, code states ".$msgLen." bytes\n");        
     }
     $codeSend = substr($hexMsg,8,4);
     sendHexMsg($s,$hexMsg,$ip);
@@ -360,8 +418,8 @@ function searchS20(){
 
 function subscribe($mac,$s20Table){
     //
-    // Sends a subscribe message to S20 specified by mac address 
-    // $mac, using global device information im $s20Table.
+    // Sends a subscribe message to the S20 specified by mac address 
+    // $mac, using global device information in $s20Table.
     // 
     // Returns the socket status 
     //
@@ -398,12 +456,25 @@ function setSwitchOffTimer($mac,$sec,&$s20Table){
     subscribe($mac,$s20Table);
     $table = 4; $vflag = "17";
     $recTable = getTable($mac,$table,$vflag,$s20Table);
+    
 
     $switchOffData = substr($recTable,164*2,8);
-    $switchOffData = (($sec == 0) ? "00" : "01").
-                   substr($switchOffData,2,2);
-    $switchOffData = $switchOffData.secToHexLE($sec);
 
+    // This substring defines  the format for 
+    // "automatic switch off after switch on" according to the following
+    //
+    //  XXYYZZZZ
+    //
+    //  XX, Enabled satus: XX=00 Disabled,XX=01 - Enabled
+    //  YY, Action to be performed after switch on: 00-turn off, 01-turn on
+    //  ZZZZ Initial countdown in seconds, little endian
+    //
+    //  Not sure what is the purpose of YY=01 (switch on after switch on), 
+    //  but we have seen this configuration ocasionaly, possibly  as 
+    //  a side effect of some other operation.
+    //
+    $switchOffData = (($sec == 0) ? "00" : "01")."00";
+    $switchOffData = $switchOffData.secToHexLE($sec);
 
     // Set timer
     $newTableAux = substr_replace($recTable,$switchOffData,2*164,8);
