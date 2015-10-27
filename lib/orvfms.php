@@ -475,7 +475,7 @@ function searchS20(){
     //
     // Returns the $s20Table array
     //
-    echo "Searching S20<p>";
+    //    echo "Searching S20<p>";
     $s = createSocketAndSendMsg(DISCOVERY_MSG,IP_BROADCAST);
     $recIP="";
     $recPort=0;
