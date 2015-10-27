@@ -113,12 +113,7 @@ if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
 }
 else{
     $time_ref = time(); 
-    $s20Table=initS20Data();    
-    $macs = array_keys($s20Table);
-    $s20Table[$macs[0]]['name'] = "Living room";
-    $s20Table[$macs[1]]['name'] = "Battery";
-    $s20Table[$macs[2]]['name'] = "Heater";
-    
+    $s20Table=initS20Data();   
     $_SESSION["devNumber"]=$ndev;
     $_SESSION["time_ref"]=$time_ref;
     if(DEBUG)
