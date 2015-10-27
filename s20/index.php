@@ -104,9 +104,8 @@ else
 //
 // Otherwise, reinitialize all $s20Table structure
 //
-if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
-   (count($s20Table) == $_SESSION["devNumber"]) 
-   && (count($s20Table)>0) && ((time()-$time_ref < 300))){
+if(isset($_SESSION["s20Table"]) &&
+   (count($s20Table)>0) && ((time()-$time_ref <  120))){
     $s20Table = updateAllStatus($s20Table);  
     if(DEBUG)
         error_log("Session restarted; only status update\n");
@@ -114,6 +113,8 @@ if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
 else{
     $time_ref = time(); 
     $s20Table=initS20Data();   
+    $_SESSION["s20Table"] = $s20Table;
+    $ndev = count($s20Table);
     $_SESSION["devNumber"]=$ndev;
     $_SESSION["time_ref"]=$time_ref;
     if(DEBUG)

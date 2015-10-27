@@ -216,6 +216,7 @@ function updTableTimers(&$s20Table){
     //
     // Update the values of count down timers in table $s20Table
     //
+    // echo "Update table timers <p>";
     $justTest = 0;
     foreach($s20Table as $mac => $devData){
         // Check && update count down timers
@@ -474,6 +475,7 @@ function searchS20(){
     //
     // Returns the $s20Table array
     //
+    echo "Searching S20<p>";
     $s = createSocketAndSendMsg(DISCOVERY_MSG,IP_BROADCAST);
     $recIP="";
     $recPort=0;
@@ -661,6 +663,7 @@ function initS20Data(){
     // an associative array with all collected data,
     // including names
     //
+    // echo "Init S20<p>";
     $s20Table = searchS20();
     $s20Table = updNamesAndTimerAfterOn($s20Table);
     updTableTimers($s20Table);
@@ -686,6 +689,7 @@ function updateAllStatus($s20Table){
     // was already initialized and relevant available 
     // and one just wants to update the power status of all S20s
     //
+    // echo "Update all status <p>";
     foreach($s20Table as $mac => $devData){
         $s20Table[$mac]['st'] = checkStatus($mac,$s20Table);
     }
