@@ -1,4 +1,4 @@
-
+B1;2c
 #*************************************************************************
 #  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt                
 #*************************************************************************
@@ -17,8 +17,8 @@ ACKNOWLEDGMENTS:
 https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/	
 
       and on comments and discussions by many other users, 
-      well as some complementar reverse engineering 
-      analysis. 
+      as well as some complementar reverse engineering 
+      analysis (see TECHNICAL_DATA.txt).
 
 SUMMARY:
   This software implements a web interface to control Orvibo S20 
@@ -47,7 +47,7 @@ SUMMARY:
   network or on a cheap mini server (a Raspberry Pi, for example), 
   provided that it supports a web server with php. 
 
-  This web interface reports the status of all S20 attached to the 
+  This web interface is able to operate all S20 attached to the 
   network.  All devices are automatically detected and, therefore, 
   no configuration of individual devices is required. The web interface has 
   a responsive behavior to changing viewport sizes, therefore being well 
@@ -84,7 +84,7 @@ The code contained herein includes the following directories:
     - The css stylesheet (orvfms.css) used by index.php;
 
     img
-    - An icon for the timer clock (clock2.png);
+    - Several icons used by the web interface
 
 TESTING THE CODE:
 
@@ -125,7 +125,7 @@ prompt> php-cgi test.php
 (or replace php-cgi with the name of your php interpreter).
 
 5. If you are running on Windows, and you get an error in "socket_create()", 
-please confim if you have the sockets module installed and enabled. You may 
+please confim that you have the sockets module installed and enabled. You may 
 have to uncomment a line in php.ini (;extension=php_sockets.dll, just delete 
 the ";") and to be sure that php_sockets.dll is available. For more 
 information  check http://php.net/manual/en/sockets.installation.php 
@@ -148,10 +148,10 @@ index.php (1) the relative location of the orvfms lib directory (2)
 the relative location  of the css/orvfms.css file. (3) Check/update 
 the path of the img directory in css/orvfms.css (below timerButton).
 These lines are well marked in index.php with "UPDATE THE PATH". 
-There are 7 paths to icon files that must be updated if your 
-installation adopts a different scheme (yes, there should be someway 
-of avoiding such repetition in CSS files, but it seems that this 
-is only specific possible with CSS pre-processors).
+There are 7 paths to icon files that must be updated in the CSS file
+if your installation adopts a different scheme (yes, there should be 
+some way of avoiding such repetition in CSS files, but it seems that 
+this is only specific possible with a CSS pre-processors).
 
 In order to use the web server software, you may of course run  both the 
 server and the  browser in your desktop or laptop when you are connected 
@@ -163,7 +163,7 @@ Pi, which can be kept powered on with minimal energy consumption and which
 can be simultaneously used by other applications (e.g., media center). 
 Of course, if the server has a private address, as it usually happens in 
 domestic networks, it will be required to configure the home router with 
-Dynamic  DNS and to add appropriate  port forwarding rules to the router. 
+Dynamic  DNS and to add an appropriate  port forwarding rule to the router. 
 These operations are router and network dependent and are beyond the scope 
 of this document.
 
@@ -197,7 +197,7 @@ The web interface supplies most of the functions provided by the WiWo app.
 However, since the full technical information about the sockets is not
 disclosed, some technical details and checks may not be performed exactly
 as foresseen, and the operation may ocasionally fail. We expect to be able
-to improve this interface as more information becomes avalable.
+to improve this interface as more information becomes available.
 
 
 
