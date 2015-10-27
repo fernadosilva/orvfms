@@ -9,22 +9,25 @@ http://pastebin.com/LfUhsbcS
 
 Since most of the information provided in these two sites is acurate, we just add 
 a few notes and comments which may be useful to anyone who wants to analyse or 
-develop software for the S20s. 
+develop software for the S20s. Some of the information below resulted from 
+analysis of packet data using Wireshark.
 
 1. The available information about the S20 "countdown timers" may be sometimes 
 misleading. Each S20 supports in fact two types of "countdown timers".The first one
 is the regular countdown  that decreases from a given initial value to zero, and 
 performs a  pre-specified action when reaches zero. A second timer may be better 
 described as an "automatic switch off on a specified delay after switch on". If the
-"automatic switch off after switch on" is programmed with a given value, when the 
-socket is switched on this value is copied to the regular countdown timer, along with 
-an "off" action, and the regular countdown timer starts. The "automatic switch off
+"automatic switch off after switch on" is programmed with a given value, this value 
+is copied to the regular countdown timer every time the socket is switched on, along 
+with  an "off" action, and the regular countdown timer starts. The "automatic switch off
 after switch on", when enabled, is constant, and therefore does not reset itself after
 the switch on. By other words, when enabled, it will always trigger a countdown 
 process after switch on. 
 
 2. The "Automatic switch off after switch on timer" is reported in table 4. 
-When reading table 4, the following bytes are relevant:
+See more information on pastebin link above. 
+
+When reading table 4, the following bytes are relevant.
 
 byte 165: 00: automatic switch off timer disabled, 01 - timer enabled
 bytes 167,168: timer value in seconds, represented in big endian format. 
@@ -40,8 +43,8 @@ b) Update bytes 165, 167 and 168 with the new enabled status and countdown value
 c) Replace bytes 5 and 6 with the code for "write socket" msg: 74 6D
 d) Delete bytes 19, 27 and 28 of the resulting message (basically, this is record
   information, not required);
-e) Adjust bytes 3 and 4 with the new message size (basically, the initial less 3), 
-in big endian format
+e) Adjust bytes 3 and 4 with the new message size (basically, the received msg
+   length less 3), in big endian format
 f) Send to socket and wait reply.
 
 4. To check the regular countdown timer, its actual value during a countdown 
@@ -61,20 +64,23 @@ After sending the msg above to the socet, the following message is received:
 0010  20 20 00 00 00 00 00 00 0e 29                       .......)
 
 byte 23: 00-action = off, 01-action=on;
-bytes 24 and 25: timer current value in seconds, LITLE ENDIAN (290E in the example) 
+bytes 24 and 25: timer current value in seconds, LITTLE ENDIAN (290E in the example) 
 
 5. Weekly scheduled timers are reported in table 3. Table 3 includes several records. 
-Each record reports information aboute each one of the regular schedule timers.
+Each record reports information aboute each one of the regular scheduled timers.
  
-a) The first record starts in bytes 29,30 with the record length in LITTLE ENDIAN.
-The record length does not include the length bytes, only the record "payload".
+a) The first record starts in bytes 29,30 with the record length in LITTLE ENDIAN
+dormat. The record length does not include the length bytes, only the record "payload".
 After the first record, one may extract the following until the packet is empty.
 
-b) Considering each full record, including the msg length bytes in positions 1 and 2:
+b) Considering each full record, including the msg length bytes in positions 1 and 2, 
+   each record format is as follows:
    - bytes 1,2  - Msg Lentgh
-   - bytes 3,4  - Table code. This is the unique 4 byte code that identifies
-     	   	  the timer and which is required for delete and update operation.
-   - byte 21 is the action to be performed at the specified time (00, off, otherwise on)
+   - bytes 3,4  - Timer code. This is the unique 4 byte code that identifies
+     	   	  the timer and which is required for delete and update operation. In
+		  fact, in delete and update operation you specify this timer code,
+		  not the record number. More on this below.
+   - byte 21 is - the action to be performed at the specified time (00, off, otherwise on)
    - byte 23,24 - year this timer was first set, LITTLE ENDIAN
    - byte 25    - month this timer was first set
    - byte 26    - day of the month this timer was first set
@@ -91,7 +97,7 @@ b) Considering each full record, including the msg length bytes in positions 1 a
 		      1  - Monday
  
 
-c) Assume that a given record provided the folllowing info
+c) Assume that a given record provides the folllowing info
 
    1C 00 FE 70 20 20 20 20 20 20 20 20 20 20 20 20
    20 20 20 20 01 00 DF 07 0A 1A 12 22 06 85
@@ -105,9 +111,9 @@ c) Assume that a given record provided the folllowing info
    12    - HH	
    22    - MM (minutes)
    06    - SS
-   85    - Repeat code 
+   85    - Weekly repeat code 0 0x85 = 133 = 128 + 4 + 1 => 4 + 1 => Wednesday, Monday  
 
-In order to update this timer, send the following msg to the  socket
+In order to update this timer, send the following msg to the socket
 
 0000  68 64 00 37 74 6d XX XX XX XX XX XX 20 20 20 20   hd.7tm..#4..    
 0010  20 20 00 00 00 00 03 00 01 1c 00 fe 70 20 20 20     ..........p   
@@ -130,11 +136,11 @@ Where
 	12    - HH	
    	22    - MM (minutes)
    	06    - SS
-   	85    - Days of the week repeat code 
+   	85    - Weekly repeat code 
 
 d) Add a new timer: quite similar, but the  updated timer code must be replaced
-   for  "03 00 00 1c 00". The timer code, in this case, must be a ranndomly 
-   generated  4 hexadecimal code that is not yet used by another table .
+   with the sequence  "03 00 00 1c 00". The timer code, in this case, must be a 
+   randomly generated  4 hexadecimal code that is not yet used by other timer.
 
 Packet to send:
 
@@ -157,3 +163,4 @@ e) To delete timer with code 4f 37, send:
 	6x20+4x00 - Usual padding
 	03 00 02 - delete code
 	4F 37 - Timer to be deleted
+
