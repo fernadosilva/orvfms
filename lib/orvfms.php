@@ -24,8 +24,8 @@
    
 */
 
-include_once("globals.php"); // constants
-include_once("utils.php");   // utitlity functions
+require_once("globals.php"); // constants
+require_once("utils.php");   // utitlity functions
 
 
 
@@ -43,13 +43,13 @@ function adjustMsgSize($msg){
     return $newMsg;
 }
 
-function buildSetTimerString($h,$m,$sec,$action,$rep){
-    $now = getdate();
-    $y    = $now['year'];
-    $mon = $now['mon'];
-    $d = $now['mday'];
-    $relevantBits = ($action == 1 ? "01":"00")."00";
+function buildSetTimerString($h,$m,$sec,$action,$rep,$date){
+    $y    = $date[0];
+    $mon  = $date[1];
+    $d    = $date[2];
 
+    $relevantBits = ($action == 1 ? "01":"00")."00";
+    
     $yh = invertEndian(padHex(dechex($y),4));
     $monh = padHex(dechex($mon),2);
     $dh = padHex(dechex($d),2);
@@ -74,8 +74,45 @@ function delTimer($mac,$code,&$s20Table){
     return $res;
 }
 
+
+function getDateFromTimerCode($code,$devData){
+    //
+    // Look for timer details. If one code equal to $code found, 
+    // return creation date
+    //
+    if($code != ""){
+        if(isset($devData['details'])){
+            $det = $devData['details'];
+        }
+        else if(isset($_SESSION['details'])){
+            $det = $_SESSION['details'];
+        }
+        $nTimers = count($det);
+        for($k = 0; $k < $nTimers; $k++){
+            if($det[$k]['recCode'] == $code){
+                $recData = $det[$k];
+                break;
+            }
+        }
+    }
+    if(isset($recData)){ // If date is available, use original date
+        $y = $recData['y'];
+        $m = $recData['m'];
+        $d = $recData['d'];
+    }
+    else{                // else, use today date
+        $now   = getdate();
+        $y    = $now['year'];
+        $m    = $now['mon'];
+        $d    = $now['mday'];
+    }
+    $date = array($y,$m,$d);
+    return $date;
+}
+
 function updTimer($mac,$code,$h,$m,$sec,$action,$rep,&$s20Table){
-    $relevant=buildSetTimerString($h,$m,$sec,$action,$rep);
+    $date = getDateFromTimerCode($code,$s20Table[$mac]);
+    $relevant=buildSetTimerString($h,$m,$sec,$action,$rep,$date);
     $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
               "0300011C00".$code.twenties(16).$relevant;
     $writeMsg = adjustMsgSize($writeMsg);
@@ -99,7 +136,8 @@ function addTimer($mac,$h,$m,$sec,$action,$rep,&$s20Table){
                 $stay = 1;
         }
     }
-    $relevant=buildSetTimerString($h,$m,$sec,$action,$rep);
+    $date = getDateFromTimerCode("",$s20Table[$mac]);
+    $relevant=buildSetTimerString($h,$m,$sec,$action,$rep,$date);
     $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
               "0300001C00".$newCode.twenties(16).$relevant;
     $writeMsg = adjustMsgSize($writeMsg);

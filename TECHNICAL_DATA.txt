@@ -58,7 +58,7 @@ Send to socket, port 10000:
 where XX XX XX XX XX XX is the socket mac address, in big endian format. 68 64 is the 
 magic key, 00 1a the msg length, 63 64 the msg code.
 
-After sending the msg above to the socet, the following message is received:
+After sending the msg above to the socket, the following message is received:
 
 0000  68 64 00 1a 63 64 XX XX XX XX XX XX 20 20 20 20   hd..cd..#4..
 0010  20 20 00 00 00 00 00 00 0e 29                       .......)
@@ -71,7 +71,7 @@ Each record reports information aboute each one of the regular scheduled timers.
  
 a) The first record starts in bytes 29,30 with the record length in LITTLE ENDIAN
 dormat. The record length does not include the length bytes, only the record "payload".
-After the first record, one may extract the following until the packet is empty.
+After the first record, one may extract the following one until reaching the end packet end.
 
 b) Considering each full record, including the msg length bytes in positions 1 and 2, 
    each record format is as follows:
@@ -104,7 +104,7 @@ c) Assume that a given record provides the folllowing info
 
    1C 00 - Rec length, little endian
    FE 70 - Table code
-   (...)
+   (...) - Padding
    DF 07 - YYYY (little endian)
    0A    - MM (month)
    1A    - DD
@@ -113,7 +113,7 @@ c) Assume that a given record provides the folllowing info
    06    - SS
    85    - Weekly repeat code 0 0x85 = 133 = 128 + 4 + 1 => 4 + 1 => Wednesday, Monday  
 
-In order to update this timer, send the following msg to the socket
+In order to update this timer, send the following msg to the socket:
 
 0000  68 64 00 37 74 6d XX XX XX XX XX XX 20 20 20 20   hd.7tm..#4..    
 0010  20 20 00 00 00 00 03 00 01 1c 00 fe 70 20 20 20     ..........p   
@@ -127,7 +127,7 @@ Where
 	74 6D - Update code
 	XX XX XX XX XX XX - mac address
 	20 20 20 20 20 20 00 00 00 00 - usual padding
-	03 00 01 1C 00 Update timer code
+	03 00 01 1C 00 - Update timer code
 	FE 70 - Timer code
 	16 (sixteen) x 20 - padding
 	DF 07 - YY Little endian
@@ -140,7 +140,10 @@ Where
 
 d) Add a new timer: quite similar, but the  updated timer code must be replaced
    with the sequence  "03 00 00 1c 00". The timer code, in this case, must be a 
-   randomly generated  4 hexadecimal code that is not yet used by other timer.
+   randomly generated  4 hexadecimal code that is not yet used by other timer. 
+   Note that I am not sure if the WiWo app uses a different algorithm to 
+   define the "timer code" instead of a pseudo-random generator, but 
+   at least this randomization strategy seems to work.
 
 Packet to send:
 

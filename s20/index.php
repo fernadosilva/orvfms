@@ -77,7 +77,7 @@ S20 remote
 define("ORVFMS_PATH","../lib/orvfms/");
 define("IMG_PATH","../img/");
 
-include(ORVFMS_PATH."orvfms.php"); 
+require_once(ORVFMS_PATH."orvfms.php"); 
 
 $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
 if(DEBUG)
@@ -125,9 +125,9 @@ else{
 // Check which page must be displayed
 //
 if ($_SERVER["REQUEST_METHOD"] != "POST"){
-    include(ORVFMS_PATH."main_page.php");
+    require_once(ORVFMS_PATH."main_page.php");
     displayMainPage($s20Table,$myUrl);
-    include(ORVFMS_PATH."main_page_scripts.php");
+    require_once(ORVFMS_PATH."main_page_scripts.php");
 }
 else if(isset($_POST['toMainPage'])){
     $actionValue = $_POST['toMainPage'];
@@ -146,24 +146,24 @@ else if(isset($_POST['toMainPage'])){
     else if(($actionValue == "setCountdown") ||
             ($actionValue == "clearCountdown") ||
             ($actionValue == "clearSwitchOff")){
-        include(ORVFMS_PATH."timer_settings.php");
+        require_once(ORVFMS_PATH."timer_settings.php");
         timerSettings($s20Table,$actionValue);
     }
-    include(ORVFMS_PATH."main_page.php");
+    require_once(ORVFMS_PATH."main_page.php");
     displayMainPage($s20Table,$myUrl);
-    include(ORVFMS_PATH."main_page_scripts.php");
+    require_once(ORVFMS_PATH."main_page_scripts.php");
 }
 else if(isset($_POST['toCountDownPage'])){
     $actionValue = $_POST['toCountDownPage'];
     if(substr($actionValue,0,6)=="timer_")
         $timerName = substr($actionValue,6);
-    include(ORVFMS_PATH."timer_page.php");
+    require_once(ORVFMS_PATH."timer_page.php");
     displayTimerPage($timerName,$s20Table,$myUrl);
 }
 else if(isset($_POST['toDetailsPage'])){
     $actionValue = $_POST['toDetailsPage'];
     $timerName = $_POST['name'];
-    include(ORVFMS_PATH."edit_process.php");
+    require_once(ORVFMS_PATH."edit_process.php");
     if($actionValue=="updateOrAdd"){
         editProcess($timerName,$s20Table);
     }
@@ -172,7 +172,7 @@ else if(isset($_POST['toDetailsPage'])){
         delProcess($timerName,$recCode,$s20Table);        
     }
     $timerName = $_POST['name'];
-    include(ORVFMS_PATH."details_page.php");
+    require_once(ORVFMS_PATH."details_page.php");
     displayDetailsPage($timerName,$s20Table,$myUrl);
 }
 else if(isset($_POST['toEditPage'])){
@@ -183,8 +183,8 @@ else if(isset($_POST['toEditPage'])){
     else{
         $editIndex = -1;
     }
-    $timerName       = $_POST['name'];
-    include(ORVFMS_PATH."edit_page.php");
+    $timerName = $_POST['name'];
+    require_once(ORVFMS_PATH."edit_page.php");
     displayEditPage($timerName,$editIndex,$s20Table,$myUrl);
 }
 else{
