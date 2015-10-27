@@ -1,5 +1,7 @@
 <?php
 function displayDetailsPage($timerName,&$s20Table,$myUrl){
+    global $daysOfWeek;
+
     $mac = getMacFromName($timerName,$s20Table);
 ?>
 
@@ -10,30 +12,74 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
 
 <hr>
 <?php
-    $allTimers = parseTimerTable($mac,$s20Table);
+    $allTimers = getAndParseTimerTable($mac,$s20Table);
+    $_SESSION['details'] = $allTimers;
     $nTimers  = count($allTimers);
+    echo '<form action="'.$myUrl.'" method="post">';
+?>
+    <input type="submit" name="toMainPage" value="Back" 
+        id="backButton"> 
+    <button type="submit" name="toEditPage" value="add" 
+        id="addButton" >Add</button>
+
+<?php
+    echo '<div class="details">'."\n";
     for($i = 0; $i < $nTimers ; $i++){
+        echo '<div class="row">';
         $details = $allTimers[$i];
-        //        $date=sprintf("%02d/%02d/%04d",
-        //              $details['d'],$details['m'],$details['y']);
         $hour = secToHourString($details['time']);
 
-        //        echo $i." set to switch ".($details['st'] ? "on " : "off").
-        //       " at ".$hour." since ".$date." (stored in index ".
-        //       $details['index'].")\n";   
-        echo "<div>";
-        echo $hour;
-        echo "   ";
-        echo $details['st'] ? "on " : "off";
-        echo "<p>\n";
+        echo '<div class="hour">'.$hour.'</div>';
+
+        echo '<div class="editCol">';
+        echo '<button type="submit" name="toEditPage" value="edit'.$i.'" 
+                  id="editButton">Edit</button>';
+        echo '</div>';
+
+
+        echo '<div class="onoff">';
+        echo ($details['st'] ? "on " : "off");
+        echo '<img src="'.IMG_PATH.
+                         ($details['st'] ? 
+                          "greenCircle100px.png" : "redCircle100px.png")
+ .'" style="width:0.8em;position:relative;top:0.1em;left:0.3em;">';
+        echo '</div>';
+        $bits = $details['r'];
+        //        echo $details['r']." ".$bits." ";
+        $first = 1;
+        echo '<div class="daysOfWeek">';
+        for($k=0; $k < 7; $k++){
+            $bit = $bits % 2;
+            $bits = (int) ($bits / 2);
+            if($bit){
+                if(!$first) {
+                    echo ",";                    
+                }
+                echo substr($daysOfWeek[$k],0,2);
+                $first = 0;
+            }
+        }
+        // echo " :".$details['recCode'];
         echo "</div>";
+        echo '<div class="delCol">';
+        echo '<button type="submit" name="toDetailsPage" value="del_'.$details['recCode'].'" 
+                  id="delButton">Delete</button>';
+        echo "</div>\n";
+        echo "</div>\n";
     }
-    echo "<hr><p><p>Sorry: not editable yet<p>";
 
+    echo "</div>\n";
 
+    echo '<input type="hidden" name="name" value="'.$timerName.'">';
+    echo "<p><p><p>";
+    echo '<button type="submit" name="toMainPage" value="done" id="doneButton">Done</button>'; 
+    echo "</form>\n";
+
+  
     
 ?>
 
 <?php
 }
 ?>
+

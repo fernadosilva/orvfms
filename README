@@ -3,7 +3,7 @@
 #  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt                
 #*************************************************************************
 
-Last update: 18 October 2015
+Last update: 26 October 2015
 
 DISCLAIMER:
 
@@ -15,7 +15,10 @@ ACKNOWLEDGMENTS:
       by Andrius Stikonas on 
 
 https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/	
-      and on comments and discussions by many other users. 
+
+      and on comments and discussions by many other users, 
+      well as some complementar reverse engineering 
+      analysis. 
 
 SUMMARY:
   This software implements a web interface to control Orvibo S20 
@@ -32,35 +35,32 @@ SUMMARY:
 
   The purpose of  this software is to setup a web interface, running 
   on a web server in the local network, which supports the most relevant 
-  S20 actions (switch off/on and countdown timers). The web interface 
-  is designed such that it may be operated from any web browser 
-  (desktop,smartphone or pad). Furthermore, it reports accurately 
-  all the satus of the S20s, something  the WiWo app often fails 
-  to do. By making this web server available over the Internet, it is
-  possible the remote and fast  operation of the S20s independently 
-  of the Orvibo proxys.
+  S20 actions (switch off/on, program of timers and countdown timers). 
+  The web interface is designed such that it may be operated from 
+  any web browser (desktop,smartphone or pad). Furthermore, it reports 
+  accurately all the satus of the S20s, something  the WiWo app often 
+  fails to do. By making this web server available over the Internet, 
+  it is possible the remote and fast  operation of the S20s independently 
+  of Orvibo proxys.
 
   The web server can be installed on any computer attached to the local 
   network or on a cheap mini server (a Raspberry Pi, for example), 
   provided that it supports a web server with php. 
 
   This web interface reports the status of all S20 attached to the 
-  network and supports ON/OFF actions of the detected devices. Moreover,
-  it supports reporting and setting of countdown timers (both switch 
-  on/off timers and switch off after on timer). 
-  All devices are automatically detected and, therefore, no configuration
-  of individual devices is required. The web interface has a responsive 
-  behavior to changing viewport sizes, therefore being well suited to both
-  desktops and smartphones. It divides the viewport in N horizontal buttons, 
+  network.  All devices are automatically detected and, therefore, 
+  no configuration of individual devices is required. The web interface has 
+  a responsive behavior to changing viewport sizes, therefore being well 
+  suited to both desktops and smartphones. 
+  
+  The main screen divides the viewport in N horizontal buttons, 
   each one labeled with the  name automatically retrieved from the 
   connected S20s. Each button is shown in green or red according to the 
   current S20 status (green = ON).
 
-  Examples of the web interface are available on web_screenshot.png and
-  web_screenshot_2.png.
- 
-  See the SECURITY section  below for discussion of security issues.
+  Examples of the web interface are available on files web_screenshot[xx].png.
 
+  See the SECURITY section  below for discussion of security issues.
 
 CONTENTS :
 The code contained herein includes the following directories:
@@ -124,7 +124,7 @@ prompt> php-cgi test.php
 
 (or replace php-cgi with the name of your php interpreter).
 
-5. If you are running in Windows, and you get an error in "socket_create()", 
+5. If you are running on Windows, and you get an error in "socket_create()", 
 please confim if you have the sockets module installed and enabled. You may 
 have to uncomment a line in php.ini (;extension=php_sockets.dll, just delete 
 the ";") and to be sure that php_sockets.dll is available. For more 
@@ -164,7 +164,7 @@ These operations are router and network dependent and are beyond the scope
 of this document.
 
 
-SECURITY
+SECURITY:
 
 This web server does not offer any particular security against outside
 attacks. Please use it at your own risk.  If you intend to  operate it 
@@ -181,11 +181,19 @@ If you want to setup real security you will have to generate your own
 .htaccess file with username/password permissions (or any other equivalent 
 option).
 
-OPERATION OF THE WEBPAGE
+OPERATION OF THE WEBPAGE:
 
 The operation is straightforward. Just note that a countdown timer over the 
 button in red means "time to switch off", in green "time to switch on", 
 and in white "time to switch off after switching on".
+
+CAVEATS AND LIMITATIONS:
+
+The web interface supplies most of the functions provided by the WiWo app.
+However, since the full technical information about the sockets is not
+disclosed, some technical details and checks may not be performed exactly
+as foresseen, and the operation may ocasionally fail. We expect to be able
+to improve this interface as more information becomes avalable.
 
 
 

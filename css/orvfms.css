@@ -1,6 +1,4 @@
 /*  UPDATE THE PATH below to match the image directory */
-
-
 /*
   Button code obtained at dabuttonfactory.com
 */
@@ -89,32 +87,9 @@ height: 0;
 }
 
 /*
-  Menu button in the timer page
+  Menu button in the count down timer page
 */
 #menuButton{
-    position: absolute;
-    left: 2vh;
-    top: 2vh;
-
-    width:5vh;
-    height:5vh;
-
-    background:    -moz-linear-gradient(#3d85c6, #073763);
-    background:    -o-linear-gradient(#3d85c6, #073763);
-    background:    -webkit-linear-gradient(#3d85c6, #073763);
-    background:    linear-gradient(#3d85c6, #073763);
-
-/*  UPDATE THE PATH below to match the image directory */
-    background-image:url("../img/menu_icon100px35pc.png");
-    background-size:5vh 5vh;
-    text-indent:-9999px;		
-    border: none;
-}
-
-/*
-  Back button in the timer page
-*/
-#backButton{
     position: absolute;
     right: 2vh;
     top: 2vh;
@@ -127,16 +102,60 @@ height: 0;
     background:    -webkit-linear-gradient(#3d85c6, #073763);
     background:    linear-gradient(#3d85c6, #073763);
 
-    /*  UPDATE THE PATH below to match the image directory */
-    background-image:url("../img/back_icon100px35pc.png");
+/*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/menu_icon128px20pc.png");
     background-size:5vh 5vh;
     text-indent:-9999px;		
     border: none;
 }
 
+/*
+  Back button in the count down timer page
+*/
+#backButton{
+    position: absolute;
+    left: 2vh;
+    top: 2vh;
+
+    width:5vh;
+    height:5vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+    /*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/back_icon128px20pc.png");
+    background-size:5vh 5vh;
+    text-indent:-9999px;		
+    border: none;
+}
+
+/*
+  Blue (large) buttons in the countdown timer page
+*/
 #timerPageButton{
     height: 10vh;
     width: 60vw;
+    display:       inline-block;
+    padding:       8px 27px;
+    background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+    border-radius: 5px;
+    color:         #fff;
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size:     2.5vh;
+    text-align:    center;
+    text-shadow:   1px 1px 0 #000;
+}
+
+#doneButton{
+    height: 5vh;
+    width: 25vw;
     display:       inline-block;
     padding:       8px 27px;
     background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
@@ -200,7 +219,7 @@ input[type=checkbox]:not(old):checked + label > span:before{
   display     : block;
   width       : 1em;
   height      : 1em;
-  color       : rgb(153,204,102);
+  color       : rgb(7,55,99);
   font-size   : 0.875em;
   line-height : 1em;
   text-align  : center;
@@ -215,7 +234,7 @@ input[type=radio]:not(old):checked +  label > span > span{
   margin           : 0.125em;
   border           : 0.0625em solid rgb(115,153,77);
   border-radius    : 0.125em;
-  background       : rgb(153,204,102);
+  background       : rgb(7,55,99);
   background-image :    -moz-linear-gradient(#3d85c6, #073763);
   background-image :     -ms-linear-gradient(#3d85c6, #073763);
   background-image :      -o-linear-gradient(#3d85c6, #073763);
@@ -224,10 +243,175 @@ input[type=radio]:not(old):checked +  label > span > span{
 }
 
 /*
-  Select: slector for hours, min, seconds 
+  Select: selector for hours, min, seconds 
 */
 select {
     font:          normal 700 29px/1 "Calibri", sans-serif;
     font-size: 2.5vh;
     color: #073763;
 }
+
+/*
+ The classes below are used in the countdown timer page to
+ place and align the elements
+*/
+
+.details {
+    display: table;
+    width: 95vw;
+    position: relative;
+    left: 2.5vw;
+}
+.row  {
+    display: table-row;
+    height: 6vh;
+    vertical-align: middle;
+}
+.hour {
+    display: table-cell;
+    width: 12vw;
+    text-align: center;
+}
+
+.editCol {
+    display: table-cell;
+    width: 8vw;
+    text-align: center;
+}
+
+.onoff {
+    display: table-cell;
+    width: 12vw; 
+    text-align: center;
+}
+
+.daysOfWeek {
+    display: table-cell;
+    width: 50vw;
+    text-align: left;
+}
+
+
+.delCol {
+    display: table-cell;
+    width: 8vw;
+    text-align: center;
+}
+
+
+
+/*
+  Edit button in timer details page
+*/
+
+#editButton{
+    width:3vh;
+    height:3vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+    /*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/edit_icon128px_green.png");
+    background-size:3vh 3vh;
+    text-indent:-9999px;		
+    border: none;
+    vertical-align: middle;
+}
+
+#delButton{
+    width:3vh;
+    height:3vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+    /*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/cross_icon_red100.png");
+    background-size:3vh 3vh;
+    text-indent:-9999px;		
+    border: none;
+    vertical-align: middle;
+}
+
+#addButton{
+    position: absolute;
+    right: 2vh;
+    top: 2vh;
+
+    width:5vh;
+    height:5vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+    /*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/add_icon128px20pc.png");
+    background-size:5vh 5vh;
+    text-indent:-9999px;		
+    border: none;
+    vertical-align: middle;
+}
+
+
+
+
+
+
+/*
+  Morebutton in the countdown page
+*/
+#moreButton{
+    position: absolute;
+    left: 2vh;
+    top: 2vh;
+
+    width:5vh;
+    height:5vh;
+
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+
+/*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/menu_icon128px20pc.png");
+    background-size:5vh 5vh;
+    text-indent:-9999px;		
+    border: none;
+}
+
+/*
+ The classes below are used in the edit timer details page
+ to align days of the week and ceckboxs
+*/
+
+.editDetail {
+    display: table;
+    width: 95vw;
+    position: relative;
+    left: 2.5vw;
+}
+.rowDetail  {
+    display: table-row;
+    height: 1.7em;
+    vertical-align: middle;
+}
+.weekDayCol {
+    display: table-cell;
+    width: 50vw;
+    text-align: right;
+}
+
+.checkBoxCol {
+    display: table-cell;
+    width: 45vw;
+    text-align: left;
+}
+

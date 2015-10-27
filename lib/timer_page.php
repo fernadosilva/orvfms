@@ -57,10 +57,11 @@ function initTimerPageScripts(){
 <hr>
 
 <form action="<?php echo $myUrl ?>" method="post">
-<input type="submit" name="buttonPressed" value="Details" 
-    id="menuButton">
-<input type="submit" name="buttonPressed" value="Back" 
+<input type="submit" name="toMainPage" value="back" 
     id="backButton">
+<input type="submit" name="toDetailsPage" value="details" 
+    id="menuButton">
+
 
 <div>
 Action<br>
@@ -102,10 +103,10 @@ Action type<br>
 </div>
 <p>
 <br>
-<input type="submit" name="buttonPressed" value="Set countdown" 
-    id="timerPageButton"><p>
-<input type="submit" name="buttonPressed" value="Clear countdown"
-    id="timerPageButton"><br>
+<button type="submit" name="toMainPage" value="setCountdown" 
+    id="timerPageButton">Set countdown</button><p>
+<button type="submit" name="toMainPage" value="clearCountdown"
+    id="timerPageButton">Clear countdown</button><br>
 
 <?php
     if($swVal > 0){
@@ -113,8 +114,9 @@ Action type<br>
         $msg = "<p>Automatic switch off timer set to: ".secToHourString($swVal)."<p>";
         echo $msg; 
 ?>
-<input type="submit" name="buttonPressed" value="Clear automatic switch off"
-id="timerPageButton"><p><p>        
+<button type="submit" name="toMainPage" value="clearSwitchOff" id="timerPageButton">
+Clear automatic switch off<br>
+</button><p><p>        
 <?php        
     }
 ?>

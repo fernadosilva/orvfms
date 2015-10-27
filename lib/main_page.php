@@ -40,14 +40,16 @@ function displayMainPage(&$s20Table,$myUrl){
         $h ='style="height:'.$bheight.'vh;"'; 
         
         // display big button
-        $bigButton='<input type="submit" name="selected" value="'.$name.'" id="'.$type.'" '.$h.' /><br>'."\n"; 
+        $bigButton='<button type="submit" name="toMainPage" 
+               value="switch_'.$name.'" id="'.$type.'" '.$h.'>'.$name.'</button><br>'."\n"; 
         echo $bigButton;
         
         // overlay timer button for each field
-        $timerButtonName = PREFIX_CODE.$name;
+        $timerButtonName = 'clock_'.$name;
         $styleTimer = 'style="top:'.$posTimerButton.'vh"';
         $posTimerButton+=$bheight;
-        $timerButton     = '<input type="submit" name="selected" id="timerButton" value="'.$timerButtonName.'" '.$styleTimer.'/>'."\n";
+        $timerButton     = '<input type="submit" name="toCountDownPage" id="timerButton" 
+                value="timer_'.$name.'" '.$styleTimer.'/>'."\n";
         echo $timerButton;
         // Include field for timer information
         if($devData['timerVal'] != 0)

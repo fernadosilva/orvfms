@@ -1,6 +1,6 @@
 <?php
 
-function timerSettings(&$s20Table){
+function timerSettings(&$s20Table,$actionValue){
     //
     // Implements  the actions selected in the web timer page.
     //
@@ -8,8 +8,8 @@ function timerSettings(&$s20Table){
     $name       = $_POST['name'];
     $mac = getMacFromName($name,$s20Table);
 
-    if(($_POST["buttonPressed"] == "Clear automatic switch off")  ||
-       ($_POST["buttonPressed"] == "Clear countdown")){
+    if(($actionValue == "clearSwitchOff")  ||
+       ($actionValue == "clearCountdown")){
         $h = $m = $s = 0;
         $act = $s20Table[$mac]['st'];
     }
@@ -22,16 +22,14 @@ function timerSettings(&$s20Table){
     }
     $sec = $h * 3600 + $m * 60 + $s;
 
-    if(($_POST["buttonPressed"] == "Clear countdown") ||
-       (($_POST["buttonPressed"] == "Set countdown") &&
-        ($actionType == "now"))){
+    if(($actionValue == "clearCountdown") ||
+       (($actionValue == "setCountdown") && ($actionType == "now"))){
         //
         // Update regular countdown timer
         //
         // Set
-        Settimer($mac,$h,$m,$s,$act,$s20Table);
+        setTimer($mac,$h,$m,$s,$act,$s20Table);
         // Confirm
-
         $s20Table[$mac]['timerVal'] = checkTimerSec($mac,$s20Table,$action);
         $s20Table[$mac]['timerAction'] = $action;
         if(($s20Table[$mac]['timerVal'] != $sec) ||

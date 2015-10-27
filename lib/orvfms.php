@@ -27,20 +27,99 @@
 include_once("globals.php"); // constants
 include_once("utils.php");   // utitlity functions
 
+
+
 function cmpTimers($a,$b){
     return $a['time'] - $b['time'];
 }
 
-function parseTimerTable($mac,$s20Table){
+function adjustMsgSize($msg){
+    //
+    // Adjust the (sending) msg size
+    //
+    $newSize = strlen($msg) / 2;
+    $newSizeHex = padHex(dechex($newSize),4);
+    $newMsg = substr_replace($msg,$newSizeHex,2*2,4);    
+    return $newMsg;
+}
+
+function buildSetTimerString($h,$m,$sec,$action,$rep){
+    $now = getdate();
+    $y    = $now['year'];
+    $mon = $now['mon'];
+    $d = $now['mday'];
+    $relevantBits = ($action == 1 ? "01":"00")."00";
+
+    $yh = invertEndian(padHex(dechex($y),4));
+    $monh = padHex(dechex($mon),2);
+    $dh = padHex(dechex($d),2);
+
+    $hh = padHex(dechex($h),2);
+    $mh = padHex(dechex($m),2);
+    $sh = padHex(dechex($sec),2);
+    $rh = padHex(dechex($rep),2);
+
+    $timerSetString = $relevantBits.$yh.$monh.$dh.$hh.$mh.$sh.$rh;
+    return $timerSetString;
+}
+
+
+
+function delTimer($mac,$code,&$s20Table){
+    $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
+              "030002".$code;
+    $writeMsg = adjustMsgSize($writeMsg);
+    $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);    
+    $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
+    return $res;
+}
+
+function updTimer($mac,$code,$h,$m,$sec,$action,$rep,&$s20Table){
+    $relevant=buildSetTimerString($h,$m,$sec,$action,$rep);
+    $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
+              "0300011C00".$code.twenties(16).$relevant;
+    $writeMsg = adjustMsgSize($writeMsg);
+    $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);
+    $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
+    return $res;    
+}
+
+function addTimer($mac,$h,$m,$sec,$action,$rep,&$s20Table){
+    srand();
+    $timerList = $s20Table[$mac]['details'];
+    // print_r($timerList);
+    $nTimers = count($timerList);
+    $stay = 1;
+    while($stay){
+        $stay = 0;
+        $newDecCode = rand(0,65535);
+        $newCode = padHex(dechex($newDecCode),4);
+        for($k = 0; $k < $nTimers ; $k++){
+            if($newCode == $timerList[$k]['recCode'])
+                $stay = 1;
+        }
+    }
+    $relevant=buildSetTimerString($h,$m,$sec,$action,$rep);
+    $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
+              "0300001C00".$newCode.twenties(16).$relevant;
+    $writeMsg = adjustMsgSize($writeMsg);
+    $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);
+    $tt = getAndParseTimerTable($mac,$s20Table);
+    $s20Table[$mac]['details'] = $tt;
+    return $res;
+}
+
+function getAndParseTimerTable($mac,&$s20Table){
     $timerList = array();
     $table = 3; $vflag = "02";
     $tab3 = getTable($mac,$table,$vflag,$s20Table);
     $recs = getRecordsFromTable($tab3,$s20Table);
     for($i=0;$i<count($recs);$i++){
         $timerList[$i] = getRecordDetails($recs[$i]);
-        $timerList[$i]['index'] = $i;
+        $timerList[$i]['recCode'] = substr($recs[$i],2*2,2*2);
     }
     usort($timerList,"cmpTimers");
+    $s20Table[$mac]['details'] = $timerList;
     return $timerList;
 }
 
@@ -61,10 +140,12 @@ function getRecordDetails($rec){
     $timerDetails['m'] = $month;
     $timerDetails['d'] = $day;
     $timerDetails['time'] = $h*3600+$m*60+$s;
-    $timerDetails['r'] = $rep;
-    $timerDetails['st'] = $swState;
+    $timerDetails['r'] = hexdec($rep); // Note: in decimal, not string.
+    $timerDetails['st'] = $swState;   // Note: in decimal, not string.
     return $timerDetails;
 }
+
+
 
 function getRecordsFromTable($tab,$s20Table){
     $records=array();
@@ -72,6 +153,7 @@ function getRecordsFromTable($tab,$s20Table){
     $n = strlen($tab)/2;
     $k = 0;
     $start = 28;
+
     while($start < $n){
         $k++;
         $recLenHex = substr($tab,$start*2,4);
@@ -95,7 +177,6 @@ function setTimer($mac,$h,$m,$s,$act,$s20Table){
     //
     // Sets countdown timer of device $mac to $h:$m:$s and action $act
     //
-    $ip=$s20Table[$mac]['ip'];
     $timeHex = hourToSecHexLE($h,$m,$s);
     $action  = ($act ? ONT : OFFT);
     $setTimer="00".$action.substr($timeHex,0,2).substr($timeHex,2,2);
@@ -106,12 +187,13 @@ function setTimer($mac,$h,$m,$s,$act,$s20Table){
    
     $stay = 1; $loop_count=0;
     while($stay && ($loop_count++ < MAX_RETRIES)){
-        $s = createSocketAndBind($ip);
-        $recHex = sendHexMsgWaitReply($s,$setTimerHexMsg,$ip);
-        socket_close($s);
+
+        $recHex = createSocketSendHexMsgWaitReply($mac,
+                                                  $setTimerHexMsg,$s20Table);
+
         $hexMsg = strtoupper($setTimerHexMsg);
         $recHex = strtoupper($recHex);
-        $recCode = substr($recHex,2*18,2);
+        $msgRecCode = substr($recHex,2*18,2);
         $recHexAux = $recHex; 
         $recHexAux[36]="0";$recHexAux[37]="0";
         if(DEBUG){
@@ -122,7 +204,7 @@ function setTimer($mac,$h,$m,$s,$act,$s20Table){
             print("RecAux\n");
             printHex($recHexAux);
         }        
-        if(($recCode != "00") && ($recHexAux == $hexMsg))
+        if(($msgRecCode != "00") && ($recHexAux == $hexMsg))
             return 0;
         else
             error_log("Retrying in setTimer\n");
@@ -132,7 +214,7 @@ function setTimer($mac,$h,$m,$s,$act,$s20Table){
 
 function updTableTimers(&$s20Table){
     //
-    // Update the values of count down timers im table $s20Table
+    // Update the values of count down timers in table $s20Table
     //
     $justTest = 0;
     foreach($s20Table as $mac => $devData){
@@ -170,14 +252,13 @@ function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
     // and updates value action with 0 (Off) or 1 (On).
     // If no countdown timer is programmed, returns 0, otherwise 1.
     //    
-    $ip=$s20Table[$mac]['ip'];
     $cmdCode = "6364";
     $checkTimer="01000000";
     $checkTimerHexMsg = MAGIC_KEY."001A".$cmdCode.$mac.
                         TWENTIES.FOUR_ZEROS.$checkTimer; 
    
-    $s = createSocketAndBind($ip);
-    $recHex = sendHexMsgWaitReply($s,$checkTimerHexMsg,$ip);
+    $recHex = createSocketSendHexMsgWaitReply($mac,
+                                    $checkTimerHexMsg,$s20Table);
     if(DEBUG){
         echo "Check timer\n";
         echo "Sent\n"; 
@@ -185,7 +266,6 @@ function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
         echo "Rec\n"; 
         printHex($recHex);
     }
-    socket_close($s);
 
     $relevant = substr($recHex,-6);
     $status = substr($relevant,0,2);
@@ -207,6 +287,19 @@ function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
 }
 
 
+function createSocketSendHexMsgWaitReply($mac,$hexMsg,$s20Table){
+    //
+    // Sends msg specified by $hexMsg, in hexadecimal, to device
+    // sepcified by $mac and waits for reply.
+    // 
+    // Returns the reply in hex format after checking major conditions
+    //
+    $ip   = $s20Table[$mac]['ip'];
+    $s = createSocketAndBind($ip);
+    $hexRecMsg = sendHexMsgWaitReply($s,$hexMsg,$ip);
+    socket_close($s);
+    return $hexRecMsg;
+}
 
 function sendHexMsgWaitReply($s,$hexMsg,$ip){
     //
@@ -276,6 +369,8 @@ function sendHexMsgWaitReply($s,$hexMsg,$ip){
     exit(0);
     return "";
 }
+
+
 
 function sendHexMsg($s,$hexMsg,$ip){
     //
@@ -428,12 +523,11 @@ function subscribe($mac,$s20Table){
         error_log("Found null s20Table in subscribe\n");
     }
     $imac = $s20Table[$mac]['imac'];
-    $ip   = $s20Table[$mac]['ip'];
+
     $hexMsg = SUBSCRIBE.$mac.TWENTIES.$imac.TWENTIES;
-    $s = createSocketAndBind($ip);
-    $hexRecMsg = sendHexMsgWaitReply($s,$hexMsg,$ip);
+
+    $hexRecMsg = createSocketSendHexMsgWaitReply($mac,$hexMsg,$s20Table);
     $status = (int) hexdec(substr($hexRecMsg,-2,2));
-    socket_close($s);
     return $status;
 }
 
@@ -442,10 +536,8 @@ function getTable($mac,$table,$vflag,$s20Table){
     if(strlen($tableHex) == 1)
         $tableHex = "0".$tableHex;
     $hexMsg = "6864001D7274".$mac.TWENTIES."00000000".$tableHex."00".$vflag."00000000";    
-    $ip = $s20Table[$mac]['ip'];
-    $s = createSocketAndBind($ip);
-    $hexRec = sendHexMsgWaitReply($s,$hexMsg,$ip);
-    socket_close($s);
+
+    $hexRec = createSocketSendHexMsgWaitReply($mac,$hexMsg,$s20Table);
     return $hexRec;
 }
 
@@ -493,17 +585,10 @@ function setSwitchOffTimer($mac,$sec,&$s20Table){
     //
     $newTable = substr_replace($newTable,"",25*2,4);
 
-    // Adjust msg size
-    $newSize = strlen($newTable) / 2;
-    $newSizeHex = padHex(dechex($newSize),4);
-    $newTable = substr_replace($newTable,$newSizeHex,2*2,4);    
+    // Update msg size, just in case it has changed
+    $newTable = adjustMsgSize($newTable);
 
-    
-
-    $ip = $s20Table[$mac]['ip'];
-    $s = createSocketAndBind($ip);    
-    $reply = sendHexMsgWaitReply($s,$newTable,$ip);
-    socket_close($s);
+    $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
     $newSec = getSwitchOffTimer($mac,$s20Table);
     return $newSec;
 }
@@ -624,11 +709,10 @@ function sendAction($mac,$action,$s20Table){
         $msg .= ON;
     else
         $msg .= OFF;
-    $ip = $s20Table[$mac]['ip'];
-    $s = createSocketAndBind($ip);    
-    $hexRecMsg = sendHexMsgWaitReply($s,$msg,$ip);    
+
+    $hexRecMsg = createSocketSendHexMsgWaitReply($mac,$msg,$s20Table);
+
     $status = (int) hexdec(substr($hexRecMsg,-2,2));    
-    socket_close($s);
 }
 
 function actionAndCheck($mac,$action,$s20Table){

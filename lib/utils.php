@@ -155,5 +155,11 @@ function invertEndian($hex){
     } 
     return $res;
 }
-    
+  
+function twenties($n){
+    $res = "";
+    for($k = 0 ; $k < $n ; $k++)
+        $res=$res."20";
+    return $res;
+}  
 ?>

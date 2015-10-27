@@ -1,15 +1,14 @@
-
 <?php
 session_start();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head
+<head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <?php
-if(($_SERVER["REQUEST_METHOD"] != "POST") || isset($_POST["action"])){
-    echo '<META HTTP-EQUIV="Refresh" CONTENT="60">'."\n";
-}
+    if(($_SERVER["REQUEST_METHOD"] != "POST") || (isset($_POST['toMainPage']))){
+        echo '<META HTTP-EQUIV="Refresh" CONTENT="60">'."\n";
+    }
 ?>
 <title>
 S20 remote
@@ -36,7 +35,6 @@ S20 remote
 </script>
 </head>
 <body>
-
 <?php
 /*************************************************************************
 *  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt             *
@@ -73,10 +71,11 @@ S20 remote
   as the location of the CSS  orvfms.css in the <head> section above.  
 */
 
-/* UPDATE THE PATH OF THE  orvfms LIBRARY  BELOW TO MATCH
-   YOUR LOCAL CONFIGURATION.              
+/* UPDATE THE PATH to THE  orvfms LIBRARY and img directory 
+   BELOW TO MATCH YOUR LOCAL CONFIGURATION.              
 */
 define("ORVFMS_PATH","../lib/orvfms/");
+define("IMG_PATH","../img/");
 
 include(ORVFMS_PATH."orvfms.php"); 
 
@@ -84,15 +83,27 @@ $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
 if(DEBUG)
     print_r($_SESSION);
 
+$daysOfWeek = array("Monday","Tuesday","Wednesday","Thursday",
+                   "Friday","Saturday","Sunday");
+
 if(isset($_SESSION["s20Table"])) {
     $s20Table = $_SESSION["s20Table"];
 }
 
+//
+// Get time reference to know when the status was updated by the last time
+//
 if(isset($_SESSION["time_ref"])) 
     $time_ref = $_SESSION["time_ref"];
 else
     $time_ref = 0;
 
+//
+// Refresh/update only S20 data if $s20Table was initialized before, data seems consistent and
+// time since last refresh was less than 5 minutes. 
+//
+// Otherwise, reinitialize all $s20Table structure
+//
 if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
    (count($s20Table) == $_SESSION["devNumber"]) 
    && (count($s20Table)>0) && ((time()-$time_ref < 300))){
@@ -103,72 +114,87 @@ if(isset($_SESSION["s20Table"]) && isset($_SESSION["devNumber"]) &&
 else{
     $time_ref = time(); 
     $s20Table=initS20Data();    
-    $ndev=count($s20Table);
+    $macs = array_keys($s20Table);
+    $s20Table[$macs[0]]['name'] = "Living room";
+    $s20Table[$macs[1]]['name'] = "Battery";
+    $s20Table[$macs[2]]['name'] = "Heater";
+    
     $_SESSION["devNumber"]=$ndev;
     $_SESSION["time_ref"]=$time_ref;
     if(DEBUG)
         error_log("New session: S20 data initialized\n");
 }
 
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    //    print_r($_POST);
-    if(isset($_POST['action'])){
-        if($_POST['buttonPressed'] == "Details"){
-            $submitAction = 'timerDetails';
-        } 
-        else if($_POST['buttonPressed'] == "Back"){
-            $submitAction = "";
-        }
-        else {                
-            $submitAction = 'setTimer';
-            include(ORVFMS_PATH."timer_settings.php");
-            timerSettings($s20Table);
-        }
-    }
-    else{
-        $submitAction = $_POST['selected'];
-        if(substr($submitAction,0,strlen(PREFIX_CODE)) == PREFIX_CODE){
-            $timerName = substr($submitAction,strlen(PREFIX_CODE));
-            $submitAction = "timerMenu";
-        }
-        else{
-            $mac = getMacFromName($submitAction,$s20Table);
-            $st = $s20Table[$mac]['st'];
-            $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
-            $s20Table[$mac]['st']=$newSt;
-            $swVal = $s20Table[$mac]['switchOffTimer']; 
-            if(($st == 0) && ($newSt == 1) && ($swVal > 0)){
-                $s20Table[$mac]['timerVal'] = $swVal;
-                $s20Table[$mac]['timerAction'] = 0;
-            }
-            if(DEBUG)
-                print "<br><br><br><br>".$st." => ".$newSt." -> ".$swVal."<br><br><br>";
-        }
-    }
-}
-else{
-    $submitAction ="";
-}
-
-$_SESSION["s20Table"]=$s20Table;
-if(DEBUG)
-    print_r($s20Table);
-
-if($submitAction == "timerDetails"){
-    $timerName       = $_POST['name'];
-    include(ORVFMS_PATH."details_page.php");
-    displayDetailsPage($timerName,$s20Table,$myUrl);
-}
-else if($submitAction == "timerMenu"){
-    include(ORVFMS_PATH."timer_page.php");
-    displayTimerPage($timerName,$s20Table,$myUrl);
-}
-else{
+//
+// Check which page must be displayed
+//
+if ($_SERVER["REQUEST_METHOD"] != "POST"){
     include(ORVFMS_PATH."main_page.php");
     displayMainPage($s20Table,$myUrl);
     include(ORVFMS_PATH."main_page_scripts.php");
 }
+else if(isset($_POST['toMainPage'])){
+    $actionValue = $_POST['toMainPage'];
+    if(substr($actionValue,0,7)=="switch_"){
+        $switchName = substr($actionValue,7);
+        $mac = getMacFromName($switchName,$s20Table);
+        $st = $s20Table[$mac]['st'];
+        $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
+        $s20Table[$mac]['st']=$newSt;
+        $swVal = $s20Table[$mac]['switchOffTimer']; 
+        if(($st == 0) && ($newSt == 1) && ($swVal > 0)){
+            $s20Table[$mac]['timerVal'] = $swVal;
+            $s20Table[$mac]['timerAction'] = 0;
+        }
+    }
+    else if(($actionValue == "setCountdown") ||
+            ($actionValue == "clearCountdown") ||
+            ($actionValue == "clearSwitchOff")){
+        include(ORVFMS_PATH."timer_settings.php");
+        timerSettings($s20Table,$actionValue);
+    }
+    include(ORVFMS_PATH."main_page.php");
+    displayMainPage($s20Table,$myUrl);
+    include(ORVFMS_PATH."main_page_scripts.php");
+}
+else if(isset($_POST['toCountDownPage'])){
+    $actionValue = $_POST['toCountDownPage'];
+    if(substr($actionValue,0,6)=="timer_")
+        $timerName = substr($actionValue,6);
+    include(ORVFMS_PATH."timer_page.php");
+    displayTimerPage($timerName,$s20Table,$myUrl);
+}
+else if(isset($_POST['toDetailsPage'])){
+    $actionValue = $_POST['toDetailsPage'];
+    $timerName = $_POST['name'];
+    include(ORVFMS_PATH."edit_process.php");
+    if($actionValue=="updateOrAdd"){
+        editProcess($timerName,$s20Table);
+    }
+    else if(substr($actionValue,0,4)=="del_"){
+        $recCode = substr($actionValue,4);
+        delProcess($timerName,$recCode,$s20Table);        
+    }
+    $timerName = $_POST['name'];
+    include(ORVFMS_PATH."details_page.php");
+    displayDetailsPage($timerName,$s20Table,$myUrl);
+}
+else if(isset($_POST['toEditPage'])){
+    $actionValue = $_POST['toEditPage'];
+    if(substr($actionValue,0,4) == "edit"){
+        $editIndex = substr($actionValue,4);
+    }
+    else{
+        $editIndex = -1;
+    }
+    $timerName       = $_POST['name'];
+    include(ORVFMS_PATH."edit_page.php");
+    displayEditPage($timerName,$editIndex,$s20Table,$myUrl);
+}
+else{
+    echo "Unexpected error 505<p>\n";
+}
+
 ?>
 </body>
 </html>
