@@ -103,7 +103,7 @@ c) Assume that a given record provides the folllowing info
    20 20 20 20 01 00 DF 07 0A 1A 12 22 06 85
 
    1C 00 - Rec length, little endian
-   FE 70 - Table code
+   FE 70 - Timer code
    (...) - Padding
    DF 07 - YYYY (little endian)
    0A    - MM (month)
