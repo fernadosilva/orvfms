@@ -67,8 +67,9 @@ function buildSetTimerString($h,$m,$sec,$action,$rep,$date){
 
 function delTimer($mac,$code,&$s20Table){
     $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
-              "030002".$code;
+              "030002".$code;    
     $writeMsg = adjustMsgSize($writeMsg);
+    // echo "<p>";printHex($writeMsg); echo "<p>";
     $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);    
     $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
     return $res;
@@ -451,11 +452,12 @@ function createSocketAndBind($ip){
         if(!socket_bind($s,"0.0.0.0",PORT)){
             if(++$loop_count > MAX_RETRIES){
                 error_log("Fatal error binding to socket\n");
+                error_log("Bind loop count = ".$loop_count);
                 echo "<h1>Error binding socket</h1>";
                 exit(0);
             }
-            usleep(TIMEOUT);
-    	        }
+            usleep(TIMEOUT*1E6 * rand(0,10000)/10000.0); // backoff for a while
+        }
         else{
             $stay = 0;
         }
