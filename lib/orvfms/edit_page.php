@@ -9,6 +9,7 @@ function clearAllFunc(){
         }
         document.getElementById("setAll").checked = false;
     }
+    updateAllFunc();
 }
 
 function setAllFunc(){
@@ -21,6 +22,7 @@ function setAllFunc(){
         }
         document.getElementById("clearAll").checked = false;
     }
+    updateAllFunc();
 }
 
 function updateAllFunc(){
@@ -156,7 +158,7 @@ Action<br>
 ?>
  <p>
  <div class="rowDetail">
-   <div class="weekDayCol"> Repeat all </div>
+   <div class="weekDayCol"> Everyday </div>
    <div class="checkBoxCol">
       <input type="checkbox" id="setAll" onclick="setAllFunc()">       <label for="setAll"><span></span></label>        
    </div>

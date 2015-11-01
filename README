@@ -1,4 +1,3 @@
-B1;2c
 #*************************************************************************
 #  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt                
 #*************************************************************************
@@ -130,6 +129,11 @@ have to uncomment a line in php.ini (;extension=php_sockets.dll, just delete
 the ";") and to be sure that php_sockets.dll is available. For more 
 information  check http://php.net/manual/en/sockets.installation.php 
 (thanks to Javier Ortiz for reporting this error).
+
+6. If no sockets are detected, check if all sockets are on-line and 
+assure that they they are not locked: 
+(check WiWo app -> select socket -> more -> advanced).
+In this version, locked or password protected devices are not supported.
 
 The output is quite straightforward, and possibly you are immediately able
 to recognize most of it. You should also see/hear the usual switching on and 

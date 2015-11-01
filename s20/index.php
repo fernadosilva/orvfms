@@ -115,6 +115,13 @@ else{
     $s20Table=initS20Data();   
     $_SESSION["s20Table"] = $s20Table;
     $ndev = count($s20Table);
+    if($ndev == 0){
+        echo "<h2>No sockets found</h2>";
+        echo " Please check if all sockets are on-line and assure that they\n";
+        echo " they are not locked (check WiWo app -> select socket -> more -> advanced).<p>";
+        echo " In this version, locked or password protected devices are not supported.<p>";
+        exit(1);
+    }
     $_SESSION["devNumber"]=$ndev;
     $_SESSION["time_ref"]=$time_ref;
     if(DEBUG)

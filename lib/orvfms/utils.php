@@ -21,6 +21,14 @@
    General purspose utility functions 
 */
 
+function hexSpace($hex){
+    $res="";
+    $n = strlen($hex) / 2;
+    for($k=0;$k<$n;$k++)
+        $res = $res.substr($hex,2*$k,2)." ";
+    return $res;
+}
+
 function hex_str2byte($string){
     //
     // Converts a string with pairs of hexadecimal numbers in a binary
@@ -129,6 +137,8 @@ function padHex($hex,$hexSize){
     // $hexSize is reached
     // 
     $n = $hexSize - strlen($hex);
+    if($n < 0) 
+        return substr($hex,-$hexSize);
     $hexRes=$hex;
     for($i = 0; $i < $n ; $i++){
         $hexRes = "0".$hexRes;
