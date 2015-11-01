@@ -42,7 +42,13 @@
 include("orvfms.php");
 
 $s20Table = initS20Data(); 
-
+if(count($s20Table) == 0){
+    echo " No sockets found\n\n";
+    echo " Please check if all sockets are on-line and assure that they\n";
+    echo " they are not locked (check WiWo app -> select socket -> more -> Advanced\n\n";
+    echo " This code does not support locked or password protected devices\n\n\n";
+    exit(0);
+}
 
 $s20Table = updateAllStatus($s20Table);   // Update all status (not required, just for test, 
                                               //since immediately after init they   
@@ -92,7 +98,7 @@ for($i = 0; $i < 2 ; $i++){
         $action = 1;
     }
     
-    $h=0;$m=0;$s=10;
+    $h=0;$m=0;$s=5;
 
     echo "setting timer: ".$name.' -> '.actionToTxt($action)." Time=".
                           sprintf("%02d:%02d:%02d\n",$h,$m,$s);
@@ -150,7 +156,27 @@ else{
 // Program again the initial value
 
 $res=setSwitchOffTimer($mac,$initValue,$s20Table);
-echo "\nSetting automatic switch off timer ".$name." to initial value (".$res."s)\n"; 
+echo "\nSetting automatic switch off timer ".$name." to initial value (".$res."s)\n\n\n"; 
+
+
+echo " ...Testing local time (note: at time of initialization, may be delayed by 20s or more)\n\n";
+
+$k=0;
+foreach($s20Table as $mac => $dev){
+    $k++;
+    echo "\n\n".$k.".\n";
+    $name = $dev['name'];
+    $time = $dev['time'];
+    $serverTime = $dev['serverTime'];
+    $tzS = $dev['timeZoneSet'];
+    $tz = $dev['timeZone'];
+    
+    echo sprintf(": %10s<",$name)." => socket time = ".date("c",$time).
+                                    " TzSet= ".$tzS." Tz= ".$tz."\n"; 
+    echo sprintf(": %10s<",$name)." => server time = ".date("c",$serverTime)."\n";
+}
+
+
 
 echo "\n\nTest finished, check if everything seems OK\n";
 
