@@ -27,7 +27,11 @@
 require_once("globals.php"); // constants
 require_once("utils.php");   // utitlity functions
 
-
+function getSocketTime($tab){
+    $th=invertEndian(padHex(substr($tab,-2*5,8),8));
+    $timeStamp = hexdec($th) - 2208988800;        
+    return $timeStamp;
+}
 
 function cmpTimers($a,$b){
     return $a['time'] - $b['time'];
@@ -102,7 +106,7 @@ function getDateFromTimerCode($code,$devData){
         $d = $recData['d'];
     }
     else{                // else, use today date
-        $now   = getdate();
+        $now  = getdate();
         $y    = $now['year'];
         $m    = $now['mon'];
         $d    = $now['mday'];
@@ -399,7 +403,7 @@ function sendHexMsgWaitReply($s,$hexMsg,$ip){
                    ($msgCodeRec == $msgCodeSend)) { 
                     // Everything seems OK
                     if(DEBUG) 
-                        error_log("OK in subscribe: Number of retries subscribe to ".$recIP." = ".$loop_count."\n");
+                        error_log("OK in sendHexMsgWaitReply: Number of retries to success ".$recIP." = ".$loop_count."\n");
                     return $recHexMsg;
                 }
             }
@@ -456,6 +460,7 @@ function createSocketAndBind($ip){
                 echo "<h1>Error binding socket</h1>";
                 exit(0);
             }
+            error_log("Error binding to socket: ".$loop_count);
             usleep(TIMEOUT*1E6 * rand(0,10000)/10000.0); // backoff for a while
         }
         else{
@@ -523,11 +528,15 @@ function searchS20(){
     $loop_count = 0;
     while ( 1 ){
         $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
+        $now = time();
         if($n == 0){
             if(++$loop_count > 3){
                 if(count($s20Table) == 0){
                     error_log("Giving up searching for sockets");
-                    echo "<h1>Internal server error (see logs)</h1>";
+                    echo "<h2>No sockets found</h2>\n\n";
+                    echo " Please check if all sockets are on-line and assure that they\n";
+                    echo " they are not locked:\n (check WiWo app -> select socket -> more -> advanced).<p>\n\n";
+                    echo " In this version, locked or password protected devices are not supported.\n\n<p>";
                     exit(1);
                 }
                 else{
@@ -546,14 +555,17 @@ function searchS20(){
                 $s20Table[$mac]['ip']=$recIP;
                 $s20Table[$mac]['st']=$status;
                 $s20Table[$mac]['imac']=invMac($mac);
+                $s20Table[$mac]['time']=getSocketTime($recMsg);
+                $s20Table[$mac]['serverTime'] = $now;
             }
+            
         }
     }
     socket_close($s);
     return $s20Table;
 }
 
-function subscribe($mac,$s20Table){
+function subscribe($mac,&$s20Table){
     //
     // Sends a subscribe message to the S20 specified by mac address 
     // $mac, using global device information in $s20Table.
@@ -583,14 +595,54 @@ function getTable($mac,$table,$vflag,$s20Table){
     return $hexRec;
 }
 
+
+function setTimeZone($mac,$tz,&$s20Table){
+    //
+    // Sets the timezone in table 4 to $tz
+    //
+    $table = 4; $vflag = "17";
+    $recTable = getTable($mac,$table,$vflag,$s20Table);
+   
+    // Set timezone
+
+    $tzSetString = "00";
+
+    $tzValString    = padHex(dechex($tz),2);
+    $tzString = $tzSetString.$tzValString;
+    
+    echo "################".$tzString."##############\n";
+
+    $newTableAux = substr_replace($recTable,$tzString,2*162,2*2);
+
+    // replace receive code with send code
+    $newTableAux = substr_replace($newTableAux,WRITE_SOCKET_CODE,2*4,4);
+
+    //
+    // Delete byte 18 (??)
+    // Wireshark shows...
+    //
+    $newTable = substr_replace($newTableAux,"",18*2,2);
+    //
+    // Delete byte 25 and 26 of resulting (??)
+    // Wireshark shows...
+    //
+    $newTable = substr_replace($newTable,"",25*2,4);
+
+    // Update msg size, just in case it has changed
+    $newTable = adjustMsgSize($newTable);
+
+    $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
+}
+
+
 function setSwitchOffTimer($mac,$sec,&$s20Table){
     //
     // Sets the automatic switch off timer in table 4 to $sec
     //
-    subscribe($mac,$s20Table);
+    subscribe($mac,$s20Table); 
     $table = 4; $vflag = "17";
     $recTable = getTable($mac,$table,$vflag,$s20Table);
-    
+   
 
     $switchOffData = substr($recTable,164*2,8);
 
@@ -660,6 +712,8 @@ function updNameAndTimerAfterOnDevice($mac,&$s20Table){
     // Upd automatic timer switch off after on
     $timerSetString = substr($recTable,164*2,2);
     $timerValString = substr($recTable,166*2,4);
+
+
     $timerValString = invertEndian($timerValString);
     if($timerSetString == "00")
         $timerVal = 0;
@@ -670,6 +724,12 @@ function updNameAndTimerAfterOnDevice($mac,&$s20Table){
         echo "Timer Set=".$timerSetString." Val= ".$timerValString." dec = ".$timerVal."\n";
 
     $s20Table[$mac]['switchOffTimer']=$timerVal;    
+
+    $tzS = hexdec(substr($recTable,162*2,2));
+    $tz  = hexdec(substr($recTable,163*2,2));
+
+    $s20Table[$mac]['timeZone'] = $tz;
+    $s20Table[$mac]['timeZoneSet'] = $tzS;
 }
 
 
@@ -710,7 +770,7 @@ function initS20Data(){
     return $s20Table;
 }
 
-function checkStatus($mac,$s20Table){
+function checkStatus($mac,&$s20Table){
     //
     // Checks the power status of the S20 speciifed by
     // mac adresss $mac using available information in 
@@ -725,9 +785,9 @@ function updateAllStatus($s20Table){
     // This function updates the power status of all S20 in $allAllS20Data.
     //
     // InitS20Data also fills the power status when it is called.
-    // However, this function is more efficient when $s20Table
-    // was already initialized and relevant available 
-    // and one just wants to update the power status of all S20s
+    // However, this function is more efficient if the $s20Table
+    // was already initialized and one just wants to update the 
+    // power status of all S20s
     //
     // echo "Update all status <p>";
     foreach($s20Table as $mac => $devData){
@@ -737,7 +797,7 @@ function updateAllStatus($s20Table){
     return $s20Table;
 }
 
-function sendAction($mac,$action,$s20Table){
+function sendAction($mac,$action,&$s20Table){
     //
     // Sends an $action (ON=1, OFF = 0) to S20 specified by $mac
     // It retries until a proper reply is received with the desired 
@@ -759,14 +819,14 @@ function sendAction($mac,$action,$s20Table){
     $status = (int) hexdec(substr($hexRecMsg,-2,2));    
 }
 
-function actionAndCheck($mac,$action,$s20Table){
+function actionAndCheck($mac,$action,&$s20Table){
     /*
       This function implements a switch and check satus.
       The check is in fact a double check and should not 
       be required, since the sendAction function checks the 
       power status itself in the reply command and only gives up
       when the correct reply is received. 
-      Nevertheless, we have seen the S20 fail report the 
+      Nevertheless, we have seen the S20 fail abd report the 
       wrong status sometimes on power on/power off actions 
       Checking the status through a separate subscribe command
       seems ro be able to always get the right status.
