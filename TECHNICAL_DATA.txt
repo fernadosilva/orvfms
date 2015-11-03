@@ -87,7 +87,8 @@ b) Considering each full record, including the msg length bytes in positions 1 a
    - byte 27    - Scheduled hour
    - byte 28    - Scheduled minutes
    - byte 29    - Scheduled seconds
-   - byte 30    - Repeat rate: 128+XX, each bit in XX one day of the week:
+   - byte 30    - If >= 128, weekly repeat; otherwise just once.
+     	  	Repeat rate: 128+XX, each bit in XX one day of the week:
      	  	XX = 64  - Sunday
 		     32  - Saturday
 		     16  - Friday
