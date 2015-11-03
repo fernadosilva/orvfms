@@ -149,9 +149,9 @@ The details of the installation will depend slightly on your HTTP server
 configuration and your own preferences. The main web page is located 
 in s20/index.php. If you untar/unzip the code directly under your web 
 server {DocumentRoot} directory, you will be able to access the page
-at http://localhost/s20/ (when running the browser in the web server) 
+at http://localhost/s20/ (when the server is run in your local  host) 
 or under http://yourURL.yourDomain/s20/ (when running from some other 
-client). If you unzip/untar under {DocumentRoot}/mydir, the web page 
+host). If you unzip/untar under {DocumentRoot}/mydir, the web page 
 will be accessible at http://localhost/mydir/s20/ (or 
 http://yourURL.yourDomain/mydir/s20/. If you follow the procedures
 above, evertyhing should work out of the box. 
@@ -165,9 +165,8 @@ the relative location  of the css/orvfms.css file. (3) Check/update
 the path of the img directory in css/orvfms.css (below timerButton).
 These lines are well marked in index.php with "UPDATE THE PATH". 
 There are 7 paths to icon files that must be updated in the CSS file
-if your installation adopts a different scheme (yes, there should be 
-some way of avoiding such repetition in CSS files, but it seems that 
-this is only possible with a specific CSS pre-processors).
+(yes, there should be  some way of avoiding such repetition in CSS files, 
+but this is only possible with a specific CSS pre-processor).
 
 In order to use the web server software, you may of course run  both the 
 server and the  browser in your desktop or laptop when you are connected 
@@ -190,13 +189,13 @@ This web server does not offer any particular security against outside
 attacks. Please use it at your own risk.  If you intend to  operate it 
 from any Internet location, a simple counter measure to mitigate 
 the risk is to store the index.php below a directory with a code name 
-only known to you (e.g., [DocumentRoot]/s20_myPassCode/index.php), to  
+only known to you (e.g., [DocumentRoot]/s20_myPassCode/index.php) and  
 assure that the Document Root directory is not  readable. This option
 assumes that  there  are not many attackers knowing this software or 
 looking for the control of your home devices :-). This is possibly more 
 than enough for most cases, provided that the  devices are not "too risky". 
-Of course, this is not "real security", and it is subject to eavesdropping.  
-If you want to setup real security you will have to generate your own 
+Of course, this is not "real" security and it is vulnerable to eavesdropping.  
+If you want to setup standard security levels you will have to generate your own 
 [self signed] certificate, enable HTTPS on your server and setup an 
 .htaccess file with username/password permissions (or any other equivalent 
 option).
