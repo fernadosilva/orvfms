@@ -38,9 +38,9 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
 
 
         echo '<div class="onoff">';
-        echo ($details['st'] ? "on " : "off");
+        echo ($details['action'] ? "on " : "off");
         echo '<img src="'.IMG_PATH.
-                         ($details['st'] ? 
+                         ($details['action'] ? 
                           "greenCircle100px.png" : "redCircle100px.png")
  .'" style="width:0.8em;position:relative;top:0.1em;left:0.3em;">';
         echo '</div>';

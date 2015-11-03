@@ -72,7 +72,7 @@ function displayEditPage($timerName,$editIndex,&$s20Table,$myUrl){
     else{
         secToHour($thisTimer['time'],$h,$m,$s);
         $recCode = $thisTimer['recCode'];
-        $action = $thisTimer['st'];
+        $action = $thisTimer['action'];
     }
 ?>
 
