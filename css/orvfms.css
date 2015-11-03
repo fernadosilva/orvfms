@@ -4,10 +4,10 @@
 
 
 body { 
-background: #ffffff; 
-font:          normal 700 29px/1 "Calibri", sans-serif;
-font-size: 2.5vh;
-color: #073763;
+    background: #ffffff; 
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size: 2.5vh;
+    color: #073763;
 }
 
 
@@ -27,15 +27,19 @@ a:active { text-decoration: none; font-weight: bold; color: #F00; background: #F
 a:hover { text-decoration: none; color: #C00; background: #FC0; }
 
 #redbutton {
-width: 95vw;
-height: 20vh;
+position:       absolute;
+left:           2.5vw;
+width:          95vw;
+top:            0vh;   /* Dummy, overriden by code */
+height:         20vh;   /* Dummy, overriden by code */
+
 display:       inline-block;
 background:    #900 url('http://dabuttonfactory.com/button.png?w=1&h=40&bgt=gradient&bgc=f00&ebgc=900') repeat-x;
 background:    -moz-linear-gradient(#f00, #900);
 background:    -o-linear-gradient(#f00, #900);
 background:    -webkit-linear-gradient(#f00, #900);
 background:    linear-gradient(#f00, #900);
-border-radius: 5px;
+border-radius: 0px;
 color:         #fff;
 font:          normal 700 29px/1 "Calibri", sans-serif;
 font-size:     5vh;
@@ -44,14 +48,20 @@ text-shadow:   1px 1px 0 #000;
 }
 
 #greenbutton {
-width: 95vw;
-height: 20vh;
+position:       absolute;
+left:           2.5vw;
+width:          95vw;
+top:            0vh;   /* Dummy, overriden by code */
+height:         20vh;   /* Dummy, overriden by code */
+
+
 display:       inline-block;
 background:    #38761d url('http://dabuttonfactory.com/button.png?w=1&h=163&bgt=gradient&bgc=23ca23&ebgc=38761d') repeat-x;
 background:    -moz-linear-gradient(#23ca23, #38761d);
 background:    -o-linear-gradient(#23ca23, #38761d);
 background:    -webkit-linear-gradient(#23ca23, #38761d);
 background:    linear-gradient(#23ca23, #38761d);
+border-radius: 0px;
 color:         #fff;
 font:          normal 700 29px/1 "Calibri", sans-serif;
 font-size:     5vh;
@@ -63,10 +73,10 @@ text-shadow:   1px 1px 0 #000;
 font:          normal 700 29px/1 "Calibri", sans-serif;
 font-size:     3vh;
 color:         #fff;
-position:      relative;
-left:  35vw;
-top: 2vw;
-height: 0vw;
+position:      absolute;
+right:         5vw;
+text-align:    right;
+
 }
 
 
@@ -74,10 +84,9 @@ height: 0vw;
 font:          normal 700 29px/1 "Calibri", sans-serif;
 font-size:     3vh;
 color:         #fff;
-position:      relative;
-top: 30vw;
-right:  27vw;
-height: 0vw;
+position:      absolute;
+left:          5vw;
+text-align:    left;
 }
 
 

@@ -10,51 +10,48 @@ function displayMainPage(&$s20Table,$myUrl){
 <form action="<?php echo $myUrl ?>" method="post">
 <?php
 
-// Compute big button height (90 percent of viewport height) 
-    $bheight = 90 / $ndevs;
-
-// Compute timer margin
-//    $tmargin = -$bheight * 0.9; //location:top
-
-// Compute timer next action margin
-    $tmargin_next = -$bheight * 0.22;    //location: bottom
-    $tmargin = $tmargin_next;  
-    
-    
-// Compute timer font size 
-    $fsize = 3; //$bheight*0.15; 
-    $fsize_next = 3; //$fsize * .6;
 //
 // Sort array (in this case, by mac address), such that data is displayed in 
 // a deterministic sequence
 //
 
     $macs = array_keys($s20Table);
+
     sort($macs);
+    //
+    // Dynamic location style details;
+    //
+// Compute big button height (90 percent of viewport height) 
+    $bigButHeight = 90 / $ndevs;    
+    
+// Timer& next action time font size 
+    $fsize = 3; 
+    $fsize_next = 3; 
+
+    $posBigButton = 0;
+    $clockTopMargin = 4;
+    $timerLabelTopMargin = $bigButHeight * 0.8;
+
 //
 // Loop on all devices and display each button, coloured according to
 // current S20 state.
 //
-
-
-
-    $posTimerButton = 4;
     foreach ($macs as $mac){
         $devData = $s20Table[$mac];
         $st   = $devData['st'];
         $name = $devData['name'];
         $type = ($st == 0 ? "redbutton" : "greenbutton");
-        $h ='style="height:'.$bheight.'vh;"'; 
+        $style ='style="height:'.$bigButHeight.'vh;top:'.$posBigButton.'vh;"'; 
         
         // display big button
         $bigButton='<button type="submit" name="toMainPage" 
-               value="switch_'.$name.'" id="'.$type.'" '.$h.'>'.$name.'</button><br>'."\n"; 
+               value="switch_'.$name.'" id="'.$type.'" '.$style.'>'.$name.'</button><br>'."\n"; 
         echo $bigButton;
         
         // overlay timer button for each field
+        $posTimerButton = $posBigButton + $clockTopMargin;
         $timerButtonName = 'clock_'.$name;
         $styleTimer = 'style="top:'.$posTimerButton.'vh"';
-        $posTimerButton+=$bheight;
         $timerButton     = '<input type="submit" name="toCountDownPage" id="timerButton" 
                 value="timer_'.$name.'" '.$styleTimer.'/>'."\n";
         echo $timerButton;
@@ -69,10 +66,10 @@ function displayMainPage(&$s20Table,$myUrl){
                 $color = "white";
             else
                 $color = "black";
-
+        $timerLabelTop = $posBigButton + $timerLabelTopMargin;
 ?>
         <div class="counter" id="<?php echo "b".$mac; 
-              ?>" style="top:<?php      echo $tmargin ?>vh;
+              ?>" style="top:<?php      echo $timerLabelTop ?>vh;
                          color:<?php     echo $color; ?>;
                          font-size:<?php echo $fsize; ?>vh;"></div>
 
@@ -107,12 +104,14 @@ function displayMainPage(&$s20Table,$myUrl){
 ?>
 
 
-                        <div class="next" style="top:<?php      echo $tmargin_next ?>vh;
+                        <div class="next" style="top:<?php      echo $timerLabelTop ?>vh;
                           color:<?php     echo $color; ?>;
-                         font-size:<?php echo $fsize_next; ?>vh;"> <?php echo $nextS;?>   </div>
+                         font-size:<?php echo $fsize_next; ?>vh;"><span> <?php echo $nextS;?></span>   </div>
+
             
 <?php
-        }        
+        }
+        $posBigButton  +=$bigButHeight;        
     } 
 ?>
 </center>
