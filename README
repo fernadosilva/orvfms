@@ -202,9 +202,16 @@ option).
 
 OPERATION OF THE WEBPAGE:
 
-The operation is straightforward. Just note that a countdown timer over the 
-button in red means "time to switch off", in green "time to switch on", 
+The operation is straightforward. 
+
+Just note that a countdown timer over the button in the bottom right corner 
+in red means  "time to switch off", in green "time to switch on", 
 and in white "time to switch off after switching on".
+
+At the bottom left corner is displayed the next scheduled switch operation in
+the day/weekly timers. As before, "off" events are displayed in red, "on" 
+events in green.
+
 
 CAVEATS AND LIMITATIONS:
 
