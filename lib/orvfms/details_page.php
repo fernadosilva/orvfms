@@ -1,6 +1,6 @@
 <?php
 function displayDetailsPage($timerName,&$s20Table,$myUrl){
-    global $daysOfWeek;
+    global $daysOfWeek,$months;
 
     $mac = getMacFromName($timerName,$s20Table);
 ?>
@@ -48,16 +48,21 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
         //        echo $details['r']." ".$bits." ";
         $first = 1;
         echo '<div class="daysOfWeek">';
-        for($k=0; $k < 7; $k++){
-            $bit = $bits % 2;
-            $bits = (int) ($bits / 2);
-            if($bit){
-                if(!$first) {
-                    echo ",";                    
+        if($bits > 0){
+            for($k=0; $k < 7; $k++){
+                $bit = $bits % 2;
+                $bits = (int) ($bits / 2);
+                if($bit){
+                    if(!$first) {
+                        echo ",";                    
+                    }
+                    echo substr($daysOfWeek[$k],0,2);
+                    $first = 0;
                 }
-                echo substr($daysOfWeek[$k],0,2);
-                $first = 0;
             }
+        }
+        else{
+            echo $details['d'] . "  ". $months[$details['m']-1]. " " . $details['y'];
         }
         // echo " :".$details['recCode'];
         echo "</div>";
