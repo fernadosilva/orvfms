@@ -64,9 +64,23 @@ font:          normal 700 29px/1 "Calibri", sans-serif;
 font-size:     3vh;
 color:         #fff;
 position:      relative;
-left:  30vw;
-height: 0;
+left:  35vw;
+top: 2vw;
+height: 0vw;
 }
+
+
+.next{
+font:          normal 700 29px/1 "Calibri", sans-serif;
+font-size:     3vh;
+color:         #fff;
+position:      relative;
+top: 30vw;
+right:  27vw;
+height: 0vw;
+}
+
+
 
 /*
  Timer buttons in main page.
@@ -84,6 +98,8 @@ height: 0;
     margin-bottom:5px;
     text-indent:-9999px;
 }
+
+
 
 /*
   Menu button in the count down timer page
