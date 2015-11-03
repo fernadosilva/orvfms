@@ -86,6 +86,8 @@ if(DEBUG)
 $daysOfWeek = array("Monday","Tuesday","Wednesday","Thursday",
                    "Friday","Saturday","Sunday");
 
+$months = array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+
 if(isset($_SESSION["s20Table"])) {
     $s20Table = $_SESSION["s20Table"];
 }
@@ -127,7 +129,6 @@ else{
     if(DEBUG)
         error_log("New session: S20 data initialized\n");
 }
-
 //
 // Check which page must be displayed
 //
