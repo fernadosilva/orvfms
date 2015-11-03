@@ -27,6 +27,58 @@
 require_once("globals.php"); // constants
 require_once("utils.php");   // utitlity functions
 
+
+function getNextAction($mac,$s20Table){
+    $timers = $s20Table[$mac]['details'];
+    $nt = count($timers);
+    if($nt==0){
+        $nextAct=-1;
+        $nextDate = 0;
+    }
+    else{
+        secToHour($timers[0]['time'],$h,$m,$s);
+        $nextStamp = getNextEventTimeStamp($h,$m,$s,$timers[0]['r']);
+        $nextAct = $timers[0]['action'];
+        for($k = 1; $k < $nt; $k++){
+            secToHour($timers[$k]['time'],$h,$m,$s);
+            $nextEvent = getNextEventTimeStamp($h,$m,$s,$timers[$k]['r']);
+            if($nextEvent < $nextStamp){
+                $nextStamp = $nextEvent;
+                $nextAct = $timers[$k]['action'];
+            }
+        }
+    }
+    return array($nextAct,$nextStamp);
+}
+
+function getNextActionOld($mac,$s20Table){
+    //
+    // Return action and stime in seconds of next action.
+    //
+    $timers = $s20Table[$mac]['details'];
+    $nt = count($timers);
+    //    print_r($timers);
+    if($nt==0){
+        $nextAct=-1;
+        $nextSec = 0;
+        
+    }
+    else{
+        $now = localtime();
+        $s = $now[0];
+        $m = $now[1];
+        $h= $now[2];
+        $tsec = hourToSec($h,$m,$s);
+        for($k=0; $k < $nt;$k++){
+            if($timers[$k]['time'] > $tsec) break;
+        }
+        if($k == $nt) $k = 0;
+        $nextSec = $timers[$k]['time'];
+        $nextAct = $timers[$k]['action'];
+    }
+    return array($nextAct,$nextSec);
+}
+
 function getSocketTime($tab){
     $th=invertEndian(padHex(substr($tab,-2*5,8),8));
     $timeStamp = hexdec($th) - 2208988800;        
@@ -79,12 +131,41 @@ function delTimer($mac,$code,&$s20Table){
     return $res;
 }
 
+function getNextEventTimeStamp($h,$m,$s,$rep){
+    //    echo "<p><p><p> Rep=".($rep-128)."<p>";
+    $nowStamp = time();
+    $auxDate = getdate($nowStamp);
+    $weekDay = $auxDate['wday'];
 
-function getDateFromTimerCode($code,$devData){
+    $year  = $auxDate['year'];
+    $month = $auxDate['mon'];
+    $day   = $auxDate['mday'];
+    $refStamp = mktime($h,$m,$s,$month,$day,$year);
+    
+    for($wd=0; $wd < 8; $wd++){
+        $auxDate = getdate($refStamp);
+        $wdAux = ($wd+$weekDay) % 7; // 0 -Sunday, 6 - Saturday
+        $bit = $wdAux - 1;
+        if($bit < 0) $bit += 7;
+        $mask = (1 << $bit);
+        // echo "<p>wd=".$weekDay." bit = ".$bit." mask = ".$mask." rep = ".$rep."<p>";
+        if(($mask & $rep) || !($rep)){
+            if($refStamp > $nowStamp){
+                $eventStamp = $refStamp;
+                break;
+            }
+        }
+        $refStamp += 24*3600; /* Advance one day */
+    }   
+    return $eventStamp;
+}
+
+function getDateFromTimerCode($code,$devData,$h,$min,$s,$rep){
     //
-    // Look for timer details. If one code equal to $code found, 
-    // return creation date
+    // Get the date of the next 
+    // occurring event at %h:$m given week repetion pattern $rep.
     //
+
     if($code != ""){
         if(isset($devData['details'])){
             $det = $devData['details'];
@@ -100,23 +181,29 @@ function getDateFromTimerCode($code,$devData){
             }
         }
     }
-    if(isset($recData)){ // If date is available, use original date
+
+    if($rep==0 || !isset($recData)){ 
+        // If just once or new timer, date is the next event date
+        $nextEventStamp = getNextEventTimeStamp($h,$min,$s,$rep);
+        $dateAux = getdate($nextEventStamp);
+        $y = $dateAux['year'];
+        $m = $dateAux['mon'];
+        $d = $dateAux['mday'];
+    }
+    else{
+        // If date is available before, and it is a repeating event,
+        // use original date
         $y = $recData['y'];
         $m = $recData['m'];
         $d = $recData['d'];
     }
-    else{                // else, use today date
-        $now  = getdate();
-        $y    = $now['year'];
-        $m    = $now['mon'];
-        $d    = $now['mday'];
-    }
     $date = array($y,$m,$d);
+    //    print_r($date);
     return $date;
 }
 
 function updTimer($mac,$code,$h,$m,$sec,$action,$rep,&$s20Table){
-    $date = getDateFromTimerCode($code,$s20Table[$mac]);
+    $date = getDateFromTimerCode($code,$s20Table[$mac],$h,$m,$sec,$rep);
     $relevant=buildSetTimerString($h,$m,$sec,$action,$rep,$date);
     $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
               "0300011C00".$code.twenties(16).$relevant;
@@ -141,7 +228,7 @@ function addTimer($mac,$h,$m,$sec,$action,$rep,&$s20Table){
                 $stay = 1;
         }
     }
-    $date = getDateFromTimerCode("",$s20Table[$mac]);
+    $date = getDateFromTimerCode("",$s20Table[$mac],$h,$m,$s,$rep);
     $relevant=buildSetTimerString($h,$m,$sec,$action,$rep,$date);
     $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
               "0300001C00".$newCode.twenties(16).$relevant;
@@ -168,7 +255,7 @@ function getAndParseTimerTable($mac,&$s20Table){
 
 function getRecordDetails($rec){
     $timerDetails = array();
-    $swState = (substr($rec,20*2,2) == "00" ? 0 : 1);
+    $swAction = (substr($rec,20*2,2) == "00" ? 0 : 1);
     $year = hexdec(invertEndian(substr($rec,22*2,4)));
     $month = hexdec(invertEndian(substr($rec,24*2,2)));
     $day = hexdec(invertEndian(substr($rec,25*2,2)));
@@ -177,14 +264,14 @@ function getRecordDetails($rec){
     $s = hexdec(invertEndian(substr($rec,28*2,2)));
     $rep=substr($rec,29*2,2);
 
-    //    print sprintf("Set to %3s:  %02d:%02d:%02 rep=%2s (since %02d/%02d/%04d)\n",($swState ? "on ":"off"),$h,$m,$s,$rep,$day,$month,$year);
+    //    print sprintf("Set to %3s:  %02d:%02d:%02 rep=%2s (since %02d/%02d/%04d)\n",($swAction ? "on ":"off"),$h,$m,$s,$rep,$day,$month,$year);
 
     $timerDetails['y'] = $year;
     $timerDetails['m'] = $month;
     $timerDetails['d'] = $day;
     $timerDetails['time'] = $h*3600+$m*60+$s;
     $timerDetails['r'] = hexdec($rep); // Note: in decimal, not string.
-    $timerDetails['st'] = $swState;   // Note: in decimal, not string.
+    $timerDetails['action'] = $swAction;   // Note: in decimal, not string.
     return $timerDetails;
 }
 
@@ -267,6 +354,7 @@ function updTableTimers(&$s20Table){
         $s20Table[$mac]['timerAction'] = $action;
         // Check && update switch off after on timer
         updNameAndTimerAfterOnDevice($mac,$s20Table);
+        getAndParseTimerTable($mac,$s20Table);
     }
 }
 
