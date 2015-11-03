@@ -164,9 +164,9 @@ Action<br>
    </div>
  </div>
  <div class="rowDetail">
-   <div class="weekDayCol"> Clear all </div>
+   <div class="weekDayCol"> Once </div>
    <div class="checkBoxCol">
-      <input type="checkbox" id="clearAll" onclick="clearAllFunc()">       <label for="clearAll"><span></span></label>        
+      <input type="checkbox" id="Set once" onclick="clearAllFunc()">       <label for="clearAll"><span></span></label>        
    </div>
  </div>
 </div>

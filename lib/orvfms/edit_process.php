@@ -20,13 +20,11 @@ function editProcess($timerName,&$s20Table){
     $s = $_POST['seconds'];
     $action = $_POST['detailAction'];
     $rep = getRepeatFromWeekDays();
-    if($rep > 0){
-        if($recCode == ""){
-            addTimer($mac,$h,$m,$s,$action,$rep,$s20Table);
-        }
-        else{
-            updTimer($mac,$recCode,$h,$m,$s,$action,$rep,$s20Table);
-        }
+    if($recCode == ""){
+        addTimer($mac,$h,$m,$s,$action,$rep,$s20Table);
+    }
+    else{
+        updTimer($mac,$recCode,$h,$m,$s,$action,$rep,$s20Table);
     }
 }
 
