@@ -42,7 +42,7 @@ background:    linear-gradient(#f00, #900);
 border-radius: 0px;
 color:         #fff;
 font:          normal 700 29px/1 "Calibri", sans-serif;
-font-size:     5vh;
+font-size:     4vh;
 text-align:    center;
 text-shadow:   1px 1px 0 #000;
 }
@@ -64,7 +64,7 @@ background:    linear-gradient(#23ca23, #38761d);
 border-radius: 0px;
 color:         #fff;
 font:          normal 700 29px/1 "Calibri", sans-serif;
-font-size:     5vh;
+font-size:     4vh;
 text-align:    center;
 text-shadow:   1px 1px 0 #000;
 }
@@ -94,18 +94,38 @@ text-align:    left;
 /*
  Timer buttons in main page.
 */
-#timerButton{
+#countDownButton{
     position: absolute;
     left: 5vw;
     top: 2vw;
     width:8vh;
     height:8vh;
+    outline:none;
+    border: none;
+    background-color: Transparent;
 
-/*  UPDATE THE PATH below to match the image directory */
-    background-image:url("../img/clock2.png");
+/*  UPDATE THE PATH below to match the image directory  */
+    background-image:url("../img/countDown_simple.png");
     background-size: contain;
-    margin-bottom:5px;
-    text-indent:-9999px;
+    text-indent:     -9999px;
+
+}
+
+#clockButton{
+    position: absolute;
+    left: calc(5vw + 10vh);
+    top: 2vw;
+    width:8vh;
+    height:8vh;
+    outline:none;
+    border: none;
+    background-color: Transparent;
+
+/*  UPDATE THE PATH below to match the image directory  */
+    background-image:url("../img/clock_simple.png");
+    background-size: contain;
+    text-indent:     -9999px;
+
 }
 
 

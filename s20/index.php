@@ -178,8 +178,9 @@ else if(isset($_POST['toDetailsPage'])){
     else if(substr($actionValue,0,4)=="del_"){
         $recCode = substr($actionValue,4);
         delProcess($timerName,$recCode,$s20Table);        
+    } else if(substr($actionValue,0,6) == "clock_"){
+        $timerName = substr($actionValue,6);
     }
-    $timerName = $_POST['name'];
     require_once(ORVFMS_PATH."details_page.php");
     displayDetailsPage($timerName,$s20Table,$myUrl);
 }

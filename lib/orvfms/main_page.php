@@ -24,12 +24,12 @@ function displayMainPage(&$s20Table,$myUrl){
 // Compute big button height (90 percent of viewport height) 
     $bigButHeight = 90 / $ndevs;    
     
-// Timer& next action time font size 
+// Countdown & next action time font size 
     $fsize = 3; 
     $fsize_next = 3; 
 
     $posBigButton = 0;
-    $clockTopMargin = 4;
+    $clockTopMargin = 2;
     $timerLabelTopMargin = $bigButHeight * 0.8;
 
 //
@@ -52,9 +52,15 @@ function displayMainPage(&$s20Table,$myUrl){
         $posTimerButton = $posBigButton + $clockTopMargin;
         $timerButtonName = 'clock_'.$name;
         $styleTimer = 'style="top:'.$posTimerButton.'vh"';
-        $timerButton     = '<input type="submit" name="toCountDownPage" id="timerButton" 
-                value="timer_'.$name.'" '.$styleTimer.'/>'."\n";
+        $timerButton     = '<input type="submit" name="toCountDownPage" id="countDownButton" 
+                value="timer_'.$name.'" '.$styleTimer.'/>'."\n";        
         echo $timerButton;
+
+        $clockButton     = '<input type="submit" name="toDetailsPage" id="clockButton" 
+                value="clock_'.$name.'" '.$styleTimer.'/>'."\n";        
+        echo $clockButton;
+
+
         // Include field for timer information
         if($devData['timerVal'] != 0)
             if($devData['timerAction'])
