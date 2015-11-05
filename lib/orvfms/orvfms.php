@@ -27,13 +27,68 @@
 require_once("globals.php"); // constants
 require_once("utils.php");   // utitlity functions
 
+function cmpActions($a1,$a2){
+    return ($a1[1] > $a2[1]);
+}
+
+function getAllActions($mac,$s20Table){
+   $timers = $s20Table[$mac]['details'];
+   $nt = count($timers);
+   $nowStamp = time(); 
+   $auxDate  = getdate($nowStamp);
+   $nowWeekDay  = $auxDate['wday'];
+   
+   $year  = $auxDate['year'];
+   $month = $auxDate['mon'];
+   $day   = $auxDate['mday'];
+   $nonRepeatSpent = array();
+
+   $todayStamp = mktime(0,0,0,$month,$day,$year);
+   $allActions = array();
+   for($d = 0; $d < 8; $d++){       
+       $wdAux = ($nowWeekDay + $d) % 7;
+       $bit = $wdAux - 1;
+       if($bit < 0) $bit += 7;
+       $mask = (1 << $bit);
+
+       for($i = 0; $i < $nt ; $i++){
+           $t = $timers[$i];
+           $rep = $t['r'];
+           $daySecs = $t['time'];
+           $act = $t['action'];
+
+           $stamp = $todayStamp + $daySecs;
+           
+           if($stamp > $nowStamp){
+               if($rep < 128){
+                   $year  = $t['y'];
+                   $month = $t['m'];
+                   $day   = $t['d'];                                          
+                   $dateStamp = mktime(0,0,0,$month,$day,$year);
+                   $stampnr = $dateStamp + $daySecs;
+                   if($stampnr > $stamp){
+                       $action = array($act,$stampnr); 
+                       array_push($allActions,$action);
+                   }
+               }
+               else if($mask & $rep){
+                   $action = array($act,$stamp); 
+                   array_push($allActions,$action);                   
+               }              
+           }
+       }
+       $todayStamp += 24*3600;
+   }
+   usort($allActions,"cmpActions");
+   //  print_r($allActions);
+   return $allActions;
+}
 
 function getNextAction($mac,$s20Table){
     $timers = $s20Table[$mac]['details'];
     $nt = count($timers);
     if($nt==0){
-        $nextAct=-1;
-        $nextDate = 0;
+        return array();
     }
     else{
         secToHour($timers[0]['time'],$h,$m,$s);
@@ -47,36 +102,9 @@ function getNextAction($mac,$s20Table){
                 $nextAct = $timers[$k]['action'];
             }
         }
+        $next = array($nextAct,$nextStamp);
     }
-    return array($nextAct,$nextStamp);
-}
-
-function getNextActionOld($mac,$s20Table){
-    //
-    // Return action and stime in seconds of next action.
-    //
-    $timers = $s20Table[$mac]['details'];
-    $nt = count($timers);
-    //    print_r($timers);
-    if($nt==0){
-        $nextAct=-1;
-        $nextSec = 0;
-        
-    }
-    else{
-        $now = localtime();
-        $s = $now[0];
-        $m = $now[1];
-        $h= $now[2];
-        $tsec = hourToSec($h,$m,$s);
-        for($k=0; $k < $nt;$k++){
-            if($timers[$k]['time'] > $tsec) break;
-        }
-        if($k == $nt) $k = 0;
-        $nextSec = $timers[$k]['time'];
-        $nextAct = $timers[$k]['action'];
-    }
-    return array($nextAct,$nextSec);
+    return array($next);
 }
 
 function getSocketTime($tab){
