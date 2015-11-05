@@ -7,7 +7,17 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
 
 
 <div style="text-align:center">
-<h2> <?php echo $timerName ?> </h2>
+    
+
+<h2> 
+<?php 
+    echo $timerName;  
+    echo '<img src="'.IMG_PATH.
+          ($s20Table[$mac]['st'] ? "greenCircle100px.png" : "redCircle100px.png")
+                     .'" style="width:0.8em;position:relative;top:0.1em;left:0.3em;">';    
+?> 
+ </h2>
+
 
 
 <hr>

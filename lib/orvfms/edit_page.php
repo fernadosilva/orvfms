@@ -59,7 +59,14 @@ function displayEditPage($timerName,$editIndex,&$s20Table,$myUrl){
 ?>
 
 <div style="text-align:center">
-    <h2> <?php echo $timerName; ?></h2>
+<h2> 
+<?php
+    echo $timerName;  
+    echo '<img src="'.IMG_PATH.
+                     ($s20Table[$mac]['st'] ? "greenCircle100px.png" : "redCircle100px.png")
+                     .'" style="width:0.8em;position:relative;top:0.1em;left:0.3em;">';    
+?> 
+</h2>
 
 <hr>
 
@@ -166,7 +173,7 @@ Action<br>
  <div class="rowDetail">
    <div class="weekDayCol"> Once </div>
    <div class="checkBoxCol">
-      <input type="checkbox" id="Set once" onclick="clearAllFunc()">       <label for="clearAll"><span></span></label>        
+      <input type="checkbox" id="clearAll" onclick="clearAllFunc()">       <label for="clearAll"><span></span></label>        
    </div>
  </div>
 </div>

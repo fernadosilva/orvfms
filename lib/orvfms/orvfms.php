@@ -66,7 +66,7 @@ function getAllActions($mac,$s20Table){
                    $day   = $t['d'];                                          
                    $dateStamp = mktime(0,0,0,$month,$day,$year);
                    $stampnr = $dateStamp + $daySecs;
-                   if($stampnr > $stamp){
+                   if($stampnr == $stamp){
                        $action = array($act,$stampnr); 
                        array_push($allActions,$action);
                    }

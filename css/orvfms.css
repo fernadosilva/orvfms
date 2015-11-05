@@ -96,7 +96,7 @@ text-align:    left;
 */
 #countDownButton{
     position: absolute;
-    left: 5vw;
+    left: calc(5vw + 10vh);
     top: 2vw;
     width:8vh;
     height:8vh;
@@ -113,7 +113,7 @@ text-align:    left;
 
 #clockButton{
     position: absolute;
-    left: calc(5vw + 10vh);
+    left: 5vw;
     top: 2vw;
     width:8vh;
     height:8vh;
@@ -131,7 +131,7 @@ text-align:    left;
 
 
 /*
-  Menu button in the count down timer page
+  Clock button in the count down timer page
 */
 #menuButton{
     position: absolute;
@@ -147,7 +147,7 @@ text-align:    left;
     background:    linear-gradient(#3d85c6, #073763);
 
 /*  UPDATE THE PATH below to match the image directory */
-    background-image:url("../img/menu_icon128px20pc.png");
+    background-image:url("../img/clock_simple.png");
     background-size:5vh 5vh;
     text-indent:-9999px;		
     border: none;
@@ -170,7 +170,7 @@ text-align:    left;
     background:    linear-gradient(#3d85c6, #073763);
 
     /*  UPDATE THE PATH below to match the image directory */
-    background-image:url("../img/back_icon128px20pc.png");
+    background-image:url("../img/back_icon_simple.png");
     background-size:5vh 5vh;
     text-indent:-9999px;		
     border: none;
@@ -396,7 +396,7 @@ select {
     background:    linear-gradient(#3d85c6, #073763);
 
     /*  UPDATE THE PATH below to match the image directory */
-    background-image:url("../img/add_icon128px20pc.png");
+    background-image:url("../img/add_icon_simple.png");
     background-size:5vh 5vh;
     text-indent:-9999px;		
     border: none;

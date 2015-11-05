@@ -123,7 +123,7 @@ function displayMainPage(&$s20Table,$myUrl){
             if($nd > $maxd) $nd = $maxd;
             $top = $posBigButton + $timerLabelTopMargin - $nd * $timerLabelvSpace;            
             $actString = '<div class="next" style="top:'.$top.
-                       'vh; color:#CCCCCC;"><span>Next '.($nd>1?$nd:"").':</span>   </div>';
+                       'vh; color:#4C4C4C;"><span>Next '.($nd>1?$nd:"").':</span>   </div>';
             echo $actString.'\n';
             for($j=0; $j < $nd; $j++){
                 $nextAct  = $next[$j][0];
