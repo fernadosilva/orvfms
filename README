@@ -24,23 +24,23 @@ SUMMARY:
   sockets/switchs attached to the local network. 
 
   The S20 switchs can be operated  in the local network using the freely
-  available WiWo app. However, it is behavior when the user is outside
-  the local network is much less convenient. Only switch on and switch off
+  available WiWo app. However, the WiWo  behavior when the user is outside
+  the local network is less convenient. Only switch on and switch off
   operations are remotely supported, and remote operations often fail due to
   timeout. In fact, remote operations through the WiWo app use a remote 
-  Orvibo proxy which is often out of service or possibly blocked(?). 
-  Moreover, the S20s  can not be operated from a regular desktop, 
-  since only IOS or Android apps are supplied by Orvibo.
+  Orvibo proxy, in order to overcome NAT limotations,  which is often 
+  out of service or possibly blocked(?). Moreover, the S20s  can not be 
+  operated from a regular desktop, since only IOS or Android apps are 
+  supplied by Orvibo.
 
-  The purpose of  this software is to setup a web interface, running 
-  on a web server in the local network, which supports the most relevant 
-  S20 actions (switch off/on, program of timers and countdown timers). 
-  The web interface is designed such that it may be operated from 
+  The purpose of  this software is to setup a web interface, supporting 
+  the most relevant S20 actions (switch off/on, program of timers and countdown 
+  timers). The web interface is designed such that it may be operated from 
   any web browser (desktop,smartphone or pad). Furthermore, it reports 
-  accurately all the satus of the S20s, something  the WiWo app often 
-  fails to do. By making this web server available over the Internet, 
+  accurately the satus of the S20s, something  the WiWo app often 
+  fail to do. By making this web server available over the Internet, 
   it is possible the remote and fast  operation of the S20s independently 
-  of Orvibo proxys.
+  of the remote Orvibo infrastructure.
 
   The web server can be installed on any computer attached to the local 
   network or on a cheap mini server (a Raspberry Pi, for example), 
@@ -144,7 +144,6 @@ in the file orvfms/example.out.
 
 INSTALLATION OF THE WEB PAGE:
 
-
 The details of the installation will depend slightly on your HTTP server 
 configuration and your own preferences. The main web page is located 
 in s20/index.php. If you untar/unzip the code directly under your web 
@@ -153,16 +152,18 @@ at http://localhost/s20/ (when the server is run in your local  host)
 or under http://yourURL.yourDomain/s20/ (when running from some other 
 host). If you unzip/untar under {DocumentRoot}/mydir, the web page 
 will be accessible at http://localhost/mydir/s20/ (or 
-http://yourURL.yourDomain/mydir/s20/. If you follow the procedures
-above, evertyhing should work out of the box. 
+http://yourURL.yourDomain/mydir/s20/. If you follow this simple direct
+installation, evertyhing should work out of the box. Just take into
+account the initial directory and the URL that must be used to access
+the web page.
 
-If you want to costumize your directories, or if your server 
+If you want to costumize your directories, or if your web server 
 configuration requires a different setup, just move the index.php,  
 css/orvfms.css and  orvfms/lib/* to the directories that suit the local  
-hierarchy and configuration of your HTTP server. Just check/update in  
-index.php (1) the relative location of the orvfms lib directory (2)  
-the relative location  of the css/orvfms.css file. (3) Check/update 
-the path of the img directory in css/orvfms.css (below timerButton).
+hierarchy and configuration of your HTTP server. In this case, you need
+to  check/update in  index.php (1) the relative location of the orvfms 
+lib directory (2)  the relative location  of the css/orvfms.css file. 
+(3) Check/update the path of the img directory in css/orvfms.cs.
 These lines are well marked in index.php with "UPDATE THE PATH". 
 There are 7 paths to icon files that must be updated in the CSS file
 (yes, there should be  some way of avoiding such repetition in CSS files, 
@@ -172,7 +173,7 @@ In order to use the web server software, you may of course run  both the
 server and the  browser in your desktop or laptop when you are connected 
 to the local network where the S20s are installed. However, in order to be 
 able to operate the S20s from any Internet location, the server must be 
-installed in a permanent host attached to the S20s network. For domestic 
+installed on a permanent host attached to the S20s network. For domestic 
 applications, a good option is to set up the server on a Raspberry 
 Pi, which can be kept powered on with minimal energy consumption and which 
 can be simultaneously used by other applications (e.g., media center). 
@@ -208,9 +209,10 @@ Just note that a countdown timer over the button in the bottom right corner
 in red means  "time to switch off", in green "time to switch on", 
 and in white "time to switch off after switching on".
 
-At the bottom left corner is displayed the next scheduled switch operation in
+At the bottom left corner are displayed the next scheduled switch operation in
 the day/weekly timers. As before, "off" events are displayed in red, "on" 
-events in green.
+events in green. You may adjust the number of displayed events in the constant
+available in globals.php under the lib drectory.
 
 
 CAVEATS AND LIMITATIONS:
