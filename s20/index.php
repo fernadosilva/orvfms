@@ -126,7 +126,7 @@ if(isset($s20Table)){
 //
 // Otherwise, reinitialize all $s20Table structure
 //
-displayDebug(120,$_POST);
+
 if(isset($s20Table) && (count($s20Table) > 0)){
     $s20Table = updateAllStatus($s20Table);  
     if(DEBUG)
