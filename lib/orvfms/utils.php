@@ -21,6 +21,12 @@
    General purspose utility functions 
 */
 
+function displayDebug($pos,$var){
+?>
+<div style="position:absolute;top:<?php echo $pos  ?>vh;"> <?php print_r($var); ?></div>
+<?php
+}
+
 function hexSpace($hex){
     $res="";
     $n = strlen($hex) / 2;

@@ -12,9 +12,9 @@ function getRepeatFromWeekDays(){
     if($tot != 0) $tot+=128;
     return $tot;
 }
-function editProcess($timerName,&$s20Table){    
+
+function editProcess($mac,&$s20Table){    
     $recCode = $_POST['recCode'];
-    $mac = getMacFromName($timerName,$s20Table);
     $h = $_POST['hours'];
     $m = $_POST['minutes'];
     $s = $_POST['seconds'];
@@ -28,8 +28,7 @@ function editProcess($timerName,&$s20Table){
     }
 }
 
-function delProcess($timerName,$recCode,&$s20Table){
-    $mac = getMacFromName($timerName,$s20Table);
+function delProcess($mac,$recCode,&$s20Table){
     delTimer($mac,$recCode,$s20Table);
 }        
 ?>

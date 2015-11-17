@@ -48,13 +48,15 @@ define("ON" ,"0000000001");
 define("OFF","0000000000");
 define("ONT" ,"01");
 define("OFFT","00");
-define("MAX_RETRIES",10);
+define("MAX_RETRIES",20);
 define("TIMEOUT",0.3); // Max time to wait for a reply from S20, in seconds
 define("MAGIC_KEY","6864");
 define("BUFFER_SIZE",500);
 define("WRITE_SOCKET_CODE","746D");
+define("SEARCH_IP","7167");
 define("DEBUG",0);
-define("NUMBER_OF_NEXT_ACTIONS_DISPLAYED_IN_MAIN_PAGE",2);
+define("NUMBER_OF_NEXT_ACTIONS_DISPLAYED_IN_MAIN_PAGE",0);
+define("LOCAL_FILE_NAME","orvfms.dat");
 ?>
 
 

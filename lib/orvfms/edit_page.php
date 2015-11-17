@@ -50,12 +50,13 @@ function updateAllFunc(){
 </script>
 
 <?php
-function displayEditPage($timerName,$editIndex,&$s20Table,$myUrl){
+function displayEditPage($mac,$editIndex,&$s20Table,$myUrl){
     global $daysOfWeek;    
-    $mac = getMacFromName($timerName,$s20Table);
+
+    $timerName = $s20Table[$mac]['name'];
     $details = $_SESSION['details'];
     $nTimers = count($details);
-    $thisTimer = $details[$editIndex];
+    $thisTimer = $details[(int) $editIndex];
 ?>
 
 <div style="text-align:center">
@@ -67,7 +68,7 @@ function displayEditPage($timerName,$editIndex,&$s20Table,$myUrl){
                      .'" style="width:0.8em;position:relative;top:0.1em;left:0.3em;">';    
 ?> 
 </h2>
-
+<p>
 <hr>
 
 <?php
@@ -85,7 +86,7 @@ function displayEditPage($timerName,$editIndex,&$s20Table,$myUrl){
 
 <div>
 <form action="<?php echo $myUrl ?>" method="post">
-    <input type="submit" name="toDetailsPage" value="Back" 
+    <input type="submit" name="toDetailsPage" value="back<?php echo $mac ?>" 
         id="backButton"> 
     <div>hh : mm : ss</div>
 <div>
@@ -178,8 +179,7 @@ Action<br>
  </div>
 </div>
 <hr>
-<button type="submit" name="toDetailsPage" value="updateOrAdd" id="doneButton">Done</button>
-<input type="hidden" name="name" value="<?php echo $timerName; ?>">
+<button type="submit" name="toDetailsPage" value="updateOrAdd<?php echo $mac ?>" id="doneButton">Done</button>
 <input type="hidden" name="recCode" value="<?php echo $recCode;  ?>">
 </form>
 <script>

@@ -11,12 +11,12 @@ foreach ($macs as $mac) {
         $id = 'b'.$mac;
         $action = $s20Table[$mac]['timerAction'];
         if($nCounters++== 0){
-            $timerNames='var timerNames = ["b'.$mac.'"';;
+            $timerNames='var timerNames = ["'.$mac.'"';;
             $timerVals = "var timerVals  = [".$val;
             $timerActs = "var timerAct  = [".$action;
         }
         else{
-            $timerNames=$timerNames.',"b'.$mac.'"';
+            $timerNames=$timerNames.',"'.$mac.'"';
             $timerVals =$timerVals.",".$val;
             $timerActs =$timerActs.",".$action;
         }
@@ -24,11 +24,11 @@ foreach ($macs as $mac) {
     if($swVal > 0){
         if($nSw++== 0){
             $switchOff = "var switchOff  = [".$swVal;
-            $swNames='var swNames = ["b'.$mac.'"';;
+            $swNames='var swNames = ["'.$mac.'"';;
         }
         else{
             $switchOff=$switchOff.','.$swVal;
-            $swNames=$swNames.',"b'.$mac.'"';
+            $swNames=$swNames.',"'.$mac.'"';
         }
     }
 

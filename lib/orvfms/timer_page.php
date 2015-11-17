@@ -1,6 +1,6 @@
 <?php
-function displayTimerPage($timerName,&$s20Table,$myUrl){
-    $mac = getMacFromName($timerName,$s20Table);
+function displayTimerPage($mac,&$s20Table,$myUrl){
+    $timerName = $s20Table[$mac]['name'];
     $swVal = $s20Table[$mac]['switchOffTimer'];
     $timerVal = $s20Table[$mac]['timerVal'];
     $timerAction = $s20Table[$mac]['timerAction'];
@@ -63,11 +63,12 @@ function initTimerPageScripts(){
 <hr>
 
 <form action="<?php echo $myUrl ?>" method="post">
-<input type="submit" name="toMainPage" value="back" 
+<input type="submit" name="toMainPage" value="back<?php echo $mac ?>"  
     id="backButton">
-<input type="submit" name="toDetailsPage" value="details" 
+<input type="submit" name="toDetailsPage" value="details<?php echo $mac ?>" 
     id="menuButton">
-
+<input type="submit" name="toSetupPage" value="setup<?php echo $mac ?>" 
+    id="setupButton">
 
 <div>
 Action<br>
@@ -104,14 +105,13 @@ Action type<br>
         echo '<option value="'.$i.'">'.$i.'</option>'."\n";
 ?>
 
-    <input type="hidden" name="name" value="<?php echo $timerName ?>">
 </select>
 </div>
 <p>
 <br>
-<button type="submit" name="toMainPage" value="setCountdown" 
+<button type="submit" name="toMainPage" value="setCountdown<?php echo $mac ?>" 
     id="timerPageButton">Set countdown</button><p>
-<button type="submit" name="toMainPage" value="clearCountdown"
+<button type="submit" name="toMainPage" value="clearCountdown<?php echo $mac ?>"
     id="timerPageButton">Clear countdown</button><br>
 
 <?php
@@ -120,7 +120,7 @@ Action type<br>
         $msg = "<p>Automatic switch off timer set to: ".secToHourString($swVal)."<p>";
         echo $msg; 
 ?>
-<button type="submit" name="toMainPage" value="clearSwitchOff" id="timerPageButton">
+<button type="submit" name="toMainPage" value="clearSwitchOff<?php echo $mac ?>" id="timerPageButton">
 Clear automatic switch off<br>
 </button><p><p>        
 <?php        

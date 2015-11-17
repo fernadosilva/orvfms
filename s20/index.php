@@ -35,6 +35,7 @@ S20 remote
 </script>
 </head>
 <body>
+
 <?php
 /*************************************************************************
 *  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt             *
@@ -74,48 +75,65 @@ S20 remote
 /* UPDATE THE PATH to THE  orvfms LIBRARY and img directory 
    BELOW TO MATCH YOUR LOCAL CONFIGURATION.              
 */
+
+
+
 define("ORVFMS_PATH","../lib/orvfms/");
 define("IMG_PATH","../img/");
+
+require_once(ORVFMS_PATH."utils.php");
+
+function  getMacAndActionFromPost(&$action,$postVal){
+    $nc = strlen($postVal);
+    $actLen = $nc - 12;
+    $action = substr($postVal,0,$actLen);
+    $mac = substr($postVal,$actLen);
+    return $mac;
+}
+
 
 require_once(ORVFMS_PATH."orvfms.php"); 
 
 $myUrl = htmlspecialchars($_SERVER["PHP_SELF"]);
-if(DEBUG)
-    print_r($_SESSION);
 
 $daysOfWeek = array("Monday","Tuesday","Wednesday","Thursday",
                    "Friday","Saturday","Sunday");
 
 $months = array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
 
+
 if(isset($_SESSION["s20Table"])) {
     $s20Table = $_SESSION["s20Table"];
 }
+else{
+    $s20Table = readDataFile();
+}
+
+// $s20Table = readDataFile(); // DELETE THIS LINE
+
+$ndummy = 0;
+if(isset($s20Table)){
+    foreach($s20Table as $mac => $data){
+        if(array_key_exists('off',$s20Table[$mac])) $ndummy++;
+    }
+}
+
+
 
 //
-// Get time reference to know when the status was updated by the last time
-//
-if(isset($_SESSION["time_ref"])) 
-    $time_ref = $_SESSION["time_ref"];
-else
-    $time_ref = 0;
-
-//
-// Refresh/update only S20 data if $s20Table was initialized before, data seems consistent and
-// time since last refresh was less than 5 minutes. 
+// Refresh/update only S20 data if $s20Table was initialized before
+// Refresh also if "inactive" S20s exists and last refressh was more than 5m away. 
 //
 // Otherwise, reinitialize all $s20Table structure
 //
-if(isset($_SESSION["s20Table"]) &&
-   (count($s20Table)>0) && ((time()-$time_ref <  120))){
+displayDebug(120,$_POST);
+if(isset($s20Table) && (count($s20Table) > 0)){
     $s20Table = updateAllStatus($s20Table);  
     if(DEBUG)
         error_log("Session restarted; only status update\n");
 }
 else{
-    $time_ref = time(); 
     $s20Table=initS20Data();   
-    $_SESSION["s20Table"] = $s20Table;
     $ndev = count($s20Table);
     if($ndev == 0){
         echo "<h2>No sockets found</h2>";
@@ -124,11 +142,10 @@ else{
         echo " In this version, locked or password protected devices are not supported.<p>";
         exit(1);
     }
-    $_SESSION["devNumber"]=$ndev;
-    $_SESSION["time_ref"]=$time_ref;
     if(DEBUG)
         error_log("New session: S20 data initialized\n");
 }
+$_SESSION["s20Table"] = $s20Table;
 //
 // Check which page must be displayed
 //
@@ -138,66 +155,110 @@ if ($_SERVER["REQUEST_METHOD"] != "POST"){
     require_once(ORVFMS_PATH."main_page_scripts.php");
 }
 else if(isset($_POST['toMainPage'])){
-    $actionValue = $_POST['toMainPage'];
-    if(substr($actionValue,0,7)=="switch_"){
-        $switchName = substr($actionValue,7);
-        $mac = getMacFromName($switchName,$s20Table);
-        $st = $s20Table[$mac]['st'];
-        $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
-        $s20Table[$mac]['st']=$newSt;
-        $swVal = $s20Table[$mac]['switchOffTimer']; 
-        if(($st == 0) && ($newSt == 1) && ($swVal > 0)){
-            $s20Table[$mac]['timerVal'] = $swVal;
-            $s20Table[$mac]['timerAction'] = 0;
+    $mac = getMacAndActionFromPost($actionValue,$_POST['toMainPage']);
+    if($actionValue == "check"){
+        $ip = getIpFromMac($mac);
+        $s20Table[$mac]['lastOffCheck'] = time();
+        $_SESSION['s20Table'] = $s20table;
+        if($ip!=0){
+            $s20Table[$mac]['ip'] = $ip;
+            $st = checkStatus($mac,$s20Table);
+            $_SESSION["s20Table"] = $s20Table;
+            if($st >= 0){
+                unset($s20Table[$mac]['off']);
+                $s20Table[$mac]['st'] = $st;
+                $_SESSION['s20Table'] = $s20Table;
+                require_once(ORVFMS_PATH."main_page.php");
+                displayMainPage($s20Table,$myUrl);
+                require_once(ORVFMS_PATH."main_page_scripts.php");
+            }
         }
+        if(($ip == 0) || ($st < 0)){            
+            require_once(ORVFMS_PATH."setup_page.php");
+            displaySetupPage($mac,$s20Table,$myUrl);
+        }
+    } 
+    else if(substr($actionValue,0,9) == "procSetup"){
+        require_once(ORVFMS_PATH."process_setup.php");
+        processSetup($mac,$s20Table,$actionValue);
+        require_once(ORVFMS_PATH."main_page.php");
+        displayMainPage($s20Table,$myUrl);
+        require_once(ORVFMS_PATH."main_page_scripts.php");
+    }    
+    else{
+        if(($actionValue != "back") && ($mac != "000000000000") && !array_key_exists('off',$s20Table[$mac])){
+            if($actionValue=="switch"){
+                $st = $s20Table[$mac]['st'];
+                $newSt = actionAndCheck($mac,($st==0 ? 1 : 0),$s20Table);
+                $s20Table[$mac]['st']=$newSt;
+                $swVal = $s20Table[$mac]['switchOffTimer']; 
+                if(($st == 0) && ($newSt == 1) && ($swVal > 0)){
+                    $s20Table[$mac]['timerVal'] = $swVal;
+                    $s20Table[$mac]['timerAction'] = 0;
+                }
+            }
+            else if(($actionValue == "setCountdown") ||
+                    ($actionValue == "clearCountdown") ||
+                    ($actionValue == "clearSwitchOff")){
+                require_once(ORVFMS_PATH."timer_settings.php");
+                timerSettings($s20Table,$mac,$actionValue);
+            }
+            else{
+                error_log("Unknown action value: >".$actionValue."<\n");
+            }
+        }
+        else if($actionValue == "find"){
+            $s20Table = initS20Data();
+        }
+        else if($actionValue == "back"){
+        /* OK, nothing done */
+        }
+        require_once(ORVFMS_PATH."main_page.php");
+        displayMainPage($s20Table,$myUrl);
+        require_once(ORVFMS_PATH."main_page_scripts.php");
     }
-    else if(($actionValue == "setCountdown") ||
-            ($actionValue == "clearCountdown") ||
-            ($actionValue == "clearSwitchOff")){
-        require_once(ORVFMS_PATH."timer_settings.php");
-        timerSettings($s20Table,$actionValue);
-    }
-    require_once(ORVFMS_PATH."main_page.php");
-    displayMainPage($s20Table,$myUrl);
-    require_once(ORVFMS_PATH."main_page_scripts.php");
-}
+}        
 else if(isset($_POST['toCountDownPage'])){
-    $actionValue = $_POST['toCountDownPage'];
-    if(substr($actionValue,0,6)=="timer_")
-        $timerName = substr($actionValue,6);
+    $mac = getMacAndActionFromPost($actionValue,$_POST['toCountDownPage']);
     require_once(ORVFMS_PATH."timer_page.php");
-    displayTimerPage($timerName,$s20Table,$myUrl);
+    displayTimerPage($mac,$s20Table,$myUrl);
 }
 else if(isset($_POST['toDetailsPage'])){
-    $actionValue = $_POST['toDetailsPage'];
-    $timerName = $_POST['name'];
+    $mac = getMacAndActionFromPost($actionValue,$_POST['toDetailsPage']);
     require_once(ORVFMS_PATH."edit_process.php");
     if($actionValue=="updateOrAdd"){
-        editProcess($timerName,$s20Table);
+        editProcess($mac,$s20Table);
     }
-    else if(substr($actionValue,0,4)=="del_"){
-        $recCode = substr($actionValue,4);
-        delProcess($timerName,$recCode,$s20Table);        
-    } else if(substr($actionValue,0,6) == "clock_"){
-        $timerName = substr($actionValue,6);
+    else if(substr($actionValue,0,3)=="del"){
+        $recCode = substr($actionValue,3);
+        delProcess($mac,$recCode,$s20Table);        
+    } else if($actionValue == "clock"){
+        /* Nothing here, just display page */
     }
     require_once(ORVFMS_PATH."details_page.php");
-    displayDetailsPage($timerName,$s20Table,$myUrl);
+    displayDetailsPage($mac,$s20Table,$myUrl);
 }
 else if(isset($_POST['toEditPage'])){
-    $actionValue = $_POST['toEditPage'];
+    $mac = getMacAndActionFromPost($actionValue,$_POST['toEditPage']);
     if(substr($actionValue,0,4) == "edit"){
         $editIndex = substr($actionValue,4);
     }
     else{
         $editIndex = -1;
     }
-    $timerName = $_POST['name'];
     require_once(ORVFMS_PATH."edit_page.php");
-    displayEditPage($timerName,$editIndex,$s20Table,$myUrl);
+    displayEditPage($mac,$editIndex,$s20Table,$myUrl);
+}
+else if(isset($_POST['toSetupPage'])){
+    $mac = getMacAndActionFromPost($actionValue,$_POST['toSetupPage']);
+    if($actionValue != "setup"){
+        echo "Unexpected error in setup (505)<p>\n";
+    }
+    require_once(ORVFMS_PATH."setup_page.php");
+    displaySetupPage($mac,$s20Table,$myUrl);
 }
 else{
-    echo "Unexpected error 505<p>\n";
+    echo "Unexpected error 505 (unkown code) <p>\n";
 }
 
 ?>

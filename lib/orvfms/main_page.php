@@ -32,9 +32,6 @@ function mkNextActString($nextTimeStamp,$nextAct,$top){
     return $actString;
 }
 
-
-
-
 function displayMainPage(&$s20Table,$myUrl){
     global $daysOfWeek;
 
@@ -76,67 +73,106 @@ function displayMainPage(&$s20Table,$myUrl){
         $name = $devData['name'];
         $type = ($st == 0 ? "redbutton" : "greenbutton");
         $style ='style="height:'.$bigButHeight.'vh;top:'.$posBigButton.'vh;"'; 
+        $bname = $name;
         
+        if(array_key_exists('off',$devData)) {
+            if(!array_key_exists('lastOffCheck',$s20Table[$mac])){
+                $s20Table[$mac]['lastOffCheck'] = $s20Table[$mac]['off'];
+                $_SESSION['s20Table'] = $s20Table;
+                $devData = $s20Table[$mac];
+            }
+            if((time() - $devData['lastOffCheck']) > 24*3600){  // Check once per day
+                $s20Table[$mac]['lastOffCheck'] = time();
+                $_SESSION['s20Table'] = $s20Table;
+                $ip = getIpFromMac($mac);
+                if($ip!=0){
+                    $s20Table[$mac]['ip'] = $ip;
+                    $st = checkStatus($mac,$s20Table);
+                    $_SESSION["s20Table"] = $s20Table;
+                    if($st >= 0){
+                        unset($s20Table[$mac]['off']);
+                        $s20Table[$mac]['st'] = $st;
+                        $_SESSION['s20Table'] = $s20Table;
+                        $devData = $s20Table[$mac];
+                    }
+                }
+            }
+        }
+
+        if(array_key_exists('off',$devData)) {
+            $type = "graybutton";
+            $bname = $name." (?)";
+            $val = "check";
+        }
+        else{
+            $val = "switch";
+        }
+
         // display big button
         $bigButton='<button type="submit" name="toMainPage" 
-               value="switch_'.$name.'" id="'.$type.'" '.$style.'>'.$name.'</button><br>'."\n"; 
-        echo $bigButton;
-        
-        // overlay timer button for each field
-        $posTimerButton = $posBigButton + $clockTopMargin;
-        $timerButtonName = 'clock_'.$name;
-        $styleTimer = 'style="top:'.$posTimerButton.'vh"';
-        $timerButton     = '<input type="submit" name="toCountDownPage" id="countDownButton" 
-                value="timer_'.$name.'" '.$styleTimer.'/>'."\n";        
-        echo $timerButton;
+              value="'.$val.$mac.'" id="'.$type.'" '.$style.'>'.$bname.'</button><br>'."\n"; 
+        echo $bigButton;        
 
-        $clockButton     = '<input type="submit" name="toDetailsPage" id="clockButton" 
-                value="clock_'.$name.'" '.$styleTimer.'/>'."\n";        
-        echo $clockButton;
+        if(!array_key_exists('off',$devData)){
+            // overlay timer button for each field (countdown timers);
+            $posTimerButton = $posBigButton + $clockTopMargin;
+            $timerButtonName = 'clock'.$mac;
+            $styleTimer = 'style="top:'.$posTimerButton.'vh"';
+            $timerButton     = '<input type="submit" name="toCountDownPage" id="countDownButton" 
+                value="timer'.$mac.'" '.$styleTimer.'/>'."\n";        
+            echo $timerButton;
+            
+            // overlay clock button for each field
+            $clockButton     = '<input type="submit" name="toDetailsPage" id="clockButton" 
+                value="clock'.$mac.'" '.$styleTimer.'/>'."\n";        
+            echo $clockButton;
 
-
-        // Include field for timer information
-        if($devData['timerVal'] != 0)
-            if($devData['timerAction'])
-                $color="#00BB00";
+            // Include field for timer information
+            if($devData['timerVal'] != 0)
+                if($devData['timerAction'])
+                    $color="#00BB00";
+                else
+                    $color="#EE0000";
             else
-                $color="#EE0000";
-        else
-            if($devData['switchOffTimer'] > 0)
-                $color = "white";
-            else
-                $color = "black";
-        $timerLabelTop  = $posBigButton  + $timerLabelTopMargin;
+                if($devData['switchOffTimer'] > 0)
+                    $color = "white";
+                else
+                    $color = "black";
+            $timerLabelTop  = $posBigButton  + $timerLabelTopMargin;
 
 ?>
-        <div class="counter" id="<?php echo "b".$mac; 
+        <div class="counter" id="<?php echo $mac; 
               ?>" style="top:<?php      echo $timerLabelTop ?>vh;
                          color:<?php     echo $color; ?>;
                          font-size:<?php echo $fsize; ?>vh;"></div>
-
-
 <?php
-        $next = getAllActions($mac,$s20Table);
-        $nd = count($next);
-        if($nd > 0){
-            $maxd = NUMBER_OF_NEXT_ACTIONS_DISPLAYED_IN_MAIN_PAGE;
+            $next = getAllActions($mac,$s20Table);
+            $nd = count($next);
+            $maxd = $s20Table[$mac]['next'];
             if($nd > $maxd) $nd = $maxd;
-            $top = $posBigButton + $timerLabelTopMargin - $nd * $timerLabelvSpace;            
-            $actString = '<div class="next" style="top:'.$top.
-                       'vh; color:#4C4C4C;"><span>Next '.($nd>1?$nd:"").':</span>   </div>';
-            echo $actString.'\n';
-            for($j=0; $j < $nd; $j++){
-                $nextAct  = $next[$j][0];
-                $nextTimeStamp = $next[$j][1];
-                $top = $posBigButton + $timerLabelTopMargin - ($nd-$j-1) * $timerLabelvSpace;
-                
-                $nextActS = mkNextActString($nextTimeStamp,$nextAct,$top); 
-                echo $nextActS."\n";
+            if($nd > 0){
+                $top = $posBigButton + $timerLabelTopMargin - $nd * $timerLabelvSpace;            
+                $actString = '<div class="next" style="top:'.$top.
+                           'vh; color:#4C4C4C;"><span>Next:</span>   </div>';
+                echo $actString.'\n';
+                for($j=0; $j < $nd; $j++){
+                    $nextAct  = $next[$j][0];
+                    $nextTimeStamp = $next[$j][1];
+                    $top = $posBigButton + $timerLabelTopMargin - ($nd-$j-1) * $timerLabelvSpace;
+                    
+                    $nextActS = mkNextActString($nextTimeStamp,$nextAct,$top); 
+                    echo $nextActS."\n";
+                }
             }
         }
         $posBigButton  +=$bigButHeight;        
     } 
+/* Overlay find button */
 ?>
+
+<input type="submit" name="toMainPage" id="findButton" 
+                value="find000000000000">
+</form>
 </center>
 <?php
 }

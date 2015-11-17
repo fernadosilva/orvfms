@@ -28,7 +28,7 @@ SUMMARY:
   the local network is less convenient. Only switch on and switch off
   operations are remotely supported, and remote operations often fail due to
   timeout. In fact, remote operations through the WiWo app use a remote 
-  Orvibo proxy, in order to overcome NAT limotations,  which is often 
+  Orvibo proxy, in order to overcome NAT constraints,  which is often 
   out of service or possibly blocked(?). Moreover, the S20s  can not be 
   operated from a regular desktop, since only IOS or Android apps are 
   supplied by Orvibo.
@@ -36,11 +36,11 @@ SUMMARY:
   The purpose of  this software is to setup a web interface, supporting 
   the most relevant S20 actions (switch off/on, program of timers and countdown 
   timers). The web interface is designed such that it may be operated from 
-  any web browser (desktop,smartphone or pad). Furthermore, it reports 
+  any web browser (desktop,smartphone or tablet). Furthermore, it reports 
   accurately the satus of the S20s, something  the WiWo app often 
   fail to do. By making this web server available over the Internet, 
   it is possible the remote and fast  operation of the S20s independently 
-  of the remote Orvibo infrastructure.
+  of the Orvibo infrastructure.
 
   The web server can be installed on any computer attached to the local 
   network or on a cheap mini server (a Raspberry Pi, for example), 
@@ -55,7 +55,13 @@ SUMMARY:
   The main screen divides the viewport in N horizontal buttons, 
   each one labeled with the  name automatically retrieved from the 
   connected S20s. Each button is shown in green or red according to the 
-  current S20 status (green = ON).
+  current S20 status (green = ON). Ocasionally, one of the buttons may
+  appear has gray. This means that the system put it in inactive mode
+  following a timeout in order to not   hamper / delay the operation of the	
+  remaining active devices. The timeout may result from a disconnected device 
+  or simply an undesired transient. In order to connect it again, just 
+  confirm that the device is pluged and connected to the network, and press the 
+  gray button. 
 
   Examples of the web interface are available on files web_screenshot[xx].png.
 
@@ -211,9 +217,13 @@ and in white "time to switch off after switching on".
 
 At the bottom left corner are displayed the next scheduled switch operation in
 the day/weekly timers. As before, "off" events are displayed in red, "on" 
-events in green. You may adjust the number of displayed events in the constant
-available in globals.php under the lib drectory.
+events in green. You may adjust the number of displayed events in the setup page
+of each device, which may be reached from the top right corner of the 
+count down page (count down icon). The default number of "next displayed events" 
+is 0, so you will not see any scheduled action by default.
 
+When adding new devices to your network, the new device may not appear at once. 
+In this case, just press the find icon in the top right corner.
 
 CAVEATS AND LIMITATIONS:
 

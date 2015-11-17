@@ -1,8 +1,9 @@
 <?php
-function displayDetailsPage($timerName,&$s20Table,$myUrl){
+function displayDetailsPage($mac,&$s20Table,$myUrl){
     global $daysOfWeek,$months;
 
-    $mac = getMacFromName($timerName,$s20Table);
+    $timerName = $s20Table[$mac]['name'];
+
 ?>
 
 
@@ -27,9 +28,9 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
     $nTimers  = count($allTimers);
     echo '<form action="'.$myUrl.'" method="post">';
 ?>
-    <input type="submit" name="toMainPage" value="Back" 
+    <input type="submit" name="toMainPage" value="back<?php echo $mac ?>" 
         id="backButton"> 
-    <button type="submit" name="toEditPage" value="add" 
+    <button type="submit" name="toEditPage" value="add<?php echo $mac ?>" 
         id="addButton" >Add</button>
 
 <?php
@@ -42,7 +43,7 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
         echo '<div class="hour">'.$hour.'</div>';
 
         echo '<div class="editCol">';
-        echo '<button type="submit" name="toEditPage" value="edit'.$i.'" 
+        echo '<button type="submit" name="toEditPage" value="edit'.sprintf("%04d",$i).$mac.'" 
                   id="editButton">Edit</button>';
         echo '</div>';
 
@@ -74,10 +75,10 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
         else{
             echo $details['d'] . "  ". $months[$details['m']-1]. " " . $details['y'];
         }
-        // echo " :".$details['recCode'];
         echo "</div>";
         echo '<div class="delCol">';
-        echo '<button type="submit" name="toDetailsPage" value="del_'.$details['recCode'].'" 
+        
+        echo '<button type="submit" name="toDetailsPage" value="del'.$details['recCode'].$mac.'" 
                   id="delButton">Delete</button>';
         echo "</div>\n";
         echo "</div>\n";
@@ -85,7 +86,6 @@ function displayDetailsPage($timerName,&$s20Table,$myUrl){
 
     echo "</div>\n";
 
-    echo '<input type="hidden" name="name" value="'.$timerName.'">';
     echo "<p><p><p>";
     echo '<button type="submit" name="toMainPage" value="done" id="doneButton">Done</button>'; 
     echo "</form>\n";

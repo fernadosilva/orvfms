@@ -80,7 +80,6 @@ function getAllActions($mac,$s20Table){
        $todayStamp += 24*3600;
    }
    usort($allActions,"cmpActions");
-   //  print_r($allActions);
    return $allActions;
 }
 
@@ -153,14 +152,17 @@ function delTimer($mac,$code,&$s20Table){
     $writeMsg = MAGIC_KEY."XXXX".WRITE_SOCKET_CODE.$mac.TWENTIES.FOUR_ZEROS.
               "030002".$code;    
     $writeMsg = adjustMsgSize($writeMsg);
-    // echo "<p>";printHex($writeMsg); echo "<p>";
     $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);    
-    $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
+    if($res==""){
+        $s20Table[$mac]['off']=time();
+    }
+    else{
+        $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
+    }
     return $res;
 }
 
 function getNextEventTimeStamp($h,$m,$s,$rep){
-    //    echo "<p><p><p> Rep=".($rep-128)."<p>";
     $nowStamp = time();
     $auxDate = getdate($nowStamp);
     $weekDay = $auxDate['wday'];
@@ -176,7 +178,6 @@ function getNextEventTimeStamp($h,$m,$s,$rep){
         $bit = $wdAux - 1;
         if($bit < 0) $bit += 7;
         $mask = (1 << $bit);
-        // echo "<p>wd=".$weekDay." bit = ".$bit." mask = ".$mask." rep = ".$rep."<p>";
         if(($mask & $rep) || !($rep)){
             if($refStamp > $nowStamp){
                 $eventStamp = $refStamp;
@@ -226,7 +227,6 @@ function getDateFromTimerCode($code,$devData,$h,$min,$s,$rep){
         $d = $recData['d'];
     }
     $date = array($y,$m,$d);
-    //    print_r($date);
     return $date;
 }
 
@@ -237,14 +237,18 @@ function updTimer($mac,$code,$h,$m,$sec,$action,$rep,&$s20Table){
               "0300011C00".$code.twenties(16).$relevant;
     $writeMsg = adjustMsgSize($writeMsg);
     $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);
-    $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
+    if($res==""){
+        $s20Table[$mac]["off"] = 1;
+    }
+    else{
+        $s20Table[$mac]['details'] = getAndParseTimerTable($mac,$s20Table);
+    }
     return $res;    
 }
 
 function addTimer($mac,$h,$m,$sec,$action,$rep,&$s20Table){
     srand();
     $timerList = $s20Table[$mac]['details'];
-    // print_r($timerList);
     $nTimers = count($timerList);
     $stay = 1;
     while($stay){
@@ -262,8 +266,13 @@ function addTimer($mac,$h,$m,$sec,$action,$rep,&$s20Table){
               "0300001C00".$newCode.twenties(16).$relevant;
     $writeMsg = adjustMsgSize($writeMsg);
     $res = createSocketSendHexMsgWaitReply($mac,$writeMsg,$s20Table);
-    $tt = getAndParseTimerTable($mac,$s20Table);
-    $s20Table[$mac]['details'] = $tt;
+    if($res == ""){
+        $s20Table[$mac]['off']=1;
+    }
+    else{
+        $tt = getAndParseTimerTable($mac,$s20Table);
+        $s20Table[$mac]['details'] = $tt;
+    }
     return $res;
 }
 
@@ -331,7 +340,7 @@ function actionToTxt($st){
     return $st ? "ON" : "OFF";
 }
 
-function setTimer($mac,$h,$m,$s,$act,$s20Table){
+function setTimer($mac,$h,$m,$s,$act,&$s20Table){
     //
     // Sets countdown timer of device $mac to $h:$m:$s and action $act
     //
@@ -343,11 +352,15 @@ function setTimer($mac,$h,$m,$s,$act,$s20Table){
     $setTimerHexMsg=MAGIC_KEY."001A".$cmdCode.$mac.
                    TWENTIES.FOUR_ZEROS.$setTimer; 
    
-    $stay = 1; $loop_count=0;
-    while($stay && ($loop_count++ < MAX_RETRIES)){
+    $stay = 1; $loopCount=0;
+    while($stay && ($loopCount++ < MAX_RETRIES)){
 
         $recHex = createSocketSendHexMsgWaitReply($mac,
                                                   $setTimerHexMsg,$s20Table);
+        if($recHex == ""){
+            $s20Table[$mac]['off']=time();
+            return 1;
+        }
 
         $hexMsg = strtoupper($setTimerHexMsg);
         $recHex = strtoupper($recHex);
@@ -374,15 +387,16 @@ function updTableTimers(&$s20Table){
     //
     // Update the values of count down timers in table $s20Table
     //
-    // echo "Update table timers <p>";
     $justTest = 0;
     foreach($s20Table as $mac => $devData){
         // Check && update count down timers
-        $s20Table[$mac]['timerVal'] = checkTimerSec($mac,$s20Table,$action);
-        $s20Table[$mac]['timerAction'] = $action;
-        // Check && update switch off after on timer
-        updNameAndTimerAfterOnDevice($mac,$s20Table);
-        getAndParseTimerTable($mac,$s20Table);
+        if(!array_key_exists('off',$s20Table[$mac])){
+            $s20Table[$mac]['timerVal'] = checkTimerSec($mac,$s20Table,$action);
+            $s20Table[$mac]['timerAction'] = $action;
+            // Check && update switch off after on timer
+            updNameAndTimerAfterOnDevice($mac,$s20Table);
+            getAndParseTimerTable($mac,$s20Table);
+        }
     }
 }
 
@@ -405,7 +419,7 @@ function checkTimerSec($mac,$s20Table,&$act){
 
 
 
-function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
+function checkTimer($mac,&$s20Table,&$h,&$m,&$sec,&$action){
     //
     // Check if countdown timer of device with mac $mac is set.
     // Updates the arguments h,m, and s with hour, minutes and seconds
@@ -419,6 +433,10 @@ function checkTimer($mac,$s20Table,&$h,&$m,&$sec,&$action){
    
     $recHex = createSocketSendHexMsgWaitReply($mac,
                                     $checkTimerHexMsg,$s20Table);
+    if($recHex == ""){
+        $s20Table[$mac]['off'] = time();
+        return -1;
+    }
     if(DEBUG){
         echo "Check timer\n";
         echo "Sent\n"; 
@@ -485,11 +503,11 @@ function sendHexMsgWaitReply($s,$hexMsg,$ip){
     }
     $codeSend = substr($hexMsg,8,4);
     sendHexMsg($s,$hexMsg,$ip);
-    $loop_count=0;
+    $loopCount=0;
     for(;;){
-        if(++$loop_count > MAX_RETRIES){
-            echo "<h1> Error: too many retries without successfull replies</h1>\n";
-            exit(0);
+        if(++$loopCount > MAX_RETRIES){
+            error_log( "Error: too many retries without successfull replies in sendHexMsgWaitReply to ".$ip."\n");
+            return "";
         }
         $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
         if($n == 0){
@@ -519,7 +537,7 @@ function sendHexMsgWaitReply($s,$hexMsg,$ip){
                    ($msgCodeRec == $msgCodeSend)) { 
                     // Everything seems OK
                     if(DEBUG) 
-                        error_log("OK in sendHexMsgWaitReply: Number of retries to success ".$recIP." = ".$loop_count."\n");
+                        error_log("OK in sendHexMsgWaitReply: Number of retries to success ".$recIP." = ".$loopCount."\n");
                     return $recHexMsg;
                 }
             }
@@ -566,17 +584,17 @@ function createSocketAndBind($ip){
         exit(0);
     }
     
-    $loop_count = 0;
+    $loopCount = 0;
     $stay = 1;
     while($stay){
         if(!socket_bind($s,"0.0.0.0",PORT)){
-            if(++$loop_count > MAX_RETRIES){
+            if(++$loopCount > MAX_RETRIES){
                 error_log("Fatal error binding to socket\n");
-                error_log("Bind loop count = ".$loop_count);
+                error_log("Bind loop count = ".$loopCount);
                 echo "<h1>Error binding socket</h1>";
                 exit(0);
             }
-            error_log("Error binding to socket: ".$loop_count);
+            error_log("Error binding to socket: ".$loopCount);
             usleep(TIMEOUT*1E6 * rand(0,10000)/10000.0); // backoff for a while
         }
         else{
@@ -584,7 +602,7 @@ function createSocketAndBind($ip){
         }
     }
     if(DEBUG)
-        error_log("Bind loop count = ".$loop_count);
+        error_log("Bind loop count = ".$loopCount);
     if(!socket_set_option($s,SOL_SOCKET,SO_BROADCAST,1)){
         echo "<h1>Error setting socket options</h1>";
         exit(0);
@@ -612,7 +630,7 @@ function createSocketAndSendMsg($msg,$ip){
 }
 
 
-function searchS20(){
+function searchS20($s20Table){
     //
     // This function searchs for all S20 in a local network
     // through a broadcast call 
@@ -622,8 +640,6 @@ function searchS20(){
     //
     // $s20Table[$mac)['ip'] - IP adresss
     // $s20Table[$mac)['st'] - current S20 status (ON=1,OFF=0)
-    // $s20Table[$mac)['imac'] - Inverted mac,not strictly required, 
-    //                             computed just once for sake of efficiency.
     //
     // Note that $mac and is represented as a sequence of hexadecimals 
     // without the usual separators; for example, ac:cf:23:34:e2:b8 is represented
@@ -634,24 +650,27 @@ function searchS20(){
     // This is done in a specific function since it requires a separate
     // request to each S20 (see function getName() and updNamesAndTimerAfterOn below).
     //
+    // Several other fields were later added during application development
+    //
     // Returns the $s20Table array
     //
-    //    echo "Searching S20<p>";
     $s = createSocketAndSendMsg(DISCOVERY_MSG,IP_BROADCAST);
     $recIP="";
     $recPort=0;
-    $s20Table=array();
-    $loop_count = 0;
+    if(!$s20Table || (count ($s20Table) == 0)){
+        $s20Table=array();
+    }
+    $loopCount = 0;
     while ( 1 ){
         $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
         $now = time();
         if($n == 0){
-            if(++$loop_count > 3){
+            if(++$loopCount > 3){
                 if(count($s20Table) == 0){
                     error_log("Giving up searching for sockets");
                     echo "<h2>No sockets found</h2>\n\n";
                     echo " Please check if all sockets are on-line and assure that they\n";
-                    echo " they are not locked:\n (check WiWo app -> select socket -> more -> advanced).<p>\n\n";
+                    echo " are not locked:\n (check WiWo app -> select socket -> more -> advanced).<p>\n\n";
                     echo " In this version, locked or password protected devices are not supported.\n\n<p>";
                     exit(1);
                 }
@@ -667,12 +686,14 @@ function searchS20(){
             if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == "7161")){
                 $mac = substr($recMsg,14,12);
                 $status = (int) substr($recMsg,-1);
-                $s20Table[$mac]=array();
+
+                if(!array_key_exists($mac,$s20Table)){
+                    $s20Table[$mac]=array();
+                    $s20Table[$mac]['imac']=invMac($mac);
+                    $s20Table[$mac]['next'] = NUMBER_OF_NEXT_ACTIONS_DISPLAYED_IN_MAIN_PAGE;
+                }
                 $s20Table[$mac]['ip']=$recIP;
                 $s20Table[$mac]['st']=$status;
-                $s20Table[$mac]['imac']=invMac($mac);
-                $s20Table[$mac]['time']=getSocketTime($recMsg);
-                $s20Table[$mac]['serverTime'] = $now;
             }
             
         }
@@ -697,7 +718,13 @@ function subscribe($mac,&$s20Table){
     $hexMsg = SUBSCRIBE.$mac.TWENTIES.$imac.TWENTIES;
 
     $hexRecMsg = createSocketSendHexMsgWaitReply($mac,$hexMsg,$s20Table);
-    $status = (int) hexdec(substr($hexRecMsg,-2,2));
+    if($hexRecMsg!=""){        
+        $status = (int) hexdec(substr($hexRecMsg,-2,2));
+    }
+    else{
+        $status = -1;
+        $s20Table[$mac]['off'] = time();
+    }
     return $status;
 }
 
@@ -708,6 +735,7 @@ function getTable($mac,$table,$vflag,$s20Table){
     $hexMsg = "6864001D7274".$mac.TWENTIES."00000000".$tableHex."00".$vflag."00000000";    
 
     $hexRec = createSocketSendHexMsgWaitReply($mac,$hexMsg,$s20Table);
+    if($hexRec == "") $s20Table[$mac]['off'] = time();
     return $hexRec;
 }
 
@@ -726,8 +754,6 @@ function setTimeZone($mac,$tz,&$s20Table){
     $tzValString    = padHex(dechex($tz),2);
     $tzString = $tzSetString.$tzValString;
     
-    echo "################".$tzString."##############\n";
-
     $newTableAux = substr_replace($recTable,$tzString,2*162,2*2);
 
     // replace receive code with send code
@@ -748,6 +774,8 @@ function setTimeZone($mac,$tz,&$s20Table){
     $newTable = adjustMsgSize($newTable);
 
     $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
+    if($reply == "") $s20Table[$mac]['off'] = time();
+    return $reply;
 }
 
 
@@ -799,6 +827,10 @@ function setSwitchOffTimer($mac,$sec,&$s20Table){
     $newTable = adjustMsgSize($newTable);
 
     $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
+    if($reply == "") {
+        $s20Table[$mac]['off'] = time();
+        return -1;
+    }
     $newSec = getSwitchOffTimer($mac,$s20Table);
     return $newSec;
 }
@@ -816,6 +848,7 @@ function updNameAndTimerAfterOnDevice($mac,&$s20Table){
     // Updates the name and "switch Off timer" on 
     // $s20Table. Information retrieved from table 4.
     //
+    if(array_key_exists('off',$s20Table[$mac])) return;
     subscribe($mac,$s20Table);
     $table = 4; $vflag = "17";
     $recTable = getTable($mac,$table,$vflag,$s20Table);
@@ -879,12 +912,20 @@ function initS20Data(){
     // an associative array with all collected data,
     // including names
     //
-    // echo "Init S20<p>";
-    $s20Table = searchS20();
+    $s20TableOld = readDataFile();
+    $s20Table = searchS20($s20TableOld);
     $s20Table = updNamesAndTimerAfterOn($s20Table);
     updTableTimers($s20Table);
+    foreach($s20Table as $mac => $data){
+        if(is_array($s20TableOld) && array_key_exists($mac,$s20TableOld)){
+            $s20Table[$mac]['next'] = $s20TableOld[$mac]['next'];
+        }
+    }
+    $_SESSION['s20Table']=$s20Table;
+    writeDataFile($s20Table);
     return $s20Table;
 }
+
 
 function checkStatus($mac,&$s20Table){
     //
@@ -896,7 +937,7 @@ function checkStatus($mac,&$s20Table){
     return subscribe($mac,$s20Table);
 }
 
-function updateAllStatus($s20Table){
+function updateAllStatus(&$s20Table){
     //
     // This function updates the power status of all S20 in $allAllS20Data.
     //
@@ -905,11 +946,23 @@ function updateAllStatus($s20Table){
     // was already initialized and one just wants to update the 
     // power status of all S20s
     //
-    // echo "Update all status <p>";
     foreach($s20Table as $mac => $devData){
-        $s20Table[$mac]['st'] = checkStatus($mac,$s20Table);
+        if(!array_key_exists('off',$s20Table[$mac])){
+            $s20Table[$mac]['st'] = checkStatus($mac,$s20Table);
+        }
+        else{
+            $offTime = $s20Table[$mac]['off'];
+            if(($offTime - time()) > 300){ // if last time checked more than 5 minutes ago, try again
+                $st = checkStatus($mac,$s20Table);
+                if($st >= 0){
+                    unset($s20Table[$mac]['off']);
+                    $s20Table[$mac]['st'] = $st;                    
+                }
+            }
+        }
     }
     updTableTimers($s20Table);
+    writeDataFile($s20Table);
     return $s20Table;
 }
 
@@ -931,8 +984,12 @@ function sendAction($mac,$action,&$s20Table){
         $msg .= OFF;
 
     $hexRecMsg = createSocketSendHexMsgWaitReply($mac,$msg,$s20Table);
-
+    if($hexRecMsg == "") {
+        $s20Table[$mac]['off'] = 1;  
+        return -1;
+    }
     $status = (int) hexdec(substr($hexRecMsg,-2,2));    
+    return $status;
 }
 
 function actionAndCheck($mac,$action,&$s20Table){
@@ -947,10 +1004,11 @@ function actionAndCheck($mac,$action,&$s20Table){
       Checking the status through a separate subscribe command
       seems ro be able to always get the right status.
     */
+    echo '<div style="position:absolute;top:100vh"><p></div>';
     $stay = 1;
-    $loop_count = 0;
+    $loopCount = 0;
     while($stay){
-        if(++$loop_count > MAX_RETRIES){
+        if(++$loopCount > MAX_RETRIES){
             echo "<h1> Error: too many retries without successfull action in actionAndCheck ()</h1>\n";
             exit(0);
         }
@@ -966,31 +1024,10 @@ function actionAndCheck($mac,$action,&$s20Table){
         }
     } 
     if(DEBUG) 
-        error_log("Number of retries actionAndCheck() = ".$loop_count."\n");
+        error_log("Number of retries actionAndCheck() = ".$loopCount."\n");
     return $st;
 }
 
-function getMacFromName($name,$s20Table){
-//
-// Returns the $mac address of the S20 with name $name
-//
-    $count = 0;
-    foreach($s20Table as $imac => $devData){
-        if($devData['name'] == $name){
-            $mac = $imac;
-            $count++;
-        } 
-    }
-    if($count == 0){
-        echo "<h1>Not found S20 with name ".$name." </h1>\n";
-        exit(0);
-    }
-    if($count > 1){
-        echo "<h1>Ambiguous: more than one S20 found with same name  ".$name." result may be incorrect</h1>\n";
-    }
-
-    return $mac;
-}
 
 function sendActionByDeviceName($name,$action,$s20Table){
     //
@@ -998,6 +1035,80 @@ function sendActionByDeviceName($name,$action,$s20Table){
     //    
     $mac = getMacFromName($name,$s20Table);
     return actionAndCheck($mac,$action,$s20Table);
+}
+
+
+function writeDataFile($s20Table){
+    $dir = sys_get_temp_dir();
+    $fname = $dir."/".LOCAL_FILE_NAME;
+    $fp = fopen($fname,"w");
+    $aux = array($s20Table,MAGIC_KEY);    // This is a simple and naive consistency check. See readDataFile
+    $line = serialize($aux);
+    fwrite($fp,$line);
+    fclose($fp);
+}
+
+function readDataFile(){
+    $dir = sys_get_temp_dir();
+    $fname = $dir."/".LOCAL_FILE_NAME;
+    $fp = fopen($fname,"r");
+    $s20Table = NULL;
+    if($fp){
+        $line=fgets($fp);
+        fclose($fp);    
+        if($line){
+            $aux = unserialize($line);
+            if(is_array($aux)){
+                if($aux[1] == MAGIC_KEY){     // This is a simple and naive consistency check, in spite of serialize/unserialize to take care of most errors
+                    $s20Table = $aux[0];       
+                }
+            }
+        }        
+    }
+    return $s20Table;
+}
+
+function getIpFromMac($mac){
+    $msg = MAGIC_KEY."XXXX".SEARCH_IP.$mac.TWENTIES;
+    $msg = adjustMsgSize($msg);
+    $s = createSocketAndSendMsg($msg,IP_BROADCAST);
+    $loopCount = 0;
+    $retIp = "";
+    $recIP = "";
+    $recPort = 0;
+    while ( 1 ){
+        $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
+        $now = time();
+        if(!isset($n) || ($n == 0)){
+            if(++$loopCount > 3) {
+                error_log("No reply in getIpFromMac after 3 null msg received: ".$mac."\n");
+                break;
+            }
+            sendHexMsg($s,$msg,IP_BROADCAST);
+            continue;
+        }
+        $recMsg = hex_byte2str($binRecMsg,$n);
+        if($recMsg == $msg) continue;
+        if($n >= 42){
+            if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == SEARCH_IP)){
+                $macRec = substr($recMsg,14,12);                
+                if($macRec == $mac){
+                    $retIp = $recIP;
+                    break;
+                }
+            }
+            
+        }        
+        if($loopCount > 3) {
+            sendHexMsg($s,$msg,IP_BROADCAST);
+        }        
+        if(++$loopCount > 6) {
+            error_log("No reply in getIpFromMac after 6 non-null msg received: ".$mac."\n");
+            break;
+        }
+    }
+    socket_close($s);
+    return $retIp;
 }
 ?>
 

@@ -69,6 +69,29 @@ text-align:    center;
 text-shadow:   1px 1px 0 #000;
 }
 
+#graybutton {
+position:       absolute;
+left:           2.5vw;
+width:          95vw;
+top:            0vh;   /* Dummy, overriden by code */
+height:         20vh;   /* Dummy, overriden by code */
+
+
+display:       inline-block;
+background:    #cacaca url('http://dabuttonfactory.com/button.png?w=1&h=163&bgt=gradient&bgc=23ca23&ebgc=38761d') repeat-x;
+background:    -moz-linear-gradient(#cacaca, #767676);
+background:    -o-linear-gradient(#cacaca, #767676);
+background:    -webkit-linear-gradient(#cacaca, #767676);
+background:    linear-gradient(#cacaca, #767676);
+border-radius: 0px;
+color:         #fff;
+font:          normal 700 29px/1 "Calibri", sans-serif;
+font-size:     4vh;
+text-align:    center;
+text-shadow:   1px 1px 0 #000;
+}
+
+
 .counter{
 font:          normal 700 29px/1 "Calibri", sans-serif;
 font-size:     3vh;
@@ -82,7 +105,7 @@ text-align:    right;
 
 .next{
 font:          normal 700 29px/1 "Calibri", sans-serif;
-font-size:     3vh;
+font-size:     2.3vh;
 color:         #fff;
 position:      absolute;
 left:          5vw;
@@ -96,10 +119,10 @@ text-align:    left;
 */
 #countDownButton{
     position: absolute;
-    left: calc(5vw + 10vh);
+    left: calc(5vw + 8vh);
     top: 2vw;
-    width:8vh;
-    height:8vh;
+    width:5vh;
+    height:5vh;
     outline:none;
     border: none;
     background-color: Transparent;
@@ -115,8 +138,8 @@ text-align:    left;
     position: absolute;
     left: 5vw;
     top: 2vw;
-    width:8vh;
-    height:8vh;
+    width:5vh;
+    height:5vh;
     outline:none;
     border: none;
     background-color: Transparent;
@@ -128,6 +151,27 @@ text-align:    left;
 
 }
 
+/*
+Find/refresh button in main page
+*/
+#findButton{
+    position: absolute;
+    right: 7vw;
+/*    left: 5vw; */
+    top: 2vw;
+/*    top: 90vh; */
+    width:6vh;
+    height:6vh;
+    outline:none;
+    border: none;
+    background-color: Transparent;
+
+/*  UPDATE THE PATH below to match the image directory  */
+    background-image:url("../img/find_simple.png");
+    background-size: contain;
+    text-indent:     -9999px;
+
+}
 
 
 /*
@@ -135,43 +179,61 @@ text-align:    left;
 */
 #menuButton{
     position: absolute;
-    right: 2vh;
+    right: 3vh;
     top: 2vh;
 
     width:5vh;
     height:5vh;
-
-    background:    -moz-linear-gradient(#3d85c6, #073763);
-    background:    -o-linear-gradient(#3d85c6, #073763);
-    background:    -webkit-linear-gradient(#3d85c6, #073763);
-    background:    linear-gradient(#3d85c6, #073763);
+    outline:none;
+    border: none;
+    background-color: Transparent;
 
 /*  UPDATE THE PATH below to match the image directory */
     background-image:url("../img/clock_simple.png");
-    background-size:5vh 5vh;
+
+    background-size: contain;
     text-indent:-9999px;		
     border: none;
 }
+
+#setupButton{
+    position: absolute;
+    right: 9vh;
+    top: 1.7vh;
+
+    width:6vh;
+    height:6vh;
+    outline:none;
+    border: none;
+    background-color: Transparent;
+
+/*  UPDATE THE PATH below to match the image directory */
+    background-image:url("../img/setup_simple.png");
+
+    background-size: contain;
+    text-indent:-9999px;		
+    border: none;
+}
+
 
 /*
   Back button in the count down timer page
 */
 #backButton{
     position: absolute;
-    left: 2vh;
+    left: 3vh;
     top: 2vh;
 
     width:5vh;
     height:5vh;
 
-    background:    -moz-linear-gradient(#3d85c6, #073763);
-    background:    -o-linear-gradient(#3d85c6, #073763);
-    background:    -webkit-linear-gradient(#3d85c6, #073763);
-    background:    linear-gradient(#3d85c6, #073763);
+    outline:none;
+    border: none;
+    background-color: Transparent;
 
     /*  UPDATE THE PATH below to match the image directory */
     background-image:url("../img/back_icon_simple.png");
-    background-size:5vh 5vh;
+    background-size:contain;
     text-indent:-9999px;		
     border: none;
 }
@@ -199,7 +261,43 @@ text-align:    left;
 
 #doneButton{
     height: 5vh;
-    width: 25vw;
+    width: 35vw;
+    display:       inline-block;
+    padding:       8px 27px;
+    background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+    border-radius: 5px;
+    color:         #fff;
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size:     2.5vh;
+    text-align:    center;
+    text-shadow:   1px 1px 0 #000;
+}
+
+#deleteButton{
+    height: 5vh;
+    width: 35vw;
+    display:       inline-block;
+    padding:       8px 27px;
+    background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
+    background:    -moz-linear-gradient(#f00, #900);
+    background:    -o-linear-gradient(#f00, #900);
+    background:    -webkit-linear-gradient(#f00, #900);
+    background:    linear-gradient(#f00, #900);
+    border-radius: 5px;
+    color:         #fff;
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size:     2.5vh;
+    text-align:    center;
+    text-shadow:   1px 1px 0 #000;
+}
+
+#cancelButton{
+    height: 5vh;
+    width: 35vw;
     display:       inline-block;
     padding:       8px 27px;
     background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
@@ -384,23 +482,22 @@ select {
 
 #addButton{
     position: absolute;
-    right: 2vh;
+    right: 3vh;
     top: 2vh;
 
     width:5vh;
     height:5vh;
+    outline:none;
+    border: none;
+    background-color: Transparent;
 
-    background:    -moz-linear-gradient(#3d85c6, #073763);
-    background:    -o-linear-gradient(#3d85c6, #073763);
-    background:    -webkit-linear-gradient(#3d85c6, #073763);
-    background:    linear-gradient(#3d85c6, #073763);
-
-    /*  UPDATE THE PATH below to match the image directory */
+/*  UPDATE THE PATH below to match the image directory */
     background-image:url("../img/add_icon_simple.png");
-    background-size:5vh 5vh;
+    background-size: contain;
     text-indent:-9999px;		
     border: none;
-    vertical-align: middle;
+
+
 }
 
 
