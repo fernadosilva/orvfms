@@ -1,3 +1,4 @@
+
 /*
   Button code obtained at dabuttonfactory.com
 */
@@ -12,7 +13,7 @@ body {
 
 
 /*
-body { background: #ffffff; font-family: Verdana, sans-serif; font-size: 11pt; }
+Bodyinput { background: #ffffff; font-family: Verdana, sans-serif; font-size: 11pt; }
 */
 
 #page { background: #ffffff; margin: 50px; border: 2px solid #c0c0c0; padding: 10px; }
@@ -110,6 +111,25 @@ color:         #fff;
 position:      absolute;
 left:          5vw;
 text-align:    left;
+}
+
+#inputName{
+    background: #ffffff; 
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size: 4vh;
+    color: #073763;
+    text-align: center;
+    border: none;
+}
+
+#mayEdit{
+    background: #ffffff; 
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-style: italic;
+    font-size: 2vh;
+    color: #979797;
+    text-align: center;
+    border: none;
 }
 
 
