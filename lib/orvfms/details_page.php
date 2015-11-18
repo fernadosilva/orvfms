@@ -3,7 +3,6 @@ function displayDetailsPage($mac,&$s20Table,$myUrl){
     global $daysOfWeek,$months;
 
     $timerName = $s20Table[$mac]['name'];
-
 ?>
 
 

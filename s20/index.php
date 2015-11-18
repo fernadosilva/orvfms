@@ -227,7 +227,6 @@ else if(isset($_POST['toCountDownPage'])){
 }
 else if(isset($_POST['toDetailsPage'])){
     $mac = getMacAndActionFromPost($actionValue,$_POST['toDetailsPage']);
-    require_once(ORVFMS_PATH."edit_process.php");
     if($actionValue=="updateOrAdd"){
         editProcess($mac,$s20Table);
     }
@@ -238,6 +237,7 @@ else if(isset($_POST['toDetailsPage'])){
         /* Nothing here, just display page */
     }
     require_once(ORVFMS_PATH."details_page.php");
+    displayDetailsPage($mac,$s20Table,$myUrl);
 }
 else if(isset($_POST['toEditPage'])){
     $mac = getMacAndActionFromPost($actionValue,$_POST['toEditPage']);
