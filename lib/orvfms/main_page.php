@@ -84,7 +84,7 @@ function displayMainPage(&$s20Table,$myUrl){
             if((time() - $devData['lastOffCheck']) > 24*3600){  // Check once per day
                 $s20Table[$mac]['lastOffCheck'] = time();
                 $_SESSION['s20Table'] = $s20Table;
-                $ip = getIpFromMac($mac);
+                $ip = getIpFromMac($mac,$s20Table);
                 if($ip!=0){
                     $s20Table[$mac]['ip'] = $ip;
                     $st = checkStatus($mac,$s20Table);
