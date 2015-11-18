@@ -8,22 +8,39 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 
 <div style="text-align:center">
 <h2> 
+<form action="<?php echo $myUrl ?>" method="post">
 <?php
-    echo $timerName;  
-    if(!isset($devData['st'])){
+    if(array_key_exists('off',$s20Table[$mac])){
+        echo $timerName;  
+        $mayEdit = 0;
+    }
+    else{
+        $mayEdit = 1;
+?>
+
+        <input type = "text" name="newName" value="<?php echo $timerName; ?>" id="inputName">
+<?php
+    }
+
+    if(isset($devData['st']) && ($devData['st'] >= 0) && !array_key_exists('off',$s20Table[$mac])){
+        $stDisplay = ($devData['st'] ? "greenCircle100px.png" : "redCircle100px.png");
         echo '<img src="'.IMG_PATH.
                          $stDisplay
                          .'" style="width:0.8em;position:relative;top:0.1em;left:0.3em;">';    
 
     }
     $nnext = $devData['next'];
+
+    if($mayEdit){
+        echo '<br><div id="mayEdit">Socket name above is editable</div>';
+    }
 ?> 
 </h2>
 <p>
 <hr>
 
 
-<form action="<?php echo $myUrl ?>" method="post">
+
 
 
     <input type="submit" name="toMainPage" value="back<?php echo $mac ?>"  
@@ -43,6 +60,10 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
         }
 ?>
 </select>
+
+<p>
+
+
 
 
 <p>

@@ -694,6 +694,8 @@ function searchS20($s20Table){
                 }
                 $s20Table[$mac]['ip']=$recIP;
                 $s20Table[$mac]['st']=$status;
+                $s20Table[$mac]['time']=getSocketTime($recMsg);
+                $s20Table[$mac]['serverTime'] = $now;
             }
             
         }
@@ -739,6 +741,59 @@ function getTable($mac,$table,$vflag,$s20Table){
     return $hexRec;
 }
 
+function setName($mac,$newName,&$s20Table){
+    //
+    // Sets the name in table 4 to $newName
+    //
+    $table = 4; $vflag = "17";
+    
+    $oldTable = getTable($mac,$table,$vflag,$s20Table);
+    $oldName = substr($oldTable,2*(4*16+6),2*16);
+   
+    // cut || pad  Name
+    $newName = trim($newName);
+    $nc = strlen($newName);
+    if($nc > 16){
+        $newName = substr($newName,0,16);
+    }
+    else{
+        $nspaces = 16 - $nc;
+        for($k = 0; $k < 16; $k++) 
+            $newName = $newName." ";
+    }
+    $newNameHex = hex_byte2str($newName,16);
+    $newTableAux = substr_replace($oldTable,$newNameHex,2*(4*16+6),2*16);
+
+
+    // replace receive code with send code
+    $newTableAux = substr_replace($newTableAux,WRITE_SOCKET_CODE,2*4,4);
+
+    //
+    // Delete byte 18 (??)
+    // Wireshark shows...
+    //
+    $newTable = substr_replace($newTableAux,"",18*2,2);
+    //
+    // Delete byte 25 and 26 of resulting (??)
+    // Wireshark shows...
+    //
+    $newTable = substr_replace($newTable,"",25*2,4);
+
+    // Update msg size, just in case it has changed
+    $newTable = adjustMsgSize($newTable);
+
+    $newName = trim($newName);
+    $reply = "";
+    $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
+    if($reply == "") 
+        $s20Table[$mac]['off'] = time();
+    else{
+        $reply = $newName;
+        $s20Table[$mac]['name'] = $newName;
+        $_SESSION['$s20Table'] = $s20Table;
+    }
+    return $reply;;
+}
 
 function setTimeZone($mac,$tz,&$s20Table){
     //
@@ -775,6 +830,7 @@ function setTimeZone($mac,$tz,&$s20Table){
 
     $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
     if($reply == "") $s20Table[$mac]['off'] = time();
+    
     return $reply;
 }
 
@@ -1004,7 +1060,6 @@ function actionAndCheck($mac,$action,&$s20Table){
       Checking the status through a separate subscribe command
       seems ro be able to always get the right status.
     */
-    echo '<div style="position:absolute;top:100vh"><p></div>';
     $stay = 1;
     $loopCount = 0;
     while($stay){
@@ -1029,24 +1084,23 @@ function actionAndCheck($mac,$action,&$s20Table){
 }
 
 
-function sendActionByDeviceName($name,$action,$s20Table){
-    //
-    // Sends an action to device designates with $name
-    //    
-    $mac = getMacFromName($name,$s20Table);
-    return actionAndCheck($mac,$action,$s20Table);
-}
-
 
 function writeDataFile($s20Table){
     $dir = sys_get_temp_dir();
     $fname = $dir."/".LOCAL_FILE_NAME;
     $fp = fopen($fname,"w");
-    $aux = array($s20Table,MAGIC_KEY);    // This is a simple and naive consistency check. See readDataFile
-    $line = serialize($aux);
-    fwrite($fp,$line);
-    fclose($fp);
+    if($fp){
+        $aux = array($s20Table,MAGIC_KEY);    // This is a simple and naive consistency check. See readDataFile
+        $line = serialize($aux);
+        fwrite($fp,$line);
+        fclose($fp);
+        chmod($fname,0666);
+    }
+    else{
+        echo "ATT: could not write output temporary file\n";
+    }
 }
+
 
 function readDataFile(){
     $dir = sys_get_temp_dir();
@@ -1068,7 +1122,7 @@ function readDataFile(){
     return $s20Table;
 }
 
-function getIpFromMac($mac){
+function getIpFromMac($mac,&$s20Table){
     $msg = MAGIC_KEY."XXXX".SEARCH_IP.$mac.TWENTIES;
     $msg = adjustMsgSize($msg);
     $s = createSocketAndSendMsg($msg,IP_BROADCAST);
@@ -1093,7 +1147,7 @@ function getIpFromMac($mac){
             if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == SEARCH_IP)){
                 $macRec = substr($recMsg,14,12);                
                 if($macRec == $mac){
-                    $retIp = $recIP;
+                    $retIp = $recIP;                    
                     break;
                 }
             }

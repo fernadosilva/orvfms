@@ -127,6 +127,7 @@ if(isset($s20Table)){
 // Otherwise, reinitialize all $s20Table structure
 //
 
+
 if(isset($s20Table) && (count($s20Table) > 0)){
     $s20Table = updateAllStatus($s20Table);  
     if(DEBUG)
@@ -134,6 +135,7 @@ if(isset($s20Table) && (count($s20Table) > 0)){
 }
 else{
     $s20Table=initS20Data();   
+
     $ndev = count($s20Table);
     if($ndev == 0){
         echo "<h2>No sockets found</h2>";
@@ -157,9 +159,9 @@ if ($_SERVER["REQUEST_METHOD"] != "POST"){
 else if(isset($_POST['toMainPage'])){
     $mac = getMacAndActionFromPost($actionValue,$_POST['toMainPage']);
     if($actionValue == "check"){
-        $ip = getIpFromMac($mac);
+        $ip = getIpFromMac($mac,$s20Table);
         $s20Table[$mac]['lastOffCheck'] = time();
-        $_SESSION['s20Table'] = $s20table;
+        $_SESSION['s20Table'] = $s20Table;
         if($ip!=0){
             $s20Table[$mac]['ip'] = $ip;
             $st = checkStatus($mac,$s20Table);
@@ -236,7 +238,6 @@ else if(isset($_POST['toDetailsPage'])){
         /* Nothing here, just display page */
     }
     require_once(ORVFMS_PATH."details_page.php");
-    displayDetailsPage($mac,$s20Table,$myUrl);
 }
 else if(isset($_POST['toEditPage'])){
     $mac = getMacAndActionFromPost($actionValue,$_POST['toEditPage']);

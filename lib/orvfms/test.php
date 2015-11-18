@@ -61,26 +61,47 @@ print_r($s20Table);
 // Loop over all switch and toggle twice the status
 //
 
+$ok = 0;
+foreach($s20Table as $mac => $devData){
+    if(!array_key_exists('off',$s20Table[$mac]))
+        $ok++;
+    else
+        echo "Device with mac address ".$mac." (".$s20Table[$mac]['name'].") seems to be inactive\n";
+}
+
+if($ok == 0){
+    echo "No active sockets found; exiting.\n";
+    exit(0);
+}
+
 for($i = 0; $i < 2; $i++){
     foreach($s20Table as $mac => $devData){
-        $name   = $devData['name'];    
-        $ip     = $devData['ip'];
-        $st = checkStatus($mac,$s20Table);
-        echo "Status of S20 named >".$name. "< (mac=".$mac.", IP=".$ip.") is ".($st ? "ON" : "OFF")."\n";
-        echo "  ...Turning it ".($st ? "OFF" : "ON")."\n";
-        sendActionByDeviceName($name,($st ? 0 : 1),$s20Table);
-        $st = checkStatus($mac,$s20Table);
-        echo "  ...new status is ".($st ? "ON" : "OFF")."\n\n";
-        ob_flush();
+        if($s20Table[$mac] && !array_key_exists('off',$s20Table[$mac])){
+            $name   = $devData['name'];    
+            $ip     = $devData['ip'];
+            $st = checkStatus($mac,$s20Table);
+            echo "Status of S20 named >".$name. "< (mac=".$mac.", IP=".$ip.") is ".($st ? "ON" : "OFF")."\n";
+            echo "  ...Turning it ".($st ? "OFF" : "ON")."\n";
+            actionAndCheck($mac,($st ? 0 : 1),$s20Table);
+            $st = checkStatus($mac,$s20Table);
+            echo "  ...new status is ".($st ? "ON" : "OFF")."\n\n";
+            ob_flush();
+        }
     }
     sleep(2);
+}
+
+foreach($s20Table as $mac => $devData){
+    if($s20Table[$mac] &&  !array_key_exists('off',$s20Table[$mac])){
+        break;
+    }
 }
 
 for($i = 0; $i < 2 ; $i++){
 //
 // Timer test; toggle first device twice, 10 seconds
 //
-    $mac = array_keys($s20Table)[0];
+
     $ip=$s20Table[$mac]['ip'];
     $name=$s20Table[$mac]['name'];
 
@@ -162,18 +183,21 @@ echo "\nSetting automatic switch off timer ".$name." to initial value (".$res."s
 echo " ...Testing local time (note: at time of initialization, may be delayed by 20s or more)\n\n";
 
 $k=0;
+
 foreach($s20Table as $mac => $dev){
-    $k++;
-    echo "\n\n".$k.".\n";
-    $name = $dev['name'];
-    $time = $dev['time'];
-    $serverTime = $dev['serverTime'];
-    $tzS = $dev['timeZoneSet'];
-    $tz = $dev['timeZone'];
+    if(!array_key_exists('off',$s20Table[$mac])){
+        $k++;
+        echo "\n\n".$k.".\n";
+        $name = $dev['name'];
+        $time = $dev['time'];
+        $serverTime = $dev['serverTime'];
+        $tzS = $dev['timeZoneSet'];
+        $tz = $dev['timeZone'];
     
-    echo sprintf(": %10s<",$name)." => socket time = ".date("c",$time).
-                                    " TzSet= ".$tzS." Tz= ".$tz."\n"; 
-    echo sprintf(": %10s<",$name)." => server time = ".date("c",$serverTime)."\n";
+        echo sprintf(": %10s<",$name)." => socket time = ".date("c",$time).
+                                     " TzSet= ".$tzS." Tz= ".$tz."\n"; 
+        echo sprintf(": %10s<",$name)." => server time = ".date("c",$serverTime)."\n";
+    }
 }
 
 
