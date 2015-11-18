@@ -219,11 +219,13 @@ At the bottom left corner are displayed the next scheduled switch operation in
 the day/weekly timers. As before, "off" events are displayed in red, "on" 
 events in green. You may adjust the number of displayed events in the setup page
 of each device, which may be reached from the top right corner of the 
-count down page (count down icon). The default number of "next displayed events" 
-is 0, so you will not see any scheduled action by default.
+count down page or weekly timers page. The default number of 
+"next displayed events"  is 0, so you will not see any scheduled action by default.
+The setup page also enables to delete or rename a device.
 
 When adding new devices to your network, the new device may not appear at once. 
-In this case, just press the find icon in the top right corner.
+In this case, just press the find icon in the top right corner. Just confirm that they
+unlocked in the WiWo application, otherwise they will not be found.
 
 CAVEATS AND LIMITATIONS:
 
@@ -233,7 +235,8 @@ disclosed, some technical details and checks may not be performed exactly
 as foresseen, and the operation may ocasionally fail. We expect to be able
 to improve this interface as more information becomes available.
 
-This software does not support locked or password protected devices.
+This software supports locked devices, but they must be unlocked at least 
+once in order to be found and registered. 
 
 
 
