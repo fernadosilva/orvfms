@@ -32,6 +32,8 @@ function displayDetailsPage($mac,&$s20Table,$myUrl){
         id="backButton"> 
     <button type="submit" name="toEditPage" value="add<?php echo $mac ?>" 
         id="addButton" >Add</button>
+        <input type="submit" name="toSetupPage" value="setup<?php echo $mac ?>" 
+        id="setupButton">
 
 <?php
     echo '<div class="details">'."\n";
