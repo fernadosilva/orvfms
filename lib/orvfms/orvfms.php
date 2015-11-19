@@ -1094,7 +1094,7 @@ function writeDataFile($s20Table){
         $line = serialize($aux);
         fwrite($fp,$line);
         fclose($fp);
-        chmod($fname,0666);
+        @chmod($fname,0666);
     }
     else{
         echo "ATT: could not write output temporary file\n";
@@ -1147,6 +1147,8 @@ function getIpFromMac($mac,&$s20Table){
             if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == SEARCH_IP)){
                 $macRec = substr($recMsg,14,12);                
                 if($macRec == $mac){
+                    $s20Table[$mac]['time'] = getSocketTime($recMsg);
+                    $s20Table[$mac]['serverTime'] = time();
                     $retIp = $recIP;                    
                     break;
                 }
