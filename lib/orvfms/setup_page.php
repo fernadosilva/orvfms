@@ -90,6 +90,7 @@ Delete device from the system<p>
             $deltaString = secToHourString($delta);
             $msg = "This device is inactive since ".$inactiveString;
             $msg = $msg." (".$deltaString."s ago)<p>";
+            $msg = $msg."It did not reply to a re-activate command. Is it connected and on-line?<p>";
             echo $msg;
 ?>
 <hr>
