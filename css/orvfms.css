@@ -141,16 +141,18 @@ text-align:    left;
     position: absolute;
     left: calc(5vw + 8vh);
     top: 2vw;
-    width:5vh;
-    height:5vh;
+    width:8vh;
+    height:8vh;
     outline:none;
     border: none;
     background-color: Transparent;
 
 /*  UPDATE THE PATH below to match the image directory  */
     background-image:url("../img/countDown_simple.png");
-    background-size: contain;
-    text-indent:     -9999px;
+    background-size: 5vh 5vh;
+    background-repeat: no-repeat;
+
+   text-indent:     -9999px;
 
 }
 
@@ -158,17 +160,18 @@ text-align:    left;
     position: absolute;
     left: 5vw;
     top: 2vw;
-    width:5vh;
-    height:5vh;
+    width:8vh;
+    height:8vh;
     outline:none;
-    border: none;
+    border: none; 
     background-color: Transparent;
 
 /*  UPDATE THE PATH below to match the image directory  */
     background-image:url("../img/clock_simple.png");
-    background-size: contain;
-    text-indent:     -9999px;
+    background-size: 5vh 5vh;
+    background-repeat: no-repeat;
 
+    text-indent:     -9999px;
 }
 
 /*
@@ -176,21 +179,19 @@ Find/refresh button in main page
 */
 #findButton{
     position: absolute;
-    right: 7vw;
-/*    left: 5vw; */
+    right: 4vw;
     top: 2vw;
-/*    top: 90vh; */
-    width:6vh;
-    height:6vh;
+    width:8vh;
+    height:8vh;
     outline:none;
-    border: none;
+    border: none; 
     background-color: Transparent;
 
 /*  UPDATE THE PATH below to match the image directory  */
     background-image:url("../img/find_simple.png");
-    background-size: contain;
+    background-size: 5vh 5vh;
+    background-repeat: no-repeat;
     text-indent:     -9999px;
-
 }
 
 
