@@ -226,6 +226,7 @@ else if(isset($_POST['toCountDownPage'])){
     displayTimerPage($mac,$s20Table,$myUrl);
 }
 else if(isset($_POST['toDetailsPage'])){
+    require_once(ORVFMS_PATH."edit_process.php");
     $mac = getMacAndActionFromPost($actionValue,$_POST['toDetailsPage']);
     if($actionValue=="updateOrAdd"){
         editProcess($mac,$s20Table);
