@@ -1,3 +1,4 @@
+
 <?php
 function displaySetupPage($mac,&$s20Table,$myUrl){
     global $daysOfWeek;    
@@ -12,10 +13,10 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 <?php
     if(array_key_exists('off',$s20Table[$mac])){
         echo $timerName;  
-        $mayEdit = 0;
+        $isActive = 0;
     }
     else{
-        $mayEdit = 1;
+        $isActive = 1;
 ?>
 
         <input type = "text" name="newName" value="<?php echo $timerName; ?>" id="inputName">
@@ -31,7 +32,7 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     }
     $nnext = $devData['next'];
 
-    if($mayEdit){
+    if($isActive){
         echo '<br><div id="mayEdit">Socket name above is editable</div>';
     }
 ?> 
@@ -47,14 +48,14 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     id="backButton"> 
 
 <?php
-    if(!array_key_exists('off',$s20Table[$mac])){
+    if($isActive){
 ?>
 
 <div>
         Number of next events displayed in main page for this timer: 
 <select name="numberOfNextEvents">        
 <?php
-        
+
         for($i = 0 ; $i < 8; $i++){
             echo '<option value="'.$i.'"'.($nnext==$i ? ' selected="selected"' : ' ').'>'.$i.'</option>'."\n";
         }
@@ -62,8 +63,46 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 </select>
 
 <p>
+<hr>
+<?php
+    $ip = getIpFromMac($mac,$s20Table);
+    $dev = $s20Table[$mac];
+    $time = $dev['time'];
+    $serverTime = $dev['serverTime'];
+    $tz = $dev['timeZone'];
+    $serverTzS = date_default_timezone_get();
+    $serverTz  =  timezone_open ($serverTzS);
+    $serverTzOffset = $serverTz -> getOffset(new DateTime());
+    echo '<div id="socketTime"></div>';
+    echo '<div id="serverTime"></div>';
+    echo "<hr>";                                                  
+?>
+<script>
+var socketTimeRef = <?php echo $time; ?>;
+var serverTimeRef = <?php echo $serverTime; ?>;
+var socketTz  = <?php echo $tz; ?>;
+var serverTz  = <?php echo $serverTzOffset; ?>;
+var t0_ref = new Date().getTime()/1000;
 
 
+function  displaySocketTime(){
+    var now,socketTime,serverTime;
+    now = new Date().getTime()/1000;
+    socketTime = now - t0_ref + socketTimeRef;
+    serverTime = now - t0_ref + serverTimeRef;
+    var socketTimeO = new Date(1000*socketTime);
+    var serverTimeO = new Date(1000*serverTime);
+    var socketTimeS = socketTimeO.toString();
+    var serverTimeS = serverTimeO.toString();
+    socketTimeS = socketTimeS.substring(0,24);
+    serverTimeS = serverTimeS.substring(0,24);
+    var msgSckt = "Socket time is " + socketTimeS+", tz="+socketTz;
+    var msgServ = "Server time is " + serverTimeS+", tz="+serverTz;
+    document.getElementById('socketTime').innerHTML = msgSckt;
+    document.getElementById('serverTime').innerHTML = msgServ;
+}
+setInterval(displaySocketTime,1000); 
+</script>
 
 
 <p>
