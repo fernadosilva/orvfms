@@ -1116,8 +1116,20 @@ function readDataFile(){
                 if($aux[1] == MAGIC_KEY){     // This is a simple and naive consistency check, in spite of serialize/unserialize to take care of most errors
                     $s20Table = $aux[0];       
                 }
+                else{
+                    error_log("readDataFile: error on MAGIC_KEY (ignoring file)\n");
+                }
+            }
+            else{
+                error_log("readDataFile: data is not an array (ignoring file)\n");
             }
         }        
+        else{
+            error_log("readDataFile: can't read data (ignoring file)\n");
+        }        
+    }
+    else{
+        error_log("readDataFile: can't open file\n");
     }
     return $s20Table;
 }
