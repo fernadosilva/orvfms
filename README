@@ -2,7 +2,7 @@
 #  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt                
 #*************************************************************************
 
-Last update: 26 October 2015
+Last update: 26 November 2015
 
 DISCLAIMER:
 
@@ -141,8 +141,6 @@ assure that they they are not locked:
 
 (check WiWo app -> select socket -> more -> advanced).
 
-In this version, locked or password protected devices are not supported.
-
 The output is quite straightforward, and possibly you are immediately able
 to recognize most of it. You should also see/hear the usual switching on and 
 off of the nearby S20s.  An example of the output of this script is included 
@@ -224,8 +222,9 @@ count down page or weekly timers page. The default number of
 The setup page also enables to delete or rename a device.
 
 When adding new devices to your network, the new device may not appear at once. 
-In this case, just press the find icon in the top right corner. Just confirm that they
-unlocked in the WiWo application, otherwise they will not be found.
+In this case, just press the find icon in the top right corner. If the new devices 
+are not detected, Just confirm that they are unlocked in the WiWo application (in the
+WiWo select device -> advanced and check that the "lock" switch is off).
 
 CAVEATS AND LIMITATIONS:
 
