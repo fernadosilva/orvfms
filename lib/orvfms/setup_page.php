@@ -77,6 +77,9 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     echo '<div id="serverTime"></div>';
     echo "<hr>";                                                  
 ?>
+S20 mac address - 
+<?php echo formatMac($mac); ?>
+<hr>
 <script>
 var socketTimeRef = <?php echo $time; ?>;
 var serverTimeRef = <?php echo $serverTime; ?>;
@@ -108,6 +111,7 @@ setInterval(displaySocketTime,1000);
 <p>
 
 <button type="submit" name="toMainPage" value="procSetup<?php echo $mac ?>" id="doneButton">Done</button>
+
 
 
 

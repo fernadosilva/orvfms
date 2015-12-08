@@ -177,5 +177,15 @@ function twenties($n){
     for($k = 0 ; $k < $n ; $k++)
         $res=$res."20";
     return $res;
-}  
+} 
+
+function formatMac($mac){
+    $macl = strtolower($mac);
+    $macr='';
+    for($k = 0; $k < 6; $k++){
+        $macr = $macr . substr($macl,2*$k,2);
+        if($k < 5) $macr = $macr . ':';
+    }
+    return $macr;
+} 
 ?>
