@@ -7,10 +7,16 @@ and
 
 http://pastebin.com/LfUhsbcS
 
-Since most of the information provided in these two sites is acurate, we just add 
-a few notes and comments which may be useful to anyone who wants to analyse or 
-develop software for the S20s. Some of the information below resulted from 
-analysis of packet data using Wireshark.
+While most of the information provided in these two sites is acurate, and it would be 
+impossible to conclude this software without it, there are few catches and details 
+that must be taken into account, namely incomplete information regarding socket time, 
+slightly wrong information regarding time zones and DST, and the diference between 
+regular countdown timers and the  "switch off upon switch on" timers. 
+
+We address several of these points in the following.
+
+Most of the information  below resulted from  analysis of packet data using Wireshark. 
+When referring byte  numbers within a packet, we assume that first byte is number 1.
 
 1. The available information about the S20 "countdown timers" may be sometimes 
 misleading. Each S20 supports in fact two types of "countdown timers".The first one
@@ -47,7 +53,8 @@ e) Adjust bytes 3 and 4 with the new message size (basically, the received msg
    length less 3), in big endian format
 f) Send to socket and wait reply.
 
-4. To check the regular countdown timer, its actual value during a countdown 
+4. Countdown timers
+a) To check the regular countdown timer, its actual value during a countdown 
 process, and the action to be performed when reaching zero, proceed as follows;
 
 Send to socket, port 10000:
@@ -61,10 +68,29 @@ magic key, 00 1a the msg length, 63 64 the msg code.
 After sending the msg above to the socket, the following message is received:
 
 0000  68 64 00 1a 63 64 XX XX XX XX XX XX 20 20 20 20   hd..cd..#4..
+0010  20 20 00 00 00 00 00 AA BB BB                       .......)
+
+
+byte 23 (AA) : 00-action = off, 01-action=on 
+bytes 24 and 25 (BB BB): timer current value in seconds, LITTLE ENDIAN 
+
+
+Therefore, if the message received is
+
+0000  68 64 00 1a 63 64 XX XX XX XX XX XX 20 20 20 20   hd..cd..#4..
 0010  20 20 00 00 00 00 00 00 0e 29                       .......)
 
-byte 23: 00-action = off, 01-action=on;
-bytes 24 and 25: timer current value in seconds, LITTLE ENDIAN (290E in the example) 
+this means that the count down timer is 290E seconds and the action to be performed is off.
+
+b) To set the regular coutdown timer, the msg code that must be sent  to the socket
+is almost the same as above but with byte 22  as 00 (instead of 01 for reading). As 
+before AA and BB BB are the values to be set:
+
+0000  68 64 00 1a 63 64 XX XX XX XX XX XX 20 20 20 20   
+0010  20 20 00 00 00 00 00 AA BB BB                       
+
+byte 23 (AA) : 00-action = off, 01-action=on 
+bytes 24 and 25 (BB BB): timer current value in seconds, LITTLE ENDIAN 
 
 5. Weekly scheduled timers are reported in table 3. Table 3 includes several records. 
 Each record reports information aboute each one of the regular scheduled timers.

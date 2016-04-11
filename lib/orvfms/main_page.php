@@ -128,6 +128,7 @@ function displayMainPage(&$s20Table,$myUrl){
             echo $clockButton;
 
             // Include field for timer information
+            // error_log("\n".$name." ".$devData['timerVal']." action:".$devData['timerAction']."\n");
             if($devData['timerVal'] != 0)
                 if($devData['timerAction'])
                     $color="#00BB00";

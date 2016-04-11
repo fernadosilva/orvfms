@@ -6,9 +6,11 @@ session_start();
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <?php
-    if(($_SERVER["REQUEST_METHOD"] != "POST") || (isset($_POST['toMainPage']))){
+    /*
+      if(($_SERVER["REQUEST_METHOD"] != "POST") || (isset($_POST['toMainPage']))){
         echo '<META HTTP-EQUIV="Refresh" CONTENT="150">'."\n";
     }
+    */
 ?>
 <title>
 S20 remote
@@ -253,7 +255,12 @@ else if(isset($_POST['toEditPage'])){
 }
 else if(isset($_POST['toSetupPage'])){
     $mac = getMacAndActionFromPost($actionValue,$_POST['toSetupPage']);
-    if($actionValue != "setup"){
+    if($actionValue == "procSync"){ // Sync socket TZ to server TZ
+        $serverTz = $s20Table[$mac]['serverTimeZone'];
+        $serverDst = $s20Table[$mac]['serverDst'];
+        setTimeZone($mac,$serverTz,$serverDst,$s20Table);
+    }
+    else if($actionValue != "setup"){
         echo "Unexpected error in setup (505)<p>\n";
     }
     require_once(ORVFMS_PATH."setup_page.php");

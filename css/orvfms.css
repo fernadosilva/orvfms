@@ -298,6 +298,25 @@ Find/refresh button in main page
     text-shadow:   1px 1px 0 #000;
 }
 
+#syncButton{
+    height: 5vh;
+    width: 35vw;
+    display:       inline-block;
+    padding:       8px 27px;
+    background:    #073763 url('http://dabuttonfactory.com/button.png?w=1&h=43&bgt=gradient&bgc=3d85c6&ebgc=073763') repeat-x;
+    background:    -moz-linear-gradient(#3d85c6, #073763);
+    background:    -o-linear-gradient(#3d85c6, #073763);
+    background:    -webkit-linear-gradient(#3d85c6, #073763);
+    background:    linear-gradient(#3d85c6, #073763);
+    border-radius: 5px;
+    color:         #fff;
+    font:          normal 700 29px/1 "Calibri", sans-serif;
+    font-size:     2.5vh;
+    text-align:    center;
+    text-shadow:   1px 1px 0 #000;
+}
+
+
 #deleteButton{
     height: 5vh;
     width: 35vw;

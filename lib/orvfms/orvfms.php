@@ -31,6 +31,23 @@ function cmpActions($a1,$a2){
     return ($a1[1] > $a2[1]);
 }
 
+function cleanTableFour($msg){
+    $newMsg=$msg;    
+    $sz = strlen($newMsg) / 2;
+    $firstZeroByteLoc = 168;
+    $k = $firstZeroByteLoc;
+    for($k = $firstZeroByteLoc;$k<$firstZeroByteLoc+12;$k++)
+        $newMsg = substr_replace($newMsg,"00",2*$k,2);
+    for(;$k<$sz;$k++)    
+        $newMsg = substr_replace($newMsg,"30",2*$k,2);
+        
+    
+    // print "msg size is ".$sz."\n"; /* DEBUG */
+    // printHex($newMsg); /* DEBUG */
+
+    return $newMsg;
+}
+
 function getAllActions($mac,$s20Table){
    $timers = $s20Table[$mac]['details'];
    $nt = count($timers);
@@ -695,7 +712,12 @@ function searchS20($s20Table){
                 $s20Table[$mac]['ip']=$recIP;
                 $s20Table[$mac]['st']=$status;
                 $s20Table[$mac]['time']=getSocketTime($recMsg);
+
                 $s20Table[$mac]['serverTime'] = $now;
+                $serverTzS = date_default_timezone_get();
+                $serverTz  =  timezone_open ($serverTzS);
+                $serverTzOffset = ($serverTz -> getOffset(new DateTime())) / 3600;
+                $s20Table[$mac]['serverTimeZone'] = $serverTzOffset;
             }
             
         }
@@ -767,7 +789,7 @@ function setName($mac,$newName,&$s20Table){
 
     // replace receive code with send code
     $newTableAux = substr_replace($newTableAux,WRITE_SOCKET_CODE,2*4,4);
-
+    $newTableAux = cleanTableFour($newTableAux); // just in case it got polluted...
     //
     // Delete byte 18 (??)
     // Wireshark shows...
@@ -778,6 +800,7 @@ function setName($mac,$newName,&$s20Table){
     // Wireshark shows...
     //
     $newTable = substr_replace($newTable,"",25*2,4);
+
 
     // Update msg size, just in case it has changed
     $newTable = adjustMsgSize($newTable);
@@ -790,12 +813,13 @@ function setName($mac,$newName,&$s20Table){
     else{
         $reply = $newName;
         $s20Table[$mac]['name'] = $newName;
-        $_SESSION['$s20Table'] = $s20Table;
+        $_SESSION['s20Table']=$s20Table;
+        writeDataFile($s20Table);
     }
-    return $reply;;
+    return $reply;
 }
 
-function setTimeZone($mac,$tz,&$s20Table){
+function setTimeZone($mac,$tz,$dst,&$s20Table){
     //
     // Sets the timezone in table 4 to $tz
     //
@@ -803,13 +827,32 @@ function setTimeZone($mac,$tz,&$s20Table){
     $recTable = getTable($mac,$table,$vflag,$s20Table);
    
     // Set timezone
+    $iTz = intval($tz); // get integer part of Timezone
+    $halfTz = ($iTz != $tz); // $halfTz -> True when in half timezones 
+                            // (e.g., -4.5 (venezuela), +4.5 (Kabul)
+ 
+    if($iTz < 0) $iTz = 256 - $iTz;  // 2's complement if negative TZ
+    $tzString    = padHex(dechex($tz),2);
+    $newTableAux = substr_replace($recTable,$tzString,2*163,2);
 
-    $tzSetString = "00";
-
-    $tzValString    = padHex(dechex($tz),2);
-    $tzString = $tzSetString.$tzValString;
+    // Set DST
+    if($dst)
+        $dstVal = 0;
+    else
+        $dstVal = 1;
     
-    $newTableAux = substr_replace($recTable,$tzString,2*162,2*2);
+    if($halfTz) 
+        $dstVal += 2; // Check updNameAndTimerAfterOnDevice and Technical Notes
+                      // Awkward, but...
+
+    $dstString = padHex(decHex($dstVal),2);
+    $newTableAux = substr_replace($newTableAux,$dstString,2*160,2);
+    //    $newTableAux = substr_replace($newTableAux,"01",2*161,2);
+    $newTableAux = cleanTableFour($newTableAux); // just in case it got polluted...
+
+    // Update s20Table
+    $s20Table[$mac]['timeZone'] = $tz;
+    $s20Table[$mac]['dst'] = $dst;
 
     // replace receive code with send code
     $newTableAux = substr_replace($newTableAux,WRITE_SOCKET_CODE,2*4,4);
@@ -827,10 +870,15 @@ function setTimeZone($mac,$tz,&$s20Table){
 
     // Update msg size, just in case it has changed
     $newTable = adjustMsgSize($newTable);
-
     $reply = createSocketSendHexMsgWaitReply($mac,$newTable,$s20Table);
-    if($reply == "") $s20Table[$mac]['off'] = time();
-    
+    if($reply == "") {
+        $s20Table[$mac]['off'] = time();
+    }
+    else{
+        $_SESSION['s20Table']=$s20Table;
+        writeDataFile($s20Table);
+    }
+
     return $reply;
 }
 
@@ -843,7 +891,6 @@ function setSwitchOffTimer($mac,$sec,&$s20Table){
     $table = 4; $vflag = "17";
     $recTable = getTable($mac,$table,$vflag,$s20Table);
    
-
     $switchOffData = substr($recTable,164*2,8);
 
     // This substring defines  the format for 
@@ -867,6 +914,7 @@ function setSwitchOffTimer($mac,$sec,&$s20Table){
 
     // replace receive code with send code
     $newTableAux = substr_replace($newTableAux,WRITE_SOCKET_CODE,2*4,4);
+    $newTableAux = cleanTableFour($newTableAux); // just in case it got polluted...
 
     //
     // Delete byte 18 (??)
@@ -930,11 +978,27 @@ function updNameAndTimerAfterOnDevice($mac,&$s20Table){
 
     $s20Table[$mac]['switchOffTimer']=$timerVal;    
 
-    $tzS = hexdec(substr($recTable,162*2,2));
-    $tz  = hexdec(substr($recTable,163*2,2));
+    $dst_raw = hexdec(substr($recTable,160*2,2)); 
+    // 00->DST on, 01 -> DST off! why inverted??? But it really is...
+    // 02-> location on half dst, DST on
+    // 03 -> location half dst, DST off
+    if($dst_raw % 2 == 0)
+        $dst = 1;
+    else
+        $dst = 0;
+    if($dst_raw >=2)
+        $half_dst = 1;
+    else
+        $half_dst = 0;
 
+    $tz  = hexdec(substr($recTable,163*2,2));
+    if($tz >=128) $tz = $tz - 256;
+    if($half_dst)
+        $tz += ($tz > 0 ? 0.5 : -0.5);
+
+    $s20Table[$mac]['dst'] = $dst;
     $s20Table[$mac]['timeZone'] = $tz;
-    $s20Table[$mac]['timeZoneSet'] = $tzS;
+
 }
 
 
@@ -1159,8 +1223,19 @@ function getIpFromMac($mac,&$s20Table){
             if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == SEARCH_IP)){
                 $macRec = substr($recMsg,14,12);                
                 if($macRec == $mac){
+                    // date_default_timezone_set("Australia/Sydney"); // DEBUG
+                    // date_default_timezone_set("America/Caracas"); // DEBUG
                     $s20Table[$mac]['time'] = getSocketTime($recMsg);
                     $s20Table[$mac]['serverTime'] = time();
+
+                    $serverTzS = date_default_timezone_get();
+                    $serverTz  =  timezone_open ($serverTzS);
+                    $serverTzOffset = ($serverTz -> getOffset(new DateTime())) / 3600.00; // TzOffset includes DST, if in effect
+                    $serverDst = date('I');   // Server time zone, 1 if DST on, else 0 
+
+                    $s20Table[$mac]['serverDst'] = $serverDst;
+                    $s20Table[$mac]['serverTimeZone'] = $serverTzOffset - $serverDst;
+
                     $retIp = $recIP;                    
                     break;
                 }
@@ -1176,6 +1251,7 @@ function getIpFromMac($mac,&$s20Table){
         }
     }
     socket_close($s);
+    
     return $retIp;
 }
 ?>

@@ -1,4 +1,3 @@
-
 <?php
 function displaySetupPage($mac,&$s20Table,$myUrl){
     global $daysOfWeek;    
@@ -39,11 +38,6 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 </h2>
 <p>
 <hr>
-
-
-
-
-
     <input type="submit" name="toMainPage" value="back<?php echo $mac ?>"  
     id="backButton"> 
 
@@ -66,41 +60,60 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 <hr>
 <?php
     $ip = getIpFromMac($mac,$s20Table);
+    $_SESSION['s20Table']=$s20Table;
+    writeDataFile($s20Table);
     $dev = $s20Table[$mac];
     $time = $dev['time'];
     $serverTime = $dev['serverTime'];
-    $tz = $dev['timeZone'];
-    $serverTzS = date_default_timezone_get();
-    $serverTz  =  timezone_open ($serverTzS);
-    $serverTzOffset = $serverTz -> getOffset(new DateTime());
+    $tz  = $dev['timeZone'];
+    $dst = $dev['dst']; // 1 means DST on
+    $serverTzOffset = $dev['serverTimeZone'];
+    $serverDst = $dev['serverDst']; 
+
     echo '<div id="socketTime"></div>';
     echo '<div id="serverTime"></div>';
-    echo "<hr>";                                                  
+?>
+<p>
+<button type="submit" name="toSetupPage" value="procSync<?php echo $mac ?>" id="syncButton">Sync TZ</button>
+
+<?php
+    echo "<p><hr>";                                                  
 ?>
 S20 mac address - 
-<?php echo formatMac($mac); ?>
+<?php echo formatMac($mac); ?><br>
+IP address - 
+<?php echo $ip; ?>
 <hr>
 <script>
 var socketTimeRef = <?php echo $time; ?>;
 var serverTimeRef = <?php echo $serverTime; ?>;
 var socketTz  = <?php echo $tz; ?>;
+var socketDst = <?php echo $dst; ?>;
+
 var serverTz  = <?php echo $serverTzOffset; ?>;
+var serverDst = <?php echo $serverDst; ?>;
 var t0_ref = new Date().getTime()/1000;
 
 
 function  displaySocketTime(){
     var now,socketTime,serverTime;
     now = new Date().getTime()/1000;
-    socketTime = now - t0_ref + socketTimeRef;
-    serverTime = now - t0_ref + serverTimeRef;
+    socketTime = now - t0_ref + socketTimeRef + 3600 *  (socketTz + socketDst);
+    serverTime = now - t0_ref + serverTimeRef + 3600 *  (serverTz + serverDst);
     var socketTimeO = new Date(1000*socketTime);
+    var socketTimeS = socketTimeO.toISOString();
+
     var serverTimeO = new Date(1000*serverTime);
-    var socketTimeS = socketTimeO.toString();
-    var serverTimeS = serverTimeO.toString();
-    socketTimeS = socketTimeS.substring(0,24);
-    serverTimeS = serverTimeS.substring(0,24);
-    var msgSckt = "Socket time is " + socketTimeS+", tz="+socketTz;
-    var msgServ = "Server time is " + serverTimeS+", tz="+serverTz;
+    var serverTimeS = serverTimeO.toISOString();
+    //    socketTimeS = socketTimeS.substring(0,24);
+    //    serverTimeS = serverTimeS.substring(0,24);
+
+    var msgSckt = "Socket time is " + socketTimeS+", tz="+socketTz+" dst=";
+    msgSckt = msgSckt + (socketDst ? "on" : "off");
+ 
+    var msgServ = "Server time is " + serverTimeS+", tz="+serverTz+" dst=";
+    msgServ = msgServ + (serverDst ? "on" : "off");
+
     document.getElementById('socketTime').innerHTML = msgSckt;
     document.getElementById('serverTime').innerHTML = msgServ;
 }

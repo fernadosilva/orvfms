@@ -7,34 +7,34 @@ $nSw = 0;
 foreach ($macs as $mac) {
     $val = $s20Table[$mac]['timerVal'];
     $swVal  = $s20Table[$mac]['switchOffTimer'];
-    if($val > 0){
-        $id = 'b'.$mac;
-        $action = $s20Table[$mac]['timerAction'];
-        if($nCounters++== 0){
-            $timerNames='var timerNames = ["'.$mac.'"';;
-            $timerVals = "var timerVals  = [".$val;
-            $timerActs = "var timerAct  = [".$action;
+    if(!array_key_exists('off',$s20Table[$mac])){
+        if($val > 0){
+            $id = 'b'.$mac;
+            $action = $s20Table[$mac]['timerAction'];
+            if($nCounters++== 0){
+                $timerNames='var timerNames = ["'.$mac.'"';;
+                $timerVals = "var timerVals  = [".$val;
+                $timerActs = "var timerAct  = [".$action;
+            }
+            else{
+                $timerNames=$timerNames.',"'.$mac.'"';
+                $timerVals =$timerVals.",".$val;
+                $timerActs =$timerActs.",".$action;
+            }
         }
-        else{
-            $timerNames=$timerNames.',"'.$mac.'"';
-            $timerVals =$timerVals.",".$val;
-            $timerActs =$timerActs.",".$action;
+        if($swVal > 0){
+            if($nSw++== 0){
+                $switchOff = "var switchOff  = [".$swVal;
+                $swNames='var swNames = ["'.$mac.'"';;
+            }
+            else{
+                $switchOff=$switchOff.','.$swVal;
+                $swNames=$swNames.',"'.$mac.'"';
+            }
         }
     }
-    if($swVal > 0){
-        if($nSw++== 0){
-            $switchOff = "var switchOff  = [".$swVal;
-            $swNames='var swNames = ["'.$mac.'"';;
-        }
-        else{
-            $switchOff=$switchOff.','.$swVal;
-            $swNames=$swNames.',"'.$mac.'"';
-        }
-    }
-
-
 }
-
+//error_log("\n nCounters=".$nCounters."\n");
 echo "var nCounters=".$nCounters.";\n";
 echo "var nSw=".$nSw.";\n";
 if($nCounters > 0){

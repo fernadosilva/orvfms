@@ -98,6 +98,27 @@ function  printHex($hexMsg){
     }
     echo "\n";
 }
+function  printHex2($hexMsg){
+    $n = strlen($hexMsg)/2;
+    echo"\nn=".$n."\n";
+    $col = 0;
+    $lin = 0;
+    for($k=0; $k <$n; $k++){
+        if($col++ == 0){
+            echo sprintf(" %02d    ",$lin++);
+        }
+        $pair = substr($hexMsg,2*$k,2);
+        $c=chr(hexdec($pair));
+        if(!ctype_print($c))
+            $c='.';
+        echo sprintf("%1s",$c);
+        if($col == 16){
+            $col = 0;
+            echo "\n";
+        }
+    }
+    echo "\n";
+}
 
 
 function secToHourString($seconds){
