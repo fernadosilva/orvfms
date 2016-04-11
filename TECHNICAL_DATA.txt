@@ -11,14 +11,75 @@ While most of the information provided in these two sites is acurate, and it wou
 impossible to conclude this software without it, there are few catches and details 
 that must be taken into account, namely incomplete information regarding socket time, 
 slightly wrong information regarding time zones and DST, and the diference between 
-regular countdown timers and the  "switch off upon switch on" timers. 
-
-We address several of these points in the following.
+regular countdown timers and the  "switch off upon switch on" timers. We address several 
+of these points in the following, but please take a look at pastebin before in 
+order to understand the comments below.
 
 Most of the information  below resulted from  analysis of packet data using Wireshark. 
 When referring byte  numbers within a packet, we assume that first byte is number 1.
 
-1. The available information about the S20 "countdown timers" may be sometimes 
+1. Socket time is available in UTC time in table 1, as reported in the "pastebin" 
+data (in the following, we will referr as "pastebin" the reverse engineering data
+published in http://pastebin.com/LfUhsbcS). 
+
+However, as discovered by Andrius Stikonas:
+a) The UTC time is a "sort of" timestamp in seconds, but considering the begining
+of time as 1 January 1900. You may obtain a conventional time stamp ("time since 
+the epoch", 1 Jan 1970) subtracting from the socket time value 2208988800.
+b) UTC time is reported in the first 4 bytes of the last 5 bytes of table 1 
+(the very last byte of the table is the socket state, 01=ON, 00=OFF, so time
+covers the four preceding bytes. Time is represented in little endian format).
+This is slightly different from the information reported in pastebin.
+Check getSocketTime() in orvfms.php
+c) All weekly scheduled timers are represented in Hours Min and Seconds in local
+time. More aboute these timers below.
+d) Sockets take care of converting UTC time to local time taking into acount 
+the local timezone (TZ) and Daylight Saving Time (DST).
+e) It is possible to initialize the socket UTC time using a specific command,
+and in fact the WiWo uses this approach. Our code does not use this possibility,  
+since the sockets  seem always to synchronize by themselves using some NTP server. 
+However, for those interested in this possibility, initialization of the  socket 
+clock in UTC can be done sending to the socket the following meesage:
+
+0000  68 64 00 1a 63 73 MM MM MM MM MM MM 20 20 20 20   hd..cs..#5..    
+0010  20 20 00 00 00 00 XX XX XX XX                     ........
+
+where
+68 64 - Magic Key
+00 1a - Msg length
+63 73 - Init socket clock command 
+MM MM MM MM MM MM - Socket mac address
+XX XX XX XX - Seconds since 1 Jan 1900 (in UTC), little endian.
+ 
+The socket, as usualy, replies with a message with the same code 63 73 and with 
+a dummy payload.
+
+2. As reported in pastebin, timezone information is reported in table 4, byte 164.
+However, the following details and additional info must be taken into account:
+a) This byte is an integer offset in hours to GMT (positive values to the east, 
+negative  values to the west). Negative values are represented in two's complemnent.
+Therefore, TZ mid atlantic time in Azores (GMT -1) is FF.
+b) Daylight savings time is represented in byte 161 of table 4 (in pastebin, this 
+byte is identified as DHCP Mode. This is not correct).
+c) DST active is represented by 00, DST off is represented by 01 (yes, it is 
+inverted relative to  what would be the commons sense!).
+d) While most TZs are integer, there are half time zones: Venezuela/Caracas, for 
+example, is GMT -4.5 and Kabul GMT +4.5. It is awkward, but we found that these
+"half time zones" are identified by the second least significant bit of byte 161
+(yes, the same used for DST). Therefore, we have the following possible combinations 
+for byte 161:
+- 00: integer TZ, DST on
+- 01: integer TZ, DST off
+- 02: half TZ, DST on
+- 03: half TZ, DST off
+
+Therefore,  we have the following examples:
+- Azores (GMT-1), DST on:	byte 161 = 00, byte 164 = FF
+- Caracas (GMT-4.5), DST off:   byte 161 = 03, byte 164 = FC
+- Paris (GMT+1), DST off:       byte 161 = 01, byte 164 = 01
+- Kabul (GMT+4.5), DST on:      bute 161 = 02, byte 164 = 04 
+
+3. The available information about the S20 "countdown timers" may be sometimes 
 misleading. Each S20 supports in fact two types of "countdown timers".The first one
 is the regular countdown  that decreases from a given initial value to zero, and 
 performs a  pre-specified action when reaches zero. A second timer may be better 
@@ -30,7 +91,7 @@ after switch on", when enabled, is constant, and therefore does not reset itself
 the switch on. By other words, when enabled, it will always trigger a countdown 
 process after switch on. 
 
-2. The "Automatic switch off after switch on timer" is reported in table 4. 
+4. The "Automatic switch off after switch on timer" is reported in table 4. 
 See more information on pastebin link above. 
 
 When reading table 4, the following bytes are relevant.
@@ -42,7 +103,7 @@ The maximum value for the timer is 0xFFFF seconds, or 18.2 hours
 (notice that the WiWo interface sets a limit of 16:59:59 for the countdown 
 timer)
 
-3. To modify the "automatic switch off timer", the following strategy works:
+5. To modify the "automatic switch off timer", the following strategy works:
 
 a) Read table 4 according to the codes provided in http://pastebin.com/LfUhsbcS;
 b) Update bytes 165, 167 and 168 with the new enabled status and countdown value;
@@ -53,7 +114,7 @@ e) Adjust bytes 3 and 4 with the new message size (basically, the received msg
    length less 3), in big endian format
 f) Send to socket and wait reply.
 
-4. Countdown timers
+6. Countdown timers
 a) To check the regular countdown timer, its actual value during a countdown 
 process, and the action to be performed when reaching zero, proceed as follows;
 
@@ -92,7 +153,7 @@ before AA and BB BB are the values to be set:
 byte 23 (AA) : 00-action = off, 01-action=on 
 bytes 24 and 25 (BB BB): timer current value in seconds, LITTLE ENDIAN 
 
-5. Weekly scheduled timers are reported in table 3. Table 3 includes several records. 
+7. Weekly scheduled timers are reported in table 3. Table 3 includes several records. 
 Each record reports information aboute each one of the regular scheduled timers.
  
 a) The first record starts in bytes 29,30 with the record length in LITTLE ENDIAN
