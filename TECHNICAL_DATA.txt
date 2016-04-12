@@ -23,9 +23,9 @@ data (in the following, we will referr as "pastebin" the reverse engineering dat
 published in http://pastebin.com/LfUhsbcS). 
 
 However:
-a) As discovered by Andrius Stikonas, UTC time is a timestamp in seconds, 
+a) As discovered by Andrius Štikonas, UTC time is a timestamp in seconds, 
 but considering the begining of time as 1 January 1900 instead of the more
-convention "Time since the epcoh", starting in 1 Jan 1970.
+convention "Time since the epoch", starting in 1 Jan 1970.
 You may obtain a conventional time stamp ("time since the epoch") subtracting 
 from the socket time stamp 2208988800.
 b) UTC time is reported in the first 4 bytes of the last 5 bytes of table 1 
