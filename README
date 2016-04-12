@@ -11,7 +11,7 @@ DISCLAIMER:
 
 ACKNOWLEDGMENTS:
       This software was based on the information originally published 
-      by Andrius Stikonas on 
+      by Andrius Štikonas on 
 
 https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/	
 
@@ -21,9 +21,9 @@ https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/
 
 SUMMARY:
   This software implements a web interface to control Orvibo S20 
-  sockets/switchs attached to the local network. 
+  sockets/switches attached to the local network.
 
-  The S20 switchs can be operated  in the local network using the freely
+  The S20 switches can be operated  in the local network using the freely
   available WiWo app. However, the WiWo  behavior when the user is outside
   the local network is less convenient. Only switch on and switch off
   operations are remotely supported, and remote operations often fail due to
@@ -120,7 +120,7 @@ terminal or console and take the following steps:
    172.16.XX.255 or 10.xx.xx.255.
 3. Check if there are  not appliances connected to the S20 sockets that may 
   2 be affected by the power on/off cycle. Unplug any devices that may be 
-   affected be this test cycle. Each off/on cycle switchs each S20 to
+   affected be this test cycle. Each off/on cycle switches each S20 to
    the oposite state for about 5/10 seconds (exact figures depend on the
    number of S20s in the local network.		
 4. Just type in the command line:
