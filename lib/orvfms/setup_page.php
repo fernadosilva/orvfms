@@ -37,7 +37,7 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 ?> 
 </h2>
 <p>
-<hr>
+
     <input type="submit" name="toMainPage" value="back<?php echo $mac ?>"  
     id="backButton"> 
 
@@ -57,7 +57,9 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 </select>
 
 <p>
+<button type="submit" name="toMainPage" value="procSetup<?php echo $mac ?>" id="doneButton">Done</button>
 <hr>
+<p><p>
 <?php
     $ip = getIpFromMac($mac,$s20Table);
     $_SESSION['s20Table']=$s20Table;
@@ -67,30 +69,33 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     $serverTime = $dev['serverTime'];
     $tz  = $dev['timeZone'];
     $dst = $dev['dst']; // 1 means DST on
-    $serverTzOffset = $dev['serverTimeZone'];
+    $serverTz = $dev['serverTimeZone'];
     $serverDst = $dev['serverDst']; 
 
     echo '<div id="socketTime"></div>';
     echo '<div id="serverTime"></div>';
 ?>
 <p>
-<button type="submit" name="toSetupPage" value="procSync<?php echo $mac ?>" id="syncButton">Sync TZ</button>
-
 <?php
+if(($serverDst != $dst) || ($tz != $serverTz)){
+?>
+<button type="submit" name="toSetupPage" value="procSync<?php echo $mac ?>" id="syncButton">Sync TZ</button>
+<?php
+}
     echo "<p><hr>";                                                  
 ?>
 S20 mac address - 
 <?php echo formatMac($mac); ?><br>
 IP address - 
 <?php echo $ip; ?>
-<hr>
+
 <script>
 var socketTimeRef = <?php echo $time; ?>;
 var serverTimeRef = <?php echo $serverTime; ?>;
 var socketTz  = <?php echo $tz; ?>;
 var socketDst = <?php echo $dst; ?>;
 
-var serverTz  = <?php echo $serverTzOffset; ?>;
+var serverTz  = <?php echo $serverTz; ?>;
 var serverDst = <?php echo $serverDst; ?>;
 var t0_ref = new Date().getTime()/1000;
 
@@ -123,12 +128,12 @@ setInterval(displaySocketTime,1000);
 
 <p>
 
-<button type="submit" name="toMainPage" value="procSetup<?php echo $mac ?>" id="doneButton">Done</button>
 
 
 
 
-<div style="margin-top:10vh;">
+
+<div style="margin-top:5vh;">
 <hr>
 Delete device from the system<p>
 <button type="submit" name="toMainPage" value="procSetupDel<?php echo $mac ?>" id="deleteButton">Delete device</button>

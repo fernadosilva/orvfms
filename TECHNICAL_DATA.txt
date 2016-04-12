@@ -82,7 +82,16 @@ As a reference, one may consider the following examples:
 - Azores (GMT-1), DST on:	byte 161 = 00, byte 164 = FF
 - Caracas (GMT-4.5), DST off:   byte 161 = 03, byte 164 = FC
 - Paris (GMT+1), DST off:       byte 161 = 01, byte 164 = 01
-- Kabul (GMT+4.5), DST on:      bute 161 = 02, byte 164 = 04 
+- Kabul (GMT+4.5), DST on:      byte 161 = 02, byte 164 = 04 
+
+IMPORTANT NOTE: at the time of writing this document (12 Apr 2016), our tests seem 
+to suggest  that the S20 socket do not support 15 minutes time zones (e.g., 
+Kathmandu, GMT+5:45). While this timezone is in fact manually available in the WiWo, 
+when it is selected (TZ=Kathmandu, DST off), byte 161 in table 4 appears as 03 and 
+the socket seems in fact  programmed as GMT+5:30 and not GMT+5:45. If there is 
+anybody out  there on one of these "15m" time zones who has a S20 and is able to get
+it properly synchronized, please drop me a note and I will try investigate further 
+this issue.
 
 3. The available information about the S20 "countdown timers" may be sometimes 
 misleading. Each S20 supports in fact two types of "countdown timers".The first one
