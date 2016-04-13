@@ -1086,6 +1086,7 @@ function updateAllStatus(&$s20Table){
         }
     }
     updTableTimers($s20Table);
+    $_SESSION['s20Table']=$s20Table;
     writeDataFile($s20Table);
     return $s20Table;
 }
