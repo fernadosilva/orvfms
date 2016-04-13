@@ -147,7 +147,6 @@ else{
     if(DEBUG)
         error_log("New session: S20 data initialized\n");
 }
-$_SESSION["s20Table"] = $s20Table;
 //
 // Check which page must be displayed
 //

@@ -417,6 +417,8 @@ function updTableTimers(&$s20Table){
             $ip = getIpFromMac($mac,$s20Table); 
         }
     }
+    $_SESSION['s20Table']=$s20Table;
+    writeDataFile($s20Table);
 }
 
 function checkTimerSec($mac,$s20Table,&$act){
