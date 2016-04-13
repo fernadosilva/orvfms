@@ -127,6 +127,14 @@ function displayMainPage(&$s20Table,$myUrl){
                 value="clock'.$mac.'" '.$styleTimer.'/>'."\n";        
             echo $clockButton;
 
+            // overlay warning button for each button if tz or dst differ between server and socket
+            if(($devData['timeZone'] != $devData['serverTimeZone']) ||
+               ($devData['dst'] != $devData['serverDst'])){
+                $warningButton     = '<input type="submit" name="toSetupPage" id="warningButton" 
+                          value="setup'.$mac.'" '.$styleTimer.'/>'."\n";        
+                echo $warningButton;
+            }
+
             // Include field for timer information
             // error_log("\n".$name." ".$devData['timerVal']." action:".$devData['timerAction']."\n");
             if($devData['timerVal'] != 0)

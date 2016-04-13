@@ -413,6 +413,8 @@ function updTableTimers(&$s20Table){
             // Check && update switch off after on timer
             updNameAndTimerAfterOnDevice($mac,$s20Table);
             getAndParseTimerTable($mac,$s20Table);
+            // force read table 1 to update time zones too
+            $ip = getIpFromMac($mac,$s20Table); 
         }
     }
 }
