@@ -221,6 +221,10 @@ count down page or weekly timers page. The default number of
 "next displayed events"  is 0, so you will not see any scheduled action by default.
 The setup page also enables to delete or rename a device.
 
+When there is a mismatch between server and socket timezone or DST mode, a yellow
+warning sign is displayed. Pressing this sign  redirects to the setup page,
+where is available an option to synchronize the socket and server.
+
 When adding new devices to your network, the new device may not appear at once. 
 In this case, just press the find icon in the top right corner. If the new devices 
 are not detected, Just confirm that they are unlocked in the WiWo application (in the
