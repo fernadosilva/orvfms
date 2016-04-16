@@ -7,7 +7,7 @@ session_start();
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <?php
       if(($_SERVER["REQUEST_METHOD"] != "POST") || (isset($_POST['toMainPage']))){
-        echo '<META HTTP-EQUIV="Refresh" CONTENT="180">'."\n";
+        echo '<META HTTP-EQUIV="Refresh" CONTENT="1800">'."\n";
     }
 ?>
 <title>

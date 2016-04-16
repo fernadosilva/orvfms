@@ -57,11 +57,17 @@ function displayMainPage(&$s20Table,$myUrl){
     $bigButHeight = 90 / $ndevs;    
     
 // Countdown & next action time font size 
-    $fsize = 3; 
+    $fsize = 3;          // in vh units; must match CSS
+
+// Font size of "next action" fields
+    $fszn  = 2.1;        // in vh units; must match CSS 
+
+// Bottom margin between the bottom of the button and counter / next action info
+    $botMargin = 0.5;   
 
     $posBigButton = 0;
     $clockTopMargin = 2;
-    $timerLabelTopMargin = $bigButHeight * 0.85;
+    $timerLabelTopMargin = $bigButHeight - $fsize - $botMargin;  
     $timerLabelvSpace    = $bigButHeight * 0.10;
 //
 // Loop on all devices and display each button, coloured according to
@@ -158,17 +164,19 @@ function displayMainPage(&$s20Table,$myUrl){
             $next = getAllActions($mac,$s20Table);
             $nd = count($next);
             $maxd = $s20Table[$mac]['next'];
+            $fszn = 2.1;
             if($nd > $maxd) $nd = $maxd;
             if($nd > 0){
-                $top = $posBigButton + $timerLabelTopMargin - $nd * $timerLabelvSpace;            
+                // $top = $posBigButton + $timerLabelTopMargin - $nd * $timerLabelvSpace; // OK
+                $top = $posBigButton + $bigButHeight - ($nd+1) * $fszn  - $botMargin;
                 $actString = '<div class="next" style="top:'.$top.
                            'vh; color:#4C4C4C;"><span>Next:</span>   </div>';
                 echo $actString.'\n';
                 for($j=0; $j < $nd; $j++){
                     $nextAct  = $next[$j][0];
                     $nextTimeStamp = $next[$j][1];
-                    $top = $posBigButton + $timerLabelTopMargin - ($nd-$j-1) * $timerLabelvSpace;
-                    
+                    // $top = $posBigButton + $timerLabelTopMargin - ($nd-$j-1) * $timerLabelvSpace; // OK
+                    $top = $posBigButton + $bigButHeight - ($nd - $j) * $fszn - $botMargin; 
                     $nextActS = mkNextActString($nextTimeStamp,$nextAct,$top); 
                     echo $nextActS."\n";
                 }
