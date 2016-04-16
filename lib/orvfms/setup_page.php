@@ -71,13 +71,16 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     $dst = $dev['dst']; // 1 means DST on
     $serverTz = $dev['serverTimeZone'];
     $serverDst = $dev['serverDst']; 
-
+    $isSync = ($serverDst == $dst) && ($tz == $serverTz);
+    if(!$isSync){
+        echo '<div style="color:red">Warning: clock seems out of sync!<p></div>';
+    }
     echo '<div id="socketTime"></div>';
     echo '<div id="serverTime"></div>';
 ?>
 <p>
 <?php
-if(($serverDst != $dst) || ($tz != $serverTz)){
+if(!$isSync){
 ?>
 <button type="submit" name="toSetupPage" value="procSync<?php echo $mac ?>" id="syncButton">Sync TZ</button>
 <?php
