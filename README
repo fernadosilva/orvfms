@@ -2,27 +2,30 @@
 #  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt                
 #*************************************************************************
 
-Last update: 26 November 2015
-
-DISCLAIMER:
-
-     This software was developed independently and it is not
-     supported or endorsed in any way by Orvibo (C).
-
-ACKNOWLEDGMENTS:
-      This software was based on the information originally published 
-      by Andrius Štikonas on 
-
-https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/	
-
-      and on comments and discussions by many other users, 
-      as well as some complementar reverse engineering 
-      analysis (see TECHNICAL_DATA.txt).
+Last update: 18 April 2016
 
 SUMMARY:
   This software implements a web interface to control Orvibo S20 
-  sockets/switches attached to the local network.
+  sockets/switches attached to the local network. Screen shots of the 
+  interface are available in the web_screenshot*.png available in the
+  root directory of this distribution; you may check/see them in github 
+  without downloading them.
 
+DISCLAIMER:
+   This software was developed independently and it is not
+   supported or endorsed in any way by Orvibo (C).
+
+ACKNOWLEDGMENTS:
+    This software was based on the information originally published 
+    by Andrius Štikonas on 
+
+https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/	
+
+    and on comments and discussions by many other users, 
+    as well as some complementar reverse engineering 
+    analysis (see TECHNICAL_DATA.txt).
+
+DESCRIPTION:
   The S20 switches can be operated  in the local network using the freely
   available WiWo app. However, the WiWo  behavior when the user is outside
   the local network is less convenient. Only switch on and switch off

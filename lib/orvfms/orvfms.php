@@ -1215,15 +1215,17 @@ function getIpFromMac($mac,&$s20Table){
         $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
         $now = time();
         if(!isset($n) || ($n == 0)){
-            if(++$loopCount > 3) {
-                error_log("No reply in getIpFromMac after 3 null msg received: ".$mac."\n");
+            if(++$loopCount > 6) {
+                error_log("No reply in getIpFromMac after 3 null msg received: ".$mac." -- Last name known: ".$s20Table[$mac]['name']."\n");
                 break;
             }
             sendHexMsg($s,$msg,IP_BROADCAST);
             continue;
         }
         $recMsg = hex_byte2str($binRecMsg,$n);
-        if($recMsg == $msg) continue;
+        if($recMsg == $msg) {
+            continue;
+        }
         if($n >= 42){
             if((substr($recMsg,0,4) == MAGIC_KEY) && (substr($recMsg,8,4) == SEARCH_IP)){
                 $macRec = substr($recMsg,14,12);                

@@ -54,8 +54,11 @@ function displayMainPage(&$s20Table,$myUrl){
     // Dynamic location style details;
     //
 // Compute big button height (90 percent of viewport height) 
-    $bigButHeight = 90 / $ndevs;    
-    
+    if($ndevs > 0)
+        $bigButHeight = 90 / $ndevs;    
+    else
+        $bigButHeight = 90;
+
 // Countdown & next action time font size 
     $fsize = 3;          // in vh units; must match CSS
 

@@ -12,35 +12,65 @@ impossible to conclude this software without it, there are few catches and detai
 that must be taken into account, namely incomplete information regarding socket time, 
 slightly wrong information regarding time zones and DST, and the diference between 
 regular countdown timers and the  "switch off upon switch on" timers. We address several 
-of these points in the following, but please take a look at pastebin before in 
-order to understand the comments below.
+of these points in the following. We assume that you are already familar with the basic 
+structure of data communication with the sockets.
 
-Most of the information  below resulted from  analysis of packet data using Wireshark. 
-When referring byte  numbers within a packet, we assume that first byte is number 1.
+Most of the information  below resulted from combining the information in the two links
+above with the  analysis of packet data using Wireshark. When referring byte  numbers 
+within a packet, we assume that first byte is number 1.
 
-1. Socket time is available in UTC time in table 1, as reported in the "pastebin" 
+1. Basic communication 
+a) All communication between the client (here, we will designate broadly as 
+"client" the device(s) that communicate with the sockets) are done by UDP packets 
+sent to port 10000 in the socket.  
+b) All msgs sent to the socket are a sequence of bytes with the following sequence
+(represented in hexadecimal):
+
+68 64 AA AA XX XX PP PP PP ...
+
+Where
+
+68 64 - Orvibo so-called "magic code", identifies the begining of all messages
+AA AA - Packet length (including ALL bytes, namely the magic key), big  endian 
+XX XX - Command / message code - identifies the action or command request
+PP PP PP ... (variable size) - Payload
+
+c) The socket replies to all messages received with a packet with a similar 
+structure, with the same Command / message code, and the answer payload 
+(which, in general, may have a different size):
+
+68 64 BB BB XX XX RR RR RR ...
+
+68 64 - Orvibo so-called "magic code", identifies the begining of all messages
+BB BB - Reply packet length (including ALL bytes, namely the magic key), big  endian 
+XX XX - Command / message code - identifies the action or command request, matches the 
+sent command
+RR RR RR ... (variable size) - Reply payload 
+
+2. Socket time is available in UTC time in table 1, as reported in the "pastebin" 
 data (in the following, we will referr as "pastebin" the reverse engineering data
-published in http://pastebin.com/LfUhsbcS). 
+published in http://pastebin.com/LfUhsbcS and reproduced as pastebin.pdf 
+in the root directory of this distribution, thanks to Nozza87). 
 
 However:
 a) As discovered by Andrius Štikonas, UTC time is a timestamp in seconds, 
 but considering the begining of time as 1 January 1900 instead of the more
-convention "Time since the epoch", starting in 1 Jan 1970.
+conventional "Time since the epoch", starting in 1 Jan 1970.
 You may obtain a conventional time stamp ("time since the epoch") subtracting 
 from the socket time stamp 2208988800.
 b) UTC time is reported in the first 4 bytes of the last 5 bytes of table 1 
 (the very last byte of the table is the socket state, 01=ON, 00=OFF, so time
 covers the four preceding bytes). Time is represented in little endian format.
 This is slightly different from the information reported in pastebin.
-Check getSocketTime() in orvfms.php.
+Check the code in getSocketTime() in orvfms.php.
 c) All weekly scheduled timers are represented in Hours Min and Seconds in local
 time. More aboute these timers below.
 d) Sockets take care of converting UTC time to local time taking into acount 
 the local timezone (TZ) and Daylight Saving Time (DST).
 e) It is possible to initialize the socket UTC time using a specific command.
 While the WiWo performs this initialization, our code does not uses it, 
-since the sockets  seem always to synchronize by themselves using some NTP 
-server. 
+since the sockets  seem always to automatically synchronize by themselves 
+using some NTP alike service.
 
 However, for those interested in this possibility, initialization of the  
 socket  clock in UTC can be done sending to the socket the following 
@@ -52,14 +82,15 @@ message:
 where
 68 64 - Magic Key
 00 1a - Msg length
-63 73 - Init socket clock command 
+63 73 - Init socket clock command
+20 ... 00 - Padding 
 MM MM MM MM MM MM - Socket mac address
 XX XX XX XX - Seconds since 1 Jan 1900 (in UTC), little endian.
  
 The socket, as usualy, replies with a message with the same code 63 73 and with 
 a dummy payload.
 
-2. As reported in pastebin, timezone information is reported in table 4, byte 164.
+3. As reported in pastebin, timezone information is reported in table 4, byte 164.
 However, the following details and additional info must be taken into account:
 a) This byte is an integer offset in hours to GMT (positive values to the east, 
 negative  values to the west). Negative values are represented in two's complemnent.
@@ -88,24 +119,24 @@ IMPORTANT NOTE: at the time of writing this document (12 Apr 2016), our tests se
 to suggest  that the S20 socket do not support 15 minutes time zones (e.g., 
 Kathmandu, GMT+5:45). While this timezone is in fact manually available in the WiWo, 
 when it is selected (TZ=Kathmandu, DST off), byte 161 in table 4 appears as 03 and 
-the socket seems in fact  programmed as GMT+5:30 and not GMT+5:45. If there is 
+the socket seems in programmed as GMT+5:30 and not GMT+5:45. If there is 
 anybody out  there on one of these "15m" time zones who has a S20 and is able to get
 it properly synchronized, please drop me a note and I will try investigate further 
 this issue.
 
-3. The available information about the S20 "countdown timers" may be sometimes 
+4. The available information about the S20 "countdown timers" may be sometimes 
 misleading. Each S20 supports in fact two types of "countdown timers".The first one
 is the regular countdown  that decreases from a given initial value to zero, and 
-performs a  pre-specified action when reaches zero. A second timer may be better 
-described as an "automatic switch off on a specified delay after switch on". If the
-"automatic switch off after switch on" is programmed with a given value, this value 
+performs a  pre-specified action (on or off) when reaches zero. A second timer 
+may be better described as an "automatic switch off on a specified delay after switch on". 
+If the "automatic switch off after switch on" is programmed with a given value, this value 
 is copied to the regular countdown timer every time the socket is switched on, along 
 with  an "off" action, and the regular countdown timer starts. The "automatic switch off
 after switch on", when enabled, is constant, and therefore does not reset itself after
-the switch on. By other words, when enabled, it will always trigger a countdown 
-process after switch on. 
+the switch on. By other words, when enabled, it will always trigger a countdown process 
+after switch on, with a switch off ocurring when it reaches zero.
 
-4. The "Automatic switch off after switch on timer" is reported in table 4. 
+5. The "Automatic switch off after switch on timer" is the one reported in table 4. 
 See more information on pastebin link above. 
 
 When reading table 4, the following bytes are relevant.
@@ -117,7 +148,7 @@ The maximum value for the timer is 0xFFFF seconds, or 18.2 hours
 (notice that the WiWo interface sets a limit of 16:59:59 for the countdown 
 timer)
 
-5. To modify the "automatic switch off timer", the following strategy works:
+6. To modify the "automatic switch off timer", the following strategy works:
 
 a) Read table 4 according to the codes provided in http://pastebin.com/LfUhsbcS;
 b) Update bytes 165, 167 and 168 with the new enabled status and countdown value;
@@ -128,7 +159,7 @@ e) Adjust bytes 3 and 4 with the new message size (basically, the received msg
    length less 3), in big endian format
 f) Send to socket and wait reply.
 
-6. Countdown timers
+7. Countdown timers
 a) To check the regular countdown timer, its actual value during a countdown 
 process, and the action to be performed when reaching zero, proceed as follows;
 
@@ -167,12 +198,13 @@ before AA and BB BB are the values to be set:
 byte 23 (AA) : 00-action = off, 01-action=on 
 bytes 24 and 25 (BB BB): timer current value in seconds, LITTLE ENDIAN 
 
-7. Weekly scheduled timers are reported in table 3. Table 3 includes several records. 
+8. Weekly scheduled timers are reported in table 3. Table 3 includes several records. 
 Each record reports information aboute each one of the regular scheduled timers.
  
 a) The first record starts in bytes 29,30 with the record length in LITTLE ENDIAN
-dormat. The record length does not include the length bytes, only the record "payload".
-After the first record, one may extract the following one until reaching the end packet end.
+format. The record length does not include the length bytes, only the record "payload".
+After the first record, one may extract the following records until reaching the 
+packet end (since the total packet length is well known).
 
 b) Considering each full record, including the msg length bytes in positions 1 and 2, 
    each record format is as follows:
@@ -181,7 +213,7 @@ b) Considering each full record, including the msg length bytes in positions 1 a
      	   	  the timer and which is required for delete and update operation. In
 		  fact, in delete and update operation you specify this timer code,
 		  not the record number. More on this below.
-   - byte 21 is - the action to be performed at the specified time (00, off, otherwise on)
+   - byte 21    - the action to be performed at the specified time (00, off, otherwise on)
    - byte 23,24 - year this timer was first set, LITTLE ENDIAN
    - byte 25    - month this timer was first set
    - byte 26    - day of the month this timer was first set
@@ -199,7 +231,7 @@ b) Considering each full record, including the msg length bytes in positions 1 a
 		      1  - Monday
  
 
-c) Assume that a given record provides the folllowing info
+c) Assume that a given record provides the following info:
 
    1C 00 FE 70 20 20 20 20 20 20 20 20 20 20 20 20
    20 20 20 20 01 00 DF 07 0A 1A 12 22 06 85
@@ -222,7 +254,7 @@ In order to update this timer, send the following msg to the socket:
 0020  20 20 20 20 20 20 20 20 20 20 20 20 20 00 00 df                ...
 0030  07 0a 1a 12 22 06 85                              ...."..
 
-Where
+Where:
 
 	68 64 - Magic key
 	00 37 - Msg Length
@@ -242,10 +274,10 @@ Where
 
 d) Add a new timer: quite similar, but the  updated timer code must be replaced
    with the sequence  "03 00 00 1c 00". The timer code, in this case, must be a 
-   randomly generated  4 hexadecimal code that is not yet used by other timer. 
-   Note that I am not sure if the WiWo app uses a different algorithm to 
-   define the "timer code" instead of a pseudo-random generator, but 
-   at least this randomization strategy seems to work.
+   unique 4 hexadecimal code that is not yet used by other timer. We do not 
+   know which algorithm or sequence Orvibo adopts to generate the timer code. 
+   We just use a random generated code and we check if it is unique. This 
+   strategy works fine. 
 
 Packet to send:
 
