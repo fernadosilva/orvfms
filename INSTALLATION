@@ -1,0 +1,42 @@
+#*************************************************************************
+#  Copyright (C) 2015 by Fernando M. Silva   fcr@netcabo.pt                
+#*************************************************************************
+
+Last update: 18 April 2016
+
+DISCLAIMER:
+   This software was developed independently and it is not
+   supported or endorsed in any way by Orvibo (C).
+
+ACKNOWLEDGMENTS:
+    This software was based on the information originally published 
+    by Andrius Štikonas on 
+
+https://stikonas.eu/wordpress/2015/02/24/reverse-engineering-orvibo-s20-socket/	
+
+    and on comments and discussions by many other users, 
+    as well as some complementar reverse engineering 
+    analysis (see TECHNICAL_DATA.txt).
+
+INSTALLATION (fast track):
+    More detailed installation instructions are available in the README file. We include here a short version, 
+    please refer to the README if you have any issues.
+
+    1. Unzip /untar the code under your server {DocumentRoot} directory;
+    2. Check and update your home network broadcast address in {Document Root}/lib/orvfms/globals.php.
+       If required, replace the address in line
+
+       define("IP_BROADCAST","192.168.1.255");
+
+       with your local broadcast address. 
+    3. Start your web server
+    4. Access the code at http://your.server.adress/s20 (or http://localhost/, if the browser and server
+       share the same host).
+
+In order to isolate the code from other pages, you may untar/unzip under {DocumentRoot}/yourdirname. 
+In this case, the web page will be available under http://your.server.adress/yourdirname/s20.
+
+
+
+
+
