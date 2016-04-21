@@ -15,7 +15,14 @@ function processSetup($mac,&$s20Table,$actionValue){
             }
         }
         $nnext = (int) $_POST['numberOfNextEvents'];
-        $s20Table[$mac]['next'] = $nnext;
+        if(!isset($_POST['applyToAllAction'])){
+            $s20Table[$mac]['next'] = $nnext;
+        }
+        else{
+            foreach($s20Table as $macAux => $devAux){
+                $s20Table[$macAux]['next'] = $nnext;
+            }
+        }
         writeDataFile($s20Table);
         $_SESSION['s20Table'] = $s20Table;
 

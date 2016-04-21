@@ -1,3 +1,7 @@
+<script>
+
+</script>
+
 <?php
 function displaySetupPage($mac,&$s20Table,$myUrl){
     global $daysOfWeek;    
@@ -55,7 +59,9 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
         }
 ?>
 </select>
-
+<br>
+<input id="applyToAll" type="checkBox" name="applyToAllAction">   
+<label for="applyToAll"><span><span></span></span>Apply the same to all</label>
 <p>
 <button type="submit" name="toMainPage" value="procSetup<?php echo $mac ?>" id="doneButton">Done</button>
 <hr>
