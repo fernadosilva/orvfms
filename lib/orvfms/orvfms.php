@@ -1153,29 +1153,33 @@ function actionAndCheck($mac,$action,&$s20Table){
 }
 
 
-
-function writeDataFile($s20Table){
-    $dir = sys_get_temp_dir();
-    $fname = $dir."/".LOCAL_FILE_NAME;
+function writeData($data,$fileName){
+    if(TMP_DIR==""){
+        $dir = sys_get_temp_dir();
+    }
+    else{
+        $dir = TMP_DIR;
+    }
+    $fname = $dir."/".$fileName;
     $fp = fopen($fname,"w");
     if($fp){
-        $aux = array($s20Table,MAGIC_KEY);    // This is a simple and naive consistency check. See readDataFile
+        $aux = array($data,MAGIC_KEY);    // This is a simple and naive consistency check. See readDataFile
         $line = serialize($aux);
         fwrite($fp,$line);
         fclose($fp);
         @chmod($fname,0666);
     }
     else{
-        echo "ATT: could not write output temporary file\n";
+        echo "ATT: could not write output temporary file ".$fname."\n";
     }
 }
 
 
-function readDataFile(){
+function readData($fileName){
     $dir = sys_get_temp_dir();
-    $fname = $dir."/".LOCAL_FILE_NAME;
+    $fname = $dir."/".$fileName;
     $fp = fopen($fname,"r");
-    $s20Table = NULL;
+    $data = NULL;
     if($fp){
         $line=fgets($fp);
         fclose($fp);    
@@ -1183,25 +1187,46 @@ function readDataFile(){
             $aux = unserialize($line);
             if(is_array($aux)){
                 if($aux[1] == MAGIC_KEY){     // This is a simple and naive consistency check, in spite of serialize/unserialize to take care of most errors
-                    $s20Table = $aux[0];       
+                    $data = $aux[0];       
                 }
                 else{
-                    error_log("readDataFile: error on MAGIC_KEY (ignoring file)\n");
+                    error_log("readData from ".$fileName.": error on MAGIC_KEY (ignoring file)\n");
                 }
             }
             else{
-                error_log("readDataFile: data is not an array (ignoring file)\n");
+                error_log("readData from ".$fileName.": data is not an array (ignoring file)\n");
             }
         }        
         else{
-            error_log("readDataFile: can't read data (ignoring file)\n");
+            error_log("readData from ".$fileName.": can't read data (ignoring file)\n");
         }        
     }
     else{
-        error_log("readDataFile: can't open file\n");
+        error_log("readData  from ".$fileName.": can't open file\n");
     }
-    return $s20Table;
+    return $data;
 }
+
+function writeDataFile($s20Table){
+    writeData($s20Table,LOCAL_FILE_NAME);
+}
+function readDataFile(){
+    return readData(LOCAL_FILE_NAME);
+}
+
+function writeSceneList($sceneList){
+    writeData($sceneList,SCENE_FILE_NAME);
+}
+
+function readSceneList(){
+    return readData(SCENE_FILE_NAME);
+}
+
+
+
+
+
+
 
 function getIpFromMac($mac,&$s20Table){
     $msg = MAGIC_KEY."XXXX".SEARCH_IP.$mac.TWENTIES;

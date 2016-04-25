@@ -23,15 +23,31 @@ INSTALLATION (fast track):
     please refer to the README if you have any issues.
 
     1. Unzip /untar the code under your server {DocumentRoot} directory;
-    2. Check and update your home network broadcast address in {Document Root}/lib/orvfms/globals.php.
+    2. Check and update your home network broadcast address in 
+       {Document Root}/lib/orvfms/globals.php.
+
        If required, replace the address in line
 
        define("IP_BROADCAST","192.168.1.255");
 
        with your local broadcast address. 
-    3. Start your web server
-    4. Access the code at http://your.server.adress/s20 (or http://localhost/, if the browser and server
-       share the same host).
+    4. If you want to create scenes and store scenes, edit also the line in globals.php
+       
+       define("TMP_DIR",""); 
+
+       and define here an existing  permanent directory that can be *written* by your http server, 
+       for example:
+	
+	define("TMP_DIR","/mytmp");
+	
+
+       When left with the default empty string, the code will store working data files,
+       namely scene data, on the system default temporary directory. However, this directory
+       may be erased due to system maintenance procedures or reboot operation, and 
+       scene configuration wil be lost.
+    5. Start your web server
+    6. Access the code at http://your.server.adress/s20 (or http://localhost/, if the 
+       browser and server share the same host).
 
 In order to isolate the code from other pages, you may untar/unzip under {DocumentRoot}/yourdirname. 
 In this case, the web page will be available under http://your.server.adress/yourdirname/s20.

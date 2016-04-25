@@ -192,6 +192,10 @@ function displayMainPage(&$s20Table,$myUrl){
 
 <input type="submit" name="toMainPage" id="findButton" 
                 value="find000000000000">
+
+<input type="submit" name="toSceneList" id="sceneButton" 
+                value="scene000000000000">
+
 </form>
 </center>
 <?php

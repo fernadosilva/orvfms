@@ -147,6 +147,37 @@ else{
     if(DEBUG)
         error_log("New session: S20 data initialized\n");
 }
+
+//
+// init sceneList, for now just a static associative array
+//
+if(0){
+    $dev1="ACCF23358402";
+    $dev2="ACCF23350E50";
+    $act1[$dev1]['action']=1;
+    $act1[$dev1]['time']=20;
+    $act1[$dev2]['action']=1;
+    $act1[$dev2]['time']=10;
+    
+    $act2[$dev1]['action']=0;
+    $act2[$dev1]['time']=0;
+    $act2[$dev2]['action']=0;
+    $act2[$dev2]['time']=15;
+    
+    $sceneList['Cena on']=$act1;
+    $sceneList['Cena off']=$act2;
+    writeSceneList($sceneList);
+    $_SESSION['sceneList']=$sceneList;
+}
+if(isset($_SESSION["sceneList"])) {
+    $sceneList = $_SESSION["sceneList"];
+}
+else{
+    $sceneList = readSceneList();
+}
+
+
+
 //
 // Check which page must be displayed
 //
@@ -185,7 +216,15 @@ else if(isset($_POST['toMainPage'])){
         require_once(ORVFMS_PATH."main_page.php");
         displayMainPage($s20Table,$myUrl);
         require_once(ORVFMS_PATH."main_page_scripts.php");
-    }    
+    }
+    else if(substr($actionValue,0,8)=="sceneAct"){
+        $sceneName=substr($actionValue,8);        
+        require_once(ORVFMS_PATH."process_sceneAct.php");
+        processSceneAct($sceneList,$s20Table,$sceneName);
+        require_once(ORVFMS_PATH."main_page.php");
+        displayMainPage($s20Table,$myUrl);
+        require_once(ORVFMS_PATH."main_page_scripts.php");        
+    }
     else{
         if(($actionValue != "back") && ($mac != "000000000000") && !array_key_exists('off',$s20Table[$mac])){
             if($actionValue=="switch"){
@@ -263,8 +302,27 @@ else if(isset($_POST['toSetupPage'])){
     require_once(ORVFMS_PATH."setup_page.php");
     displaySetupPage($mac,$s20Table,$myUrl);
 }
+else if(isset($_POST['toSceneList'])){
+    $sceneVal = $_POST['toSceneList'];
+    if(substr($sceneVal,0,3)=="del"){
+        $scene = substr($sceneVal,3);
+        require_once(ORVFMS_PATH."proc_scene.php");
+        deleteScene($scene,$sceneList);
+    }
+    else if($sceneVal == "save"){
+        require_once(ORVFMS_PATH."proc_scene.php");
+        saveScene($sceneList,$s20Table);
+    }
+    require_once(ORVFMS_PATH."scene_list_page.php");
+    displaySceneListPage($sceneList,$s20Table,$myUrl);    
+}
+else if(isset($_POST['toSceneEdit'])){
+    $sceneVal = $_POST['toSceneEdit'];
+    require_once(ORVFMS_PATH."edit_scene_page.php");
+    displayEditScene($sceneVal,$sceneList,$s20Table,$myUrl);
+}
 else{
-    echo "Unexpected error 505 (unkown code) <p>\n";
+    echo "Unexpected error 505 (unkown action code when returning to main page) <p>\n";
 }
 
 ?>
