@@ -109,8 +109,6 @@ else{
     $s20Table = readDataFile();
 }
 
-// $s20Table = readDataFile(); // DELETE THIS LINE
-
 $ndummy = 0;
 if(isset($s20Table)){
     foreach($s20Table as $mac => $data){
@@ -151,30 +149,14 @@ else{
 //
 // init sceneList, for now just a static associative array
 //
-if(0){
-    $dev1="ACCF23358402";
-    $dev2="ACCF23350E50";
-    $act1[$dev1]['action']=1;
-    $act1[$dev1]['time']=20;
-    $act1[$dev2]['action']=1;
-    $act1[$dev2]['time']=10;
-    
-    $act2[$dev1]['action']=0;
-    $act2[$dev1]['time']=0;
-    $act2[$dev2]['action']=0;
-    $act2[$dev2]['time']=15;
-    
-    $sceneList['Cena on']=$act1;
-    $sceneList['Cena off']=$act2;
-    writeSceneList($sceneList);
-    $_SESSION['sceneList']=$sceneList;
-}
-if(isset($_SESSION["sceneList"])) {
-    $sceneList = $_SESSION["sceneList"];
-}
-else{
+
+
+//if(isset($_SESSION["sceneList"])) {
+//    $sceneList = $_SESSION["sceneList"];
+//}
+//else{
     $sceneList = readSceneList();
-}
+//}
 
 
 

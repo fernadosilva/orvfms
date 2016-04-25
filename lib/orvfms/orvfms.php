@@ -1176,7 +1176,12 @@ function writeData($data,$fileName){
 
 
 function readData($fileName){
-    $dir = sys_get_temp_dir();
+    if(TMP_DIR==""){
+        $dir = sys_get_temp_dir();
+    }
+    else{
+        $dir = TMP_DIR;
+    }
     $fname = $dir."/".$fileName;
     $fp = fopen($fname,"r");
     $data = NULL;
