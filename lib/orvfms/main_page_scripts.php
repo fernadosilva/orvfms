@@ -1,6 +1,8 @@
 <script>
 <?php
+$actual_link = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 echo "var timerId;\n";
+echo "var myUrl=".'"'.$actual_link.'";'."\n";
 $macs = array_keys($s20Table);
 $nCounters = 0;
 $nSw = 0;
@@ -84,7 +86,8 @@ if($nSw > 0){
               delta = Math.round(timerVals[k] - currentTime);
               if(delta<0){
                   clearInterval(timerId);
-                  location.reload(true);
+                  window.location.href = myUrl;
+                  window.reload();
               }
               else{
                   t = convToString(delta);
