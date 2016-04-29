@@ -389,13 +389,14 @@ function setTimer($mac,$h,$m,$s,$act,&$s20Table){
             printHex($hexMsg);
             print("Rec\n");
             printHex($recHex);
-            print("RecAux\n");
-            printHex($recHexAux);
+            print("RecAux\n");            printHex($recHexAux);
         }        
         if(($msgRecCode != "00") && ($recHexAux == $hexMsg))
             return 0;
-        else
+        else{
+            printHex($recHex);
             error_log("Retrying in setTimer\n");
+        }
     }
     return 1;
 }
@@ -1183,8 +1184,11 @@ function readData($fileName){
         $dir = TMP_DIR;
     }
     $fname = $dir."/".$fileName;
+    $data = array();
+    if(!file_exists($fname))
+        return $data;
     $fp = fopen($fname,"r");
-    $data = NULL;
+
     if($fp){
         $line=fgets($fp);
         fclose($fp);    
@@ -1242,7 +1246,7 @@ function getIpFromMac($mac,&$s20Table){
     $recIP = "";
     $recPort = 0;
     while ( 1 ){
-        $n=@socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
+        $n=socket_recvfrom($s,$binRecMsg,BUFFER_SIZE,0,$recIP,$recPort);
         $now = time();
         if(!isset($n) || ($n == 0)){
             if(++$loopCount > 6) {

@@ -31,7 +31,8 @@ function timerSettings(&$s20Table,$mac,$actionValue){
         // Confirm
         $s20Table[$mac]['timerVal'] = checkTimerSec($mac,$s20Table,$action);
         $s20Table[$mac]['timerAction'] = $action;
-        if(($s20Table[$mac]['timerVal'] != $sec) ||
+        $dif = (abs($s20Table[$mac]['timerVal'] - $sec) > 1);
+        if($dif &&            
            ($s20Table[$mac]['timerAction'] != $act)){
             error_log("Unexpected inconsistency in timerSettings function: ".$mac." Set=(".$sec.",".$act.") Res=("
                       .$s20Table[$mac]['timerVal'].",".$s20Table[$mac]['timerAction'].")\n"); 

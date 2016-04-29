@@ -272,17 +272,38 @@ else if(isset($_POST['toEditPage'])){
     displayEditPage($mac,$editIndex,$s20Table,$myUrl);
 }
 else if(isset($_POST['toSetupPage'])){
+    $toSetup = 1;
     $mac = getMacAndActionFromPost($actionValue,$_POST['toSetupPage']);
     if($actionValue == "procSync"){ // Sync socket TZ to server TZ
         $serverTz = $s20Table[$mac]['serverTimeZone'];
         $serverDst = $s20Table[$mac]['serverDst'];
         setTimeZone($mac,$serverTz,$serverDst,$s20Table);
     }
+    elseif($actionValue=="wake"){
+        $ip = getIpFromMac($mac,$s20Table);
+        $s20Table[$mac]['lastOffCheck'] = time();
+        $_SESSION['s20Table'] = $s20Table;
+        if($ip!=0){
+            $s20Table[$mac]['ip'] = $ip;
+            $st = checkStatus($mac,$s20Table);
+            $_SESSION["s20Table"] = $s20Table;
+            if($st >= 0){
+                unset($s20Table[$mac]['off']);
+                $s20Table[$mac]['st'] = $st;
+                $_SESSION['s20Table'] = $s20Table;
+                require_once(ORVFMS_PATH."main_page.php");
+                displayMainPage($s20Table,$myUrl);
+                require_once(ORVFMS_PATH."main_page_scripts.php");
+                $toSetup = 0;
+            }
+        }
+    }
     else if($actionValue != "setup"){
         echo "Unexpected error in setup (505)<p>\n";
     }
     require_once(ORVFMS_PATH."setup_page.php");
-    displaySetupPage($mac,$s20Table,$myUrl);
+    if($toSetup)
+        displaySetupPage($mac,$s20Table,$myUrl);
 }
 else if(isset($_POST['toSceneList'])){
     $sceneVal = $_POST['toSceneList'];

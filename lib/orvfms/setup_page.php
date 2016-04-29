@@ -158,18 +158,30 @@ Delete device from the system<p>
             $now = time();
             $delta = $now - $inactiveTimeStamp;
             $deltaString = secToHourString($delta);
-            $msg = "This device is inactive since ".$inactiveString;
+            $msg = "This device seems to be inactive <br>at least since ".$inactiveString;
             $msg = $msg." (".$deltaString."s ago)<p>";
             $msg = $msg."It did not reply to a re-activate command. Is it connected and on-line?<p>";
+            $msg =$msg."Last known name: ".$s20Table[$mac]['name'];
             echo $msg;
 ?>
 <hr>
 <button type="submit" name="toMainPage" value="procSetupDel<?php echo $mac ?>" id="deleteButton">Delete device</button>
-<p>
+<p><p>
+<hr><P>
 <button type="submit" name="toMainPage" value="procSetupCancel<?php echo $mac ?>" id="cancelButton">Cancel</button>
-
-
+<p>
 <?php
+            if(substr($_POST[toSetupPage],0,4)=="wake"){
+                echo "Retry failed<p>";
+?>
+<button type="submit" name="toSetupPage" value="wake<?php echo $mac ?>" id="cancelButton">Retry again</button>
+<?php
+            }
+            else{
+?>
+<button type="submit" name="toSetupPage" value="wake<?php echo $mac ?>" id="cancelButton">Retry</button>
+<?php
+            }
         }
 ?>
 </form>
