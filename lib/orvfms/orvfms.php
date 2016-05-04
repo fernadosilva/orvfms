@@ -384,18 +384,24 @@ function setTimer($mac,$h,$m,$s,$act,&$s20Table){
         $msgRecCode = substr($recHex,2*18,2);
         $recHexAux = $recHex; 
         $recHexAux[36]="0";$recHexAux[37]="0";
-        if(DEBUG){
-            print("Send\n");
-            printHex($hexMsg);
-            print("Rec\n");
-            printHex($recHex);
-            print("RecAux\n");            printHex($recHexAux);
-        }        
-        if(($msgRecCode != "00") && ($recHexAux == $hexMsg))
+
+        if($recHexAux == $hexMsg){
             return 0;
+        }
         else{
-            printHex($recHex);
-            error_log("Retrying in setTimer\n");
+            error_log("Retrying in setTimer ".$s20Table[$mac]['name']." to ".
+            $h.":".$m.":".$s." to state ".$act."\n");
+            
+            error_log("Sent msg");
+            error_log(sprintHex($hexMsg));
+
+            error_log("Ref msg");            
+            error_log(sprintHex($recHexAux));            
+
+            error_log("Rec msg");            
+            error_log(sprintHex($recHex));
+
+            error_log("msgRecCode=".$msgRecCode."\n\n");
         }
     }
     return 1;

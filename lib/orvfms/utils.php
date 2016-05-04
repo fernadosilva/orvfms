@@ -98,6 +98,29 @@ function  printHex($hexMsg){
     }
     echo "\n";
 }
+
+function  sprintHex($hexMsg){
+    $n = strlen($hexMsg)/2;
+    $res ="\n\n";
+    $col = 0;
+    $lin = 0;
+    for($k=0; $k <$n; $k++){
+        if($col++ == 0){
+            $res=$res . sprintf(" %02d    ",$lin++);
+        }
+        $pair = substr($hexMsg,2*$k,2);
+        $res = $res .  sprintf(" %2s",$pair);
+        if($col == 16){
+            $col = 0;
+            $res = $res . "\n";
+        }
+    }
+    $res = $res . "\n";
+    return $res;
+}
+
+
+
 function  printHex2($hexMsg){
     $n = strlen($hexMsg)/2;
     echo"\nn=".$n."\n";

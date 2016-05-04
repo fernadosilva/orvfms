@@ -171,7 +171,7 @@ Delete device from the system<p>
 <button type="submit" name="toMainPage" value="procSetupCancel<?php echo $mac ?>" id="cancelButton">Cancel</button>
 <p>
 <?php
-            if(substr($_POST[toSetupPage],0,4)=="wake"){
+            if(isset($_POST['toSetupPage']) && (substr($_POST['toSetupPage'],0,4)=="wake")){
                 echo "Retry failed<p>";
 ?>
 <button type="submit" name="toSetupPage" value="wake<?php echo $mac ?>" id="cancelButton">Retry again</button>

@@ -33,7 +33,7 @@ INSTALLATION (fast track):
        define("IP_BROADCAST","192.168.1.255");
 
        with your local broadcast address. 
-    4. If you want to create scenes and store scenes, edit also the line in globals.php
+    4. If you want to create and store scenes, edit also the line in globals.php
        
        define("TMP_DIR",""); 
 
@@ -46,7 +46,7 @@ INSTALLATION (fast track):
        When left with the default empty string, the code will store working data files,
        namely scene data, on the system default temporary directory. However, this directory
        may be erased due to system maintenance procedures or reboot operation, and 
-       scene configuration wil be lost.
+       scene configuration will be lost.
     5. Start your web server
     6. Access the code at http://your.server.adress/s20 (or http://localhost/, if the 
        browser and server share the same host).

@@ -151,6 +151,22 @@ to recognize most of it. You should also see/hear the usual switching on and
 off of the nearby S20s.  An example of the output of this script is included 
 in the file orvfms/example.out.
 
+7. If you want to create and store scenes, edit also the line in globals.php
+         
+	 define("TMP_DIR",""); 
+   
+and define here an existing  permanent directory that can be *written* by your http server, 
+for example:
+    	
+	define("TMP_DIR","/mytmp");
+	
+
+When left with the default empty string, the code will store working data files,
+namely scene data, on the system default temporary directory. However, this directory
+may be erased due to system maintenance procedures or reboot operation, and 
+previously configured scenes configuration will be lost.
+
+
 INSTALLATION OF THE WEB PAGE:
 
 The details of the installation will depend slightly on your HTTP server 
