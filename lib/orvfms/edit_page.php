@@ -56,7 +56,6 @@ function displayEditPage($mac,$editIndex,&$s20Table,$myUrl){
     $timerName = $s20Table[$mac]['name'];
     $details = $_SESSION['details'];
     $nTimers = count($details);
-    $thisTimer = $details[(int) $editIndex];
 ?>
 
 <div style="text-align:center">
@@ -78,6 +77,7 @@ function displayEditPage($mac,$editIndex,&$s20Table,$myUrl){
         $action = 0;
     }
     else{
+    	$thisTimer = $details[(int) $editIndex];
         secToHour($thisTimer['time'],$h,$m,$s);
         $recCode = $thisTimer['recCode'];
         $action = $thisTimer['action'];

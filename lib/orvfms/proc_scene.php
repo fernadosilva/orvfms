@@ -12,7 +12,7 @@ function saveScene(&$sceneList,$s20Table){
     $oldName = $_SESSION['orgSceneName'];
     $macs = array_keys($s20Table);
     $tmpScene = array();
-    displayDebug(120,$_POST);
+//    displayDebug(120,$_POST);
     foreach($macs as $mac){
         $isActive = "isActive".$mac;
         if(isset($_POST[$isActive])){
