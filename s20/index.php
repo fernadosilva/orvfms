@@ -279,7 +279,8 @@ else if(isset($_POST['toSetupPage'])){
         $serverDst = $s20Table[$mac]['serverDst'];
 	$serverTime = $s20Table[$mac]['serverTime'];
         setTimeZone($mac,$serverTz,$serverDst,$s20Table);
-        setSocketTime($mac,time(),$s20Table);	
+	$now = time();
+        setSocketTime($mac,$now,$s20Table);	
     }
     elseif($actionValue=="wake"){
         $ip = getIpFromMac($mac,$s20Table);
