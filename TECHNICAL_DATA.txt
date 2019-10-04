@@ -301,3 +301,5 @@ e) To delete timer with code 4f 37, send:
 	03 00 02 - delete code
 	4F 37 - Timer to be deleted
 
+
+Last updated May 2016
