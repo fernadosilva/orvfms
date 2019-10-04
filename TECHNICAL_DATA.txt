@@ -1,3 +1,11 @@
+Last reviewed: 4 october 2019
+
+IMPORTANT NOTICE: unhappily, this code only supports the "old" S20 Orvibo socket. The newer S25
+socket, as well as newer Orvibo devices, use a completely different protocol and, so far it
+seems to us, much more difficult to reverse engineering to the level we were able to do with
+the S20 :-(. However, may be this code still fits to some of us that still use the old S20
+socket.
+
 As stated in the README file, most of the reverse engineering information required 
 to operate the S20 was obtained from 
 
@@ -67,19 +75,14 @@ c) All weekly scheduled timers are represented in Hours Min and Seconds in local
 time. More aboute these timers below.
 d) Sockets take care of converting UTC time to local time taking into acount 
 the local timezone (TZ) and Daylight Saving Time (DST).
-e) It is possible to initialize the socket UTC time using a specific command.
-While the WiWo performs this initialization, our code does not uses it, 
-since the sockets  seem always to automatically synchronize by themselves 
-using some NTP alike service.
-
-However, for those interested in this possibility, initialization of the  
-socket  clock in UTC can be done sending to the socket the following 
+e) To initialize the socket UTC time, send to the socket the following 
 message:
 
 0000  68 64 00 1a 63 73 MM MM MM MM MM MM 20 20 20 20   hd..cs..#5..    
 0010  20 20 00 00 00 00 XX XX XX XX                     ........
 
 where
+
 68 64 - Magic Key
 00 1a - Msg length
 63 73 - Init socket clock command
@@ -89,6 +92,14 @@ XX XX XX XX - Seconds since 1 Jan 1900 (in UTC), little endian.
  
 The socket, as usualy, replies with a message with the same code 63 73 and with 
 a dummy payload.
+
+Up to version 1.1 of Orvfms, we did not use this time initializon since the sockets
+were always automatically synchronized by themselves using some Orvibo NTP alike
+service. Unhappily, we believe that Orvibo ceased to support this service somewhere
+in the middle of 2019 (June/July?), and since then our sockets defaulted to 1 january
+1900 each time they were unplugged. Therefore, in 4 october 2019 we updated the code
+and now the sync command update both the Time zone, DST and the socket time (up to then,
+we just updated the TZ and DST).
 
 3. As reported in pastebin, timezone information is reported in table 4, byte 164.
 However, the following details and additional info must be taken into account:

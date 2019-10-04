@@ -277,7 +277,9 @@ else if(isset($_POST['toSetupPage'])){
     if($actionValue == "procSync"){ // Sync socket TZ to server TZ
         $serverTz = $s20Table[$mac]['serverTimeZone'];
         $serverDst = $s20Table[$mac]['serverDst'];
+	$serverTime = $s20Table[$mac]['serverTime'];
         setTimeZone($mac,$serverTz,$serverDst,$s20Table);
+        setSocketTime($mac,time(),$s20Table);	
     }
     elseif($actionValue=="wake"){
         $ip = getIpFromMac($mac,$s20Table);

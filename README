@@ -3,6 +3,14 @@
 #*************************************************************************
 
 Last update: 13 May 2016
+Reviewed: 4 October 2019
+
+PRELIMINARY NOTE:
+  Unhappily, this code only supports the "old" S20 Orvibo socket. The newer S25
+  socket, as well as newer Orvibo devices, use a completely different and encrypted
+  protocol and, so far it seems to us, much more difficult to reverse engineering to
+  the level we were able to do with the S20 :-(. However, may be this code still fits
+  to some of us that use the "old" S20 socket.
 
 SUMMARY:
   This software implements a web interface to control Orvibo S20 

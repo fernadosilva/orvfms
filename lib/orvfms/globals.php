@@ -41,7 +41,7 @@ define("IP_BROADCAST","192.168.1.255");
 // We strongly advise to use here a permanent working directory in the
 // line below, (for example, define("TMP_DIR","/mytmp"). See INSTALLATION 
 // for more information on this subject.
-define("TMP_DIR",""); 
+define("TMP_DIR","/tmp2"); 
 
 define("PORT",10000);
 define("TWENTIES","202020202020");
@@ -59,11 +59,13 @@ define("MAGIC_KEY","6864");
 define("BUFFER_SIZE",500);
 define("WRITE_SOCKET_CODE","746D");
 define("SEARCH_IP","7167");
+define("SET_TIME","6373");
 define("DEBUG",0);
 define("NUMBER_OF_NEXT_ACTIONS_DISPLAYED_IN_MAIN_PAGE",0);
 define("LOCAL_FILE_NAME","orvfms.dat");
 define("SCENE_FILE_NAME","scene_orvfms.dat");
 define("NULL_MAC","000000000000");
+define("FROM_CENTURY_TO_EPOCH",2208988800);        
 ?>
 
 

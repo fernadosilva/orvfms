@@ -125,7 +125,7 @@ function getNextAction($mac,$s20Table){
 
 function getSocketTime($tab){
     $th=invertEndian(padHex(substr($tab,-2*5,8),8));
-    $timeStamp = hexdec($th) - 2208988800;        
+    $timeStamp = hexdec($th) - FROM_CENTURY_TO_EPOCH;        
     return $timeStamp;
 }
 
@@ -892,6 +892,33 @@ function setTimeZone($mac,$tz,$dst,&$s20Table){
 
     return $reply;
 }
+
+function setSocketTime($mac,$newTime,&$s20Table){
+    //
+    // Sets socket time equal to server time
+    // This is required due given that Orvibo automatic NTP alike service seems not be working anymore and therefore
+    // the S20 clocks default to 1 jan 1900 each time they are switch off (further to a slight shifting delay)
+    //
+    $socketTime = $newTime + FROM_CENTURY_TO_EPOCH;  // adjust to 1 jan 1900
+    $socketTime = $socketTime + 1; // compensate for delay (roughly)
+    $socketTimeHex = dechex($socketTime);
+    $socketTimeHexLE = invertEndian($socketTimeHex);
+
+    $msg = MAGIC_KEY."XXXX".SET_TIME.$mac.TWENTIES.FOUR_ZEROS.$socketTimeHexLE;
+    $msg = adjustMsgSize($msg);
+    
+    $reply = createSocketSendHexMsgWaitReply($mac,$msg,$s20Table);
+    if($reply == "") {
+        $s20Table[$mac]['off']  = time();
+    }
+    else{
+       	$s20Table[$mac]['time'] = $newTime;	
+        $_SESSION['s20Table']=$s20Table;
+        writeDataFile($s20Table);
+    }
+
+}
+
 
 
 function setSwitchOffTimer($mac,$sec,&$s20Table){

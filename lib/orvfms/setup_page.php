@@ -41,7 +41,6 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 ?> 
 </h2>
 <p>
-
     <input type="submit" name="toMainPage" value="back<?php echo $mac ?>"  
     id="backButton"> 
 
@@ -77,7 +76,7 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     $dst = $dev['dst']; // 1 means DST on
     $serverTz = $dev['serverTimeZone'];
     $serverDst = $dev['serverDst']; 
-    $isSync = ($serverDst == $dst) && ($tz == $serverTz);
+    $isSync = ($serverDst == $dst) && ($tz == $serverTz) && (abs($serverTime - $time) < 5);
     if(!$isSync){
         echo '<div style="color:red">Warning: clock seems out of sync!<p></div>';
     }
@@ -86,11 +85,11 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
 ?>
 <p>
 <?php
-if(!$isSync){
+
 ?>
 <button type="submit" name="toSetupPage" value="procSync<?php echo $mac ?>" id="syncButton">Sync TZ</button>
 <?php
-}
+
     echo "<p><hr>";                                                  
 ?>
 S20 mac address - 
