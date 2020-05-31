@@ -78,7 +78,7 @@ function displaySetupPage($mac,&$s20Table,$myUrl){
     $serverDst = $dev['serverDst']; 
     $isSyncTZ = ($serverDst == $dst) && ($tz == $serverTz);
     $isSyncCK = (abs($serverTime - $time) < 5);
-    $isSync = isSyncTZ && $isSyncCK;
+    //$isSync = isSyncTZ && $isSyncCK; 
     if(!$isSyncCK){
         echo '<div style="color:red">Warning: clock seems out of sync!<p></div>';
     }
