@@ -28,7 +28,7 @@ require_once("globals.php"); // constants
 require_once("utils.php");   // utitlity functions
 
 function cmpActions($a1,$a2){
-    return ($a1[1] > $a2[1]);
+    return ($a1[1] - $a2[1]);
 }
 
 function cleanTableFour($msg){
