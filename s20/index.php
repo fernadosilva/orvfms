@@ -275,12 +275,18 @@ else if(isset($_POST['toSetupPage'])){
     $toSetup = 1;
     $mac = getMacAndActionFromPost($actionValue,$_POST['toSetupPage']);
     if($actionValue == "procSync"){ // Sync socket TZ to server TZ
-        $serverTz = $s20Table[$mac]['serverTimeZone'];
-        $serverDst = $s20Table[$mac]['serverDst'];
-	$serverTime = $s20Table[$mac]['serverTime'];
-        setTimeZone($mac,$serverTz,$serverDst,$s20Table);
-	$now = time();
-        setSocketTime($mac,$now,$s20Table);	
+    //
+    // Updated to sync all at once
+    //
+	$allMacs=array_keys($s20Table);
+	foreach($allMacs as $mac){
+          $serverTz = $s20Table[$mac]['serverTimeZone'];
+          $serverDst = $s20Table[$mac]['serverDst'];
+          $serverTime = $s20Table[$mac]['serverTime'];
+          setTimeZone($mac,$serverTz,$serverDst,$s20Table);
+	  $now = time();
+          setSocketTime($mac,$now,$s20Table);
+	}
     }
     elseif($actionValue=="wake"){
         $ip = getIpFromMac($mac,$s20Table);
