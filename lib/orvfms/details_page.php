@@ -88,7 +88,7 @@ function displayDetailsPage($mac,&$s20Table,$myUrl){
     echo "</div>\n";
 
     echo "<p><p><p>";
-    echo '<button type="submit" name="toMainPage" value="done" id="doneButton">Done</button>'; 
+    echo '<button type="submit" name="toMainPage" value="back'.NULL_MAC.'" id="doneButton">Done</button>'; 
     echo "</form>\n";
 
   
