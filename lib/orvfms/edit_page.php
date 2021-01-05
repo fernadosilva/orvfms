@@ -146,7 +146,13 @@ Action<br>
 <div class="editDetail">
 
 <?php
-    $bits = $thisTimer['r'];
+    if($editIndex < 0){
+      $bits = 0;
+      $recCode = "";
+    }
+    else{
+      $bits = $thisTimer['r'];
+    }
     for($k=0; $k <  7; $k++){
         $bit = (int) $bits % 2;
         $bits = (int) ($bits / 2);
