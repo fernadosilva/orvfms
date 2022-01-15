@@ -901,7 +901,7 @@ function setSocketTime($mac,$newTime,&$s20Table){
     //
     $socketTime = $newTime + FROM_CENTURY_TO_EPOCH;  // adjust to 1 jan 1900
     $socketTime = $socketTime + 1; // compensate for delay (roughly)
-    $socketTimeHex = dechex($socketTime);
+    $socketTimeHex = dechex(intval(round($socketTime)));
     $socketTimeHexLE = invertEndian($socketTimeHex);
 
     $msg = MAGIC_KEY."XXXX".SET_TIME.$mac.TWENTIES.FOUR_ZEROS.$socketTimeHexLE;
